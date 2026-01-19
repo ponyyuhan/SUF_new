@@ -18,19 +18,22 @@ inline u64 eval_poly(const Polynomial& poly, u64 x) {
 inline u64 eval_predicate(const Predicate& p, u64 x) {
   switch (p.kind) {
     case PredKind::LT:
-      return x < p.param ? 1ULL : 0ULL;
+      return (x + p.input_add) < p.param ? 1ULL : 0ULL;
     case PredKind::LTLOW: {
+      const u64 xshift = x + p.input_add;
       if (p.f == 64) {
-        return x < p.gamma ? 1ULL : 0ULL;
+        return xshift < p.gamma ? 1ULL : 0ULL;
       }
       const u64 mask = (p.f == 64) ? ~0ULL : ((1ULL << p.f) - 1ULL);
-      const u64 xlow = x & mask;
+      const u64 xlow = xshift & mask;
       return xlow < p.gamma ? 1ULL : 0ULL;
     }
     case PredKind::MSB:
       return (x >> 63) & 1ULL;
     case PredKind::MSB_ADD:
       return ((x + p.param) >> 63) & 1ULL;
+    case PredKind::CONST:
+      return p.param & 1ULL;
     default:
       return 0ULL;
   }

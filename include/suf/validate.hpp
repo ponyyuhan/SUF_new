@@ -18,6 +18,9 @@ inline void validate_predicate(const Predicate& p) {
       break;
     case PredKind::MSB_ADD:
       break;
+    case PredKind::CONST:
+      ensure(p.param <= 1, "CONST: param must be 0/1");
+      break;
     default:
       fail("unknown predicate kind");
   }

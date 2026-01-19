@@ -21,6 +21,14 @@ void launch_eval_poly(const u64* d_in, std::size_t n,
 void launch_eval_helper(const u8* d_pred_bits, std::size_t n,
                         const GpuBoolNode* d_nodes, int num_nodes, int root,
                         u64* d_out, cudaStream_t stream);
+
+void launch_fill_const_pred_bits(const u8* d_const_bits, std::size_t n,
+                                 int num_preds, u8* d_out,
+                                 cudaStream_t stream);
+
+void launch_scatter_pred_bits(const u8* d_query_bits, std::size_t n,
+                              int num_queries, const int* d_query_to_pred,
+                              u8* d_out, cudaStream_t stream);
 #endif
 
 } // namespace suf

@@ -20,6 +20,8 @@ struct BenchConfig {
   int helpers = 4;
   bool verify = false;
   bool secure = false;
+  bool mask_aware = false;
+  u64 mask_in = 0;
 };
 
 static BenchConfig parse_args(int argc, char** argv) {
@@ -32,6 +34,8 @@ static BenchConfig parse_args(int argc, char** argv) {
     else if (!std::strcmp(argv[i], "--helpers") && i + 1 < argc) cfg.helpers = std::stoi(argv[++i]);
     else if (!std::strcmp(argv[i], "--verify")) cfg.verify = true;
     else if (!std::strcmp(argv[i], "--secure")) cfg.secure = true;
+    else if (!std::strcmp(argv[i], "--mask-aware")) cfg.mask_aware = true;
+    else if (!std::strcmp(argv[i], "--mask") && i + 1 < argc) cfg.mask_in = std::stoull(argv[++i]);
     else {
       std::cerr << "Unknown arg: " << argv[i] << "\n";
       std::exit(1);
@@ -79,6 +83,9 @@ int main(int argc, char** argv) {
   std::mt19937_64 rng(1234);
   for (std::size_t i = 0; i < cfg.n; ++i) {
     h_in[i] = rng();
+    if (cfg.mask_aware) {
+      h_in[i] += cfg.mask_in;
+    }
   }
 
   u64* d_in = nullptr;
@@ -92,7 +99,7 @@ int main(int argc, char** argv) {
   std::unique_ptr<GpuSufProgram> prog_clear;
   std::unique_ptr<GpuSecureSufProgram> prog_secure;
   if (cfg.secure) {
-    prog_secure = std::make_unique<GpuSecureSufProgram>(desc, 0, 1234);
+    prog_secure = std::make_unique<GpuSecureSufProgram>(desc, 0, 1234, 0, cfg.mask_aware, cfg.mask_in);
   } else {
     prog_clear = std::make_unique<GpuSufProgram>(desc);
   }
@@ -132,7 +139,11 @@ int main(int argc, char** argv) {
     std::vector<u64> h_out(cfg.n);
     cudaMemcpy(h_out.data(), d_out, cfg.n * sizeof(u64), cudaMemcpyDeviceToHost);
     for (std::size_t i = 0; i < std::min<std::size_t>(cfg.n, 1024); ++i) {
-      auto ref = eval_suf_ref(desc, h_in[i]);
+      u64 x = h_in[i];
+      if (cfg.mask_aware) {
+        x -= cfg.mask_in;
+      }
+      auto ref = eval_suf_ref(desc, x);
       if (h_out[i] != ref.arith) {
         std::cerr << "verify mismatch at " << i << " got " << h_out[i] << " expected " << ref.arith << "\n";
         return 1;

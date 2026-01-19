@@ -18,6 +18,7 @@ struct GpuPredicate {
   u8 pad1 = 0;
   u64 param = 0;
   u64 gamma = 0;
+  u64 input_add = 0;
 };
 
 struct GpuBoolNode {
@@ -62,11 +63,14 @@ public:
 private:
   void upload(const SUFDescriptor& d);
   void release();
+  u8* ensure_pred_bits(std::size_t n) const;
 
   u64* d_cuts_ = nullptr;
   u64* d_coeffs_ = nullptr;
   GpuPredicate* d_preds_ = nullptr;
   GpuBoolNode* d_nodes_ = nullptr;
+  mutable u8* d_pred_bits_ = nullptr;
+  mutable std::size_t pred_capacity_ = 0;
 
   std::vector<u64> cuts_;
   std::vector<u64> coeffs_;

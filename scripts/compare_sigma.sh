@@ -6,11 +6,13 @@ SIGMA_DIR="$ROOT_DIR/third_party/EzPC/GPU-MPC"
 
 BUILD_SIGMA=false
 RUN_SIGMA=false
+FORCE_SETUP=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --build-sigma) BUILD_SIGMA=true; shift ;;
     --run-sigma) RUN_SIGMA=true; shift ;;
+    --force-setup) FORCE_SETUP=true; shift ;;
     *) echo "Unknown arg: $1"; exit 1;;
   esac
 done
@@ -36,6 +38,9 @@ if $BUILD_SIGMA; then
   : "${GPU_ARCH:=120}"
   export CUDA_VERSION GPU_ARCH
   echo "Using CUDA_VERSION=$CUDA_VERSION GPU_ARCH=$GPU_ARCH"
+  if $FORCE_SETUP; then
+    rm -f .suf_sigma_setup_done
+  fi
   if [[ ! -f .suf_sigma_setup_done ]]; then
     echo "Running setup.sh (may take a while)..."
     bash setup.sh || {
@@ -43,7 +48,7 @@ if $BUILD_SIGMA; then
     }
     touch .suf_sigma_setup_done
   fi
-  make sigma
+  make -j"${SIGMA_BUILD_JOBS:-4}" sigma
   popd >/dev/null
 fi
 
@@ -54,10 +59,13 @@ if $RUN_SIGMA; then
   if [[ ! -x ./sigma ]]; then
     echo "sigma binary not found; build it with --build-sigma"; exit 1
   fi
-  ./sigma bert-tiny 128 0 127.0.0.1 8 > /tmp/sigma_p0.log 2>&1 &
+  SIGMA_MODEL="${SIGMA_MODEL:-bert-tiny}"
+  SIGMA_SEQ="${SIGMA_SEQ:-128}"
+  SIGMA_THREADS="${SIGMA_THREADS:-8}"
+  ./sigma "$SIGMA_MODEL" "$SIGMA_SEQ" 0 127.0.0.1 "$SIGMA_THREADS" > /tmp/sigma_p0.log 2>&1 &
   P0_PID=$!
   sleep 1
-  ./sigma bert-tiny 128 1 127.0.0.1 8 > /tmp/sigma_p1.log 2>&1 &
+  ./sigma "$SIGMA_MODEL" "$SIGMA_SEQ" 1 127.0.0.1 "$SIGMA_THREADS" > /tmp/sigma_p1.log 2>&1 &
   P1_PID=$!
   wait $P0_PID || true
   wait $P1_PID || true

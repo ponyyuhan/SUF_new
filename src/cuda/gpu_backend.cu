@@ -12,7 +12,8 @@ namespace suf {
 namespace {
 void check_cuda(cudaError_t err, const char* msg) {
   if (err != cudaSuccess) {
-    fail(msg);
+    std::string detail = std::string(msg) + ": " + cudaGetErrorString(err);
+    fail(detail.c_str());
   }
 }
 
@@ -22,6 +23,7 @@ GpuPredicate to_gpu_pred(const Predicate& p) {
   out.f = p.f;
   out.param = p.param;
   out.gamma = p.gamma;
+  out.input_add = p.input_add;
   return out;
 }
 }
@@ -99,18 +101,31 @@ void GpuSufProgram::release() {
   if (d_coeffs_) cudaFree(d_coeffs_);
   if (d_preds_) cudaFree(d_preds_);
   if (d_nodes_) cudaFree(d_nodes_);
+  if (d_pred_bits_) cudaFree(d_pred_bits_);
   d_cuts_ = nullptr;
   d_coeffs_ = nullptr;
   d_preds_ = nullptr;
   d_nodes_ = nullptr;
+  d_pred_bits_ = nullptr;
+  pred_capacity_ = 0;
+}
+
+u8* GpuSufProgram::ensure_pred_bits(std::size_t n) const {
+  const std::size_t needed = preds_.size() * n;
+  if (needed == 0) return nullptr;
+  if (needed > pred_capacity_) {
+    if (d_pred_bits_) cudaFree(d_pred_bits_);
+    check_cuda(cudaMalloc(&d_pred_bits_, needed * sizeof(u8)), "cudaMalloc pred bits failed");
+    pred_capacity_ = needed;
+  }
+  return d_pred_bits_;
 }
 
 void GpuSufProgram::eval(const u64* d_in, std::size_t n,
                          u64* d_out_arith, u64* d_out_helpers,
                          cudaStream_t stream) const {
-  u8* d_pred_bits = nullptr;
-  if (!preds_.empty()) {
-    check_cuda(cudaMalloc(&d_pred_bits, preds_.size() * n * sizeof(u8)), "cudaMalloc pred bits failed");
+  u8* d_pred_bits = ensure_pred_bits(n);
+  if (d_pred_bits) {
     launch_eval_preds(d_in, n, d_preds_, static_cast<int>(preds_.size()), d_pred_bits, stream);
   }
 
@@ -125,7 +140,6 @@ void GpuSufProgram::eval(const u64* d_in, std::size_t n,
     }
   }
 
-  if (d_pred_bits) cudaFree(d_pred_bits);
 }
 
 void GpuSufProgram::eval_poly_only(const u64* d_in, std::size_t n,

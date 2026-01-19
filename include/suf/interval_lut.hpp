@@ -1,7 +1,7 @@
 #pragma once
 
 #include "suf/common.hpp"
-#include "suf/dcf_batch.hpp"
+#include "suf/dmpf.hpp"
 
 #ifdef SUF_HAVE_CUDA
 #include <cuda_runtime.h>
@@ -23,19 +23,19 @@ struct IntervalLutHeaderV2 {
   u32 flags = 0;
 };
 
+constexpr u32 kIntervalLutFlagDirectTable = 1u;
+
 struct IntervalLutKeyV2 {
   IntervalLutHeaderV2 hdr;
   std::vector<u64> base_share; // out_words
-  DcfKeyBatch dcf_batch;
-  std::vector<u64> deltas; // (intervals-1) * out_words, public
+  DmpfKey dmpf;
 };
 
 #ifdef SUF_HAVE_CUDA
 struct IntervalLutKeyV2Gpu {
   IntervalLutHeaderV2 hdr;
   u64* d_base = nullptr;
-  u64* d_deltas = nullptr;
-  DcfKeyBatchGpu dcf;
+  DmpfKeyGpu dmpf;
 };
 #endif
 
@@ -56,9 +56,13 @@ void eval_interval_lut_v2_gpu(const u64* d_in, std::size_t n,
                               const IntervalLutKeyV2Gpu& key,
                               u64* d_out, cudaStream_t stream = nullptr);
 
-void interval_lut_combine_gpu(const u64* d_base, const u64* d_deltas, const u64* d_bits,
-                              u64* d_out, std::size_t n, std::size_t num_keys, int out_words,
-                              cudaStream_t stream = nullptr);
+void interval_lut_add_base_gpu(const u64* d_base, u64* d_out,
+                               std::size_t n, int out_words,
+                               cudaStream_t stream = nullptr);
+
+void interval_lut_direct_gpu(const u64* d_table, const u64* d_in,
+                             std::size_t n, int in_bits, int out_words,
+                             u64* d_out, cudaStream_t stream = nullptr);
 #endif
 
 } // namespace suf

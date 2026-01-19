@@ -11,7 +11,8 @@ enum class PredKind : u8 {
   LT = 0,     // x < beta (unsigned)
   LTLOW = 1,  // (x mod 2^f) < gamma
   MSB = 2,    // msb(x)
-  MSB_ADD = 3 // msb(x + c)
+  MSB_ADD = 3, // msb(x + c)
+  CONST = 4   // constant bit (secret-shared in secure mode)
 };
 
 struct Predicate {
@@ -19,6 +20,7 @@ struct Predicate {
   u64 param = 0;   // beta for LT, c for MSB_ADD, unused for MSB
   u64 gamma = 0;   // gamma for LTLOW
   u8 f = 0;        // f for LTLOW
+  u64 input_add = 0; // added to x before comparison (for view_{k,c})
 };
 
 struct BoolNode {

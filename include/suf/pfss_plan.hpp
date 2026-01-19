@@ -29,10 +29,12 @@ inline PfssPlan compile_pfss_plan(const SUFDescriptor& d) {
       case PredKind::LT:
         q.n_bits = 64;
         q.threshold = p.param;
+        q.input_add = p.input_add;
         break;
       case PredKind::LTLOW:
         q.n_bits = static_cast<int>(p.f);
         q.threshold = p.gamma;
+        q.input_add = p.input_add;
         break;
       case PredKind::MSB:
         q.n_bits = 64;
@@ -45,6 +47,8 @@ inline PfssPlan compile_pfss_plan(const SUFDescriptor& d) {
         q.input_add = p.param;
         q.invert = true;
         break;
+      case PredKind::CONST:
+        continue;
       default:
         fail("unknown predicate kind in compile_pfss_plan");
     }

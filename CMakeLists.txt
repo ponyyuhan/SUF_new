@@ -20,8 +20,11 @@ if (SUF_ENABLE_CUDA)
     src/cuda/gpu_backend.cu
     src/cuda/dpf_kernels.cu
     src/cuda/dcf_kernels.cu
+    src/cuda/dmpf_kernels.cu
     src/cuda/interval_lut_kernels.cu
     src/secure_program.cpp
+    src/dmpf.cpp
+    src/masked_compile.cpp
     src/interval_lut.cpp
   )
   target_include_directories(suf_cuda PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -37,6 +40,10 @@ if (SUF_ENABLE_BENCH)
   add_executable(bench_suf_gpu src/bench/bench_suf_gpu.cpp)
   target_link_libraries(bench_suf_gpu PRIVATE suf_core $<$<BOOL:${SUF_ENABLE_CUDA}>:suf_cuda>)
   target_compile_definitions(bench_suf_gpu PRIVATE SUF_ENABLE_BENCH=1)
+
+  add_executable(bench_suf_model src/bench/bench_suf_model.cpp)
+  target_link_libraries(bench_suf_model PRIVATE suf_core $<$<BOOL:${SUF_ENABLE_CUDA}>:suf_cuda>)
+  target_compile_definitions(bench_suf_model PRIVATE SUF_ENABLE_BENCH=1)
 endif()
 
 if (SUF_ENABLE_TESTS)
