@@ -142,7 +142,103 @@ Sigma 运行时调节（可选）：
 
 ---
 
-## 6. 准确性曲线（速度‑准确性）
+## 6. 为什么 SUF 比 Sigma 快（本实现的原因）
+
+1) **关键瓶颈被替换**  
+   Sigma 的 Softmax/LayerNorm 中最重的是 nExp / inverse / rsqrt 这三类标量非线性。  
+   SUF 用统一的 DMPF + Interval LUT 组合替换它们，减少多轮比较/校正/截断的链路。
+
+2) **key/通信减少**  
+   SUF 只需要两类模板 key（谓词 + 区间选择），并且 LUT 输入位宽可控（`SUF_NEXP_BITS` 等），
+   让 key size 与在线通信明显下降。
+
+3) **GPU kernel 更少、同步更少**  
+   Sigma 原本每个 primitive 要跑多个 kernel（比较 + LUT + 截断 + 修正），
+   SUF 把它们收敛为一条统一的 GPU 流水线。
+
+4) **对短序列提升更大**  
+   在 gpt2‑128 这类短序列下，非线性开销占比更高，替换后收益更明显；  
+   随着序列变长，matmul/MHA 占比上升，整体加速会收敛。
+
+---
+
+## 7. DMPF / Interval LUT 细节
+
+### 7.1 DMPF 理论基础（简述）
+
+- **DPF/FSS 基础**：DPF 将点函数以两个短 key 形式共享，在线评估时每方只需本地计算并求和恢复输出。
+  DPF/DCF 是现代 FSS 系统中点函数/比较函数的标准内核。  
+- **DMPF 概念**：DMPF 是 DPF 的多点扩展，表示“稀疏 t‑point 函数/向量”，
+  通过更紧凑的 key 与更快的 Eval 来替代“t 个 DPF”。
+  近期的 DMPF 构造（如 big‑state / OKVS 方案）在理论上可显著降低 Eval 成本。
+
+> 本仓库当前实现的是 **baseline 版本**：把多点问题映射成 **多个 DCF‑LT（阈值比较）**
+> 并进行批处理（见 `include/suf/dmpf.hpp` 的注释）。  
+> 该路径在 t 较小（如 Interval LUT 的 cutpoints 数）时非常实际，并且易于 GPU 并行化。
+
+**参考文献（DMPF / DPF / Interval FSS）**
+- Elette Boyle et al., *Improved Constructions for Distributed Multi‑Point Functions*, IEEE S&P 2025 (DOI: 10.1109/SP61157.2025.00044, https://dblp.org/rec/conf/sp/BoyleGHIT25)
+- Elette Boyle, Niv Gilboa, Yuval Ishai, *Function Secret Sharing: Improvements and Extensions*, ePrint 2018/707 (https://eprint.iacr.org/2018/707)
+- Niv Gilboa, Yuval Ishai, *Distributed Point Functions and Their Applications* (DPF 基础, https://cris.technion.ac.il/en/publications/distributed-point-functions-and-their-applications-2/)
+- Chandan Kumar et al., *Compact Key Function Secret Sharing with Non‑linear Decoder*, ePrint 2024/1062 (point/comparison/interval, https://eprint.iacr.org/2024/1062)
+
+### 7.2 Interval LUT 的结构与原因
+
+Interval LUT 用来在“公开掩码输入 $\hat{x}$”上选择一组区间 payload。  
+当前实现有两条路径：
+
+**A) Direct Table（小域直接查表）**  
+- 当 `in_bits <= SUF_DIRECT_LUT_BITS` 时，直接构建长度 `2^{in_bits}` 的表。  
+- Eval 复杂度 O(1)，GPU 上极快。  
+
+**B) DMPF + Suffix‑Sum（通用路径）**  
+- 将区间 payload 表示成 “base + cutpoint deltas”：  
+  `payload[i] = base + sum_{j < i} delta[j]`  
+- 对每个 cutpoint 评估 `1[x < cutpoint]`（DCF‑LT），并加权 delta，最后加 base。
+
+这样做的好处：
+1) **向量 payload 的代价集中在末端**（加法累积），避免每层都携带大 payload。  
+2) **cutpoints 数通常远小于域大小**，适合 DMPF/DCF 批处理。  
+3) **GPU 友好**：对同一输入 batch 做 batched DCF‑LT，内存访问连续。
+
+### 7.3 复杂度（基于当前实现）
+
+设：
+- `t = intervals - 1`（cutpoints 数）
+- `n = in_bits`
+- `w = out_words`（payload 的 u64 数）
+
+**DMPF‑suffix（当前实现）**
+- Eval：`O(t * log N)` 次 DCF‑LT PRG 展开 + `O(t * w)` 的向量加法  
+- Key size：`O(t * log N)` 的 DCF key + `O(t * w)` 的 delta payload  
+
+**Direct Table**
+- Eval：`O(1 * w)`  
+- Key size：`O(2^{n} * w)`  
+
+结论：  
+- **小域**选 Direct Table（极速，但 key 爆炸）。  
+- **大域/中等 cutpoints**选 DMPF‑suffix（更平衡）。  
+
+### 7.4 配置建议（与代码一致）
+
+**Interval LUT 选择：**
+- `SUF_DIRECT_LUT_BITS`（默认 16）：`in_bits` 不超过该阈值时直接查表。  
+
+**Softmax / LayerNorm 相关：**
+- `SUF_NEXP_XMAX`：nExp clamp 上界  
+- `SUF_INV_FRAC`：inverse 输入小数位  
+- `SUF_RSQRT_VMAX`：rsqrt clamp 上界  
+- `SUF_NEXP_BITS` / `SUF_INV_BITS`：限制 LUT 输入位宽，减少 key 与 Eval  
+
+推荐参数（当前验证稳定且较快）：
+```
+SUF_NONLINEAR=1 SUF_NEXP_XMAX=16 SUF_INV_FRAC=6 SUF_RSQRT_VMAX=8 SUF_NEXP_BITS=12
+```
+
+---
+
+## 8. 准确性曲线（速度‑准确性）
 
 导出输出并计算精度差异：
 ```
@@ -161,7 +257,7 @@ python scripts/sigma_accuracy.py \
 
 ---
 
-## 7. Sigma 集成逻辑（Softmax/LayerNorm）
+## 9. Sigma 集成逻辑（Softmax/LayerNorm）
 
 Softmax：
 1) `max` 与 `sum` 仍由 Sigma 的 GPU 协议处理（非 SUF 部分）。  
@@ -175,7 +271,7 @@ LayerNorm：
 
 ---
 
-## 8. 注意事项
+## 10. 注意事项
 
 1) `SIGMA_CLEAR_REF` 不可用：ClearText backend 缺 MHA，已在代码中直接跳过并提示。  
 2) 大模型/长序列对显存要求高，单卡可能失败。  
