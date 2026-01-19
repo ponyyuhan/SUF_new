@@ -43,6 +43,7 @@ src/                SUF 编译与 GPU 实现
 src/cuda/           CUDA 核心（DMPF、Interval LUT 等）
 scripts/            对比脚本与准确性分析
 third_party/EzPC/   Sigma (GPU-MPC) 子模块 + 我们的集成修改
+third_party/EzPC_vendor/  Sigma 的“完整拷贝”，用于便携迁移（无子模块依赖）
 ```
 
 Sigma 集成桥接：
@@ -51,6 +52,9 @@ Sigma 集成桥接：
 - `third_party/EzPC/GPU-MPC/fss/gpu_softmax.cu`
 - `third_party/EzPC/GPU-MPC/fss/gpu_layernorm.cu`
 - `third_party/EzPC/GPU-MPC/backend/sigma.h`
+
+可移植版本（不依赖子模块）：
+- `third_party/EzPC_vendor/GPU-MPC/...`
 
 ---
 
@@ -176,4 +180,3 @@ LayerNorm：
 1) `SIGMA_CLEAR_REF` 不可用：ClearText backend 缺 MHA，已在代码中直接跳过并提示。  
 2) 大模型/长序列对显存要求高，单卡可能失败。  
 3) 若需更明显的精度‑速度折中曲线，可继续调低 `SUF_NEXP_BITS` 或 `SUF_RSQRT_FRAC`。
-
