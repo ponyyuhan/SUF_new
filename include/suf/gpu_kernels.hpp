@@ -1,0 +1,26 @@
+#pragma once
+
+#include "suf/gpu_backend.hpp"
+
+#ifdef SUF_HAVE_CUDA
+#include <cuda_runtime.h>
+#endif
+
+namespace suf {
+
+#ifdef SUF_HAVE_CUDA
+void launch_eval_preds(const u64* d_in, std::size_t n,
+                       const GpuPredicate* d_preds, int num_preds,
+                       u8* d_out, cudaStream_t stream);
+
+void launch_eval_poly(const u64* d_in, std::size_t n,
+                      const u64* d_cuts, int num_cuts,
+                      const u64* d_coeffs, int degree,
+                      u64* d_out, cudaStream_t stream);
+
+void launch_eval_helper(const u8* d_pred_bits, std::size_t n,
+                        const GpuBoolNode* d_nodes, int num_nodes, int root,
+                        u64* d_out, cudaStream_t stream);
+#endif
+
+} // namespace suf

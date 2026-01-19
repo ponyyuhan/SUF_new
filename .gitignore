@@ -1,0 +1,22 @@
+# build artifacts
+/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+Testing/
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# local outputs
+*.log
+*.tmp
+
+# editor
+.DS_Store
+.vscode/
