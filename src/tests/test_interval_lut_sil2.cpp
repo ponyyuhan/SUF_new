@@ -59,9 +59,8 @@ int main() {
   for (std::size_t i = 0; i < N; ++i) {
     const u64 x = inputs[i];
     std::size_t idx = 0;
-    for (std::size_t j = 0; j + 1 < intervals; ++j) {
-      if (x < cutpoints[j]) { idx = j; break; }
-      idx = j + 1;
+    for (std::size_t j = 1; j < intervals; ++j) {
+      if (x >= cutpoints[j]) idx = j;
     }
     for (std::size_t w = 0; w < out_words; ++w) {
       u64 got = out0[i * out_words + w] + out1[i * out_words + w];

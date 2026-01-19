@@ -2,6 +2,7 @@
 
 #include "suf/gpu_backend.hpp"
 #include "suf/pfss_plan.hpp"
+#include "suf/interval_lut.hpp"
 
 #ifdef SUF_HAVE_CUDA
 #include <cuda_runtime.h>
@@ -35,6 +36,9 @@ private:
 
   DpfKeyBatchGpu dpf_gpu_{};
   bool dpf_loaded_ = false;
+
+  bool use_interval_lut_ = false;
+  IntervalLutKeyV2Gpu interval_key_{};
 };
 
 #endif // SUF_HAVE_CUDA

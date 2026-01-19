@@ -53,7 +53,7 @@ IntervalLutKeyV2 gen_interval_lut_v2(const std::vector<u64>& cutpoints,
   key.dcf_batch.vcw.reserve((intervals - 1) * in_bits);
 
   for (std::size_t i = 0; i + 1 < intervals; ++i) {
-    auto kp = keygen_dcf_lt(in_bits, cutpoints[i], rng);
+    auto kp = keygen_dcf_lt(in_bits, cutpoints[i + 1], rng);
     const DcfKey& k = (party == 0) ? kp.k0 : kp.k1;
 
     DcfKeyPacked packed;
