@@ -29,6 +29,10 @@
 #include "gpu_inverse.h"
 #include "gpu_window.h"
 
+#if defined(SUF_HAVE_CUDA)
+extern "C" bool suf_softmax_enabled();
+extern "C" void suf_sigma_consume_key();
+#else
 inline bool suf_softmax_enabled()
 {
     const char* v = std::getenv("SUF_SOFTMAX");
@@ -38,6 +42,7 @@ inline bool suf_softmax_enabled()
     v = std::getenv("SUF_ACTIVATION");
     return (v && std::atoi(v) != 0);
 }
+#endif
 
 
 template <typename T>
@@ -66,7 +71,11 @@ GPUSoftMaxKey<T> readGPUSoftMaxKey(MaxpoolParams p, u8 **key_as_bytes)
         k.invKey = readGPULUTInverseKey<T>(key_as_bytes);
         k.invTrKey = k.invKey.trKey;
     } else {
+        // Skip SUF nExp key bytes in the shared key buffer.
+        suf_sigma_consume_key();
         k.invTrKey = readGPUTruncateKey<u16>(TruncateType::TrWithSlack, key_as_bytes);
+        // Skip SUF inverse key bytes before reading window-mul key.
+        suf_sigma_consume_key();
     }
     k.wMulKey = readGPUWindowMulKey<T>(p, TruncateType::TrWithSlack, key_as_bytes);
     return k;

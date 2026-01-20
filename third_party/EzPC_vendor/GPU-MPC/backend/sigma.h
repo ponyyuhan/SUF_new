@@ -107,10 +107,17 @@ public:
             keySize = std::filesystem::file_size(filename);
             int fd = openForReading(filename);
             printf("%s, %d\n", filename.data(), fd);
-            getAlignedBuf(&keyBuf, keySize);
+            bool pinKeyBuf = true;
+            const char* pin_env = std::getenv("SIGMA_PINNED_KEYBUF");
+            if (pin_env)
+                pinKeyBuf = std::atoi(pin_env) != 0;
+            getAlignedBuf(&keyBuf, keySize, pinKeyBuf);
             readKey(fd, keySize, keyBuf, NULL);
             startPtr = keyBuf;
             closeFile(fd);
+        }
+        if (use_suf_any) {
+            suf_sigma_set_keybuf_ptr(&keyBuf);
         }
 
         LlamaConfig::bitlength = bw;
@@ -340,8 +347,15 @@ public:
         initGPURandomness();
         initGPUMemPool();
         // keyBufSize = 20 * OneGB;
-        keyBuf = cpuMalloc(keyBufSize);
+        bool pinKeyBuf = true;
+        const char* pin_env = std::getenv("SIGMA_PINNED_KEYBUF");
+        if (pin_env)
+            pinKeyBuf = std::atoi(pin_env) != 0;
+        keyBuf = cpuMalloc(keyBufSize, pinKeyBuf);
         startPtr = keyBuf;
+        if (use_suf_any) {
+            suf_sigma_set_keybuf_ptr(&keyBuf);
+        }
 
         LlamaConfig::bitlength = bw;
         LlamaConfig::party = DEALER;

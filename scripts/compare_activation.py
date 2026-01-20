@@ -88,25 +88,44 @@ def parse_sigma_log(text, gate):
     key_size = re.search(r"Key size=(\d+)", text)
     eval_time = re.search(rf"{gate.capitalize()} time=(\d+)", text)
     eval_comm = re.search(r"Eval comm bytes=(\d+)", text)
-    if not (keygen_time and key_size and eval_time and eval_comm):
-        raise ValueError(f"Failed to parse Sigma output for {gate}:\n{text}")
-    return {
-        "keygen_us": int(keygen_time.group(1)),
-        "key_bytes": int(key_size.group(1)),
-        "eval_us": int(eval_time.group(1)),
-        "eval_comm_bytes": int(eval_comm.group(1)),
-    }
+    if keygen_time and key_size and eval_time and eval_comm:
+        return {
+            "keygen_us": int(keygen_time.group(1)),
+            "key_bytes": int(key_size.group(1)),
+            "eval_us": int(eval_time.group(1)),
+            "eval_comm_bytes": int(eval_comm.group(1)),
+        }
+
+    # Fallback for GPU-MPC test output (comm/transfer + eval time only)
+    eval_time = re.search(rf"{gate.capitalize()} time=(\d+)\s*micros", text)
+    comm_time = re.search(r"Comm time=(\d+)\s*micros", text)
+    if eval_time:
+        return {
+            "keygen_us": 0,
+            "key_bytes": 0,
+            "eval_us": int(eval_time.group(1)),
+            "eval_comm_bytes": 0,
+            "comm_time_us": int(comm_time.group(1)) if comm_time else 0,
+        }
+
+    raise ValueError(f"Failed to parse Sigma output for {gate}:\n{text}")
 
 
-def run_sigma_gate(sigma_bin, gate, n_elems, addr, env):
+def run_sigma_gate(sigma_bin, gate, n_elems, addr, env, gpu0, gpu1):
     with tempfile.TemporaryDirectory() as tmpdir:
         p0_log = Path(tmpdir) / "p0.log"
         p1_log = Path(tmpdir) / "p1.log"
+        env0 = env.copy()
+        env1 = env.copy()
+        if gpu0:
+            env0["CUDA_VISIBLE_DEVICES"] = str(gpu0)
+        if gpu1:
+            env1["CUDA_VISIBLE_DEVICES"] = str(gpu1)
         with p0_log.open("w") as f0:
-            p0 = subprocess.Popen([sigma_bin, "0", addr, str(n_elems)], env=env, stdout=f0, stderr=f0)
+            p0 = subprocess.Popen([sigma_bin, "0", addr, str(n_elems)], env=env0, stdout=f0, stderr=f0)
         time.sleep(0.8)
         with p1_log.open("w") as f1:
-            p1 = subprocess.Popen([sigma_bin, "1", addr, str(n_elems)], env=env, stdout=f1, stderr=f1)
+            p1 = subprocess.Popen([sigma_bin, "1", addr, str(n_elems)], env=env1, stdout=f1, stderr=f1)
         rc0 = p0.wait()
         rc1 = p1.wait()
         if rc0 != 0 or rc1 != 0:
@@ -138,6 +157,8 @@ def main():
     parser.add_argument("--sigma-keybuf-mb", type=int, default=4096)
     parser.add_argument("--sigma-mempool-mb", type=int, default=4096)
     parser.add_argument("--sigma-verify", action="store_true")
+    parser.add_argument("--sigma-gpu0", type=str, default=os.environ.get("SIGMA_GPU0", "0"))
+    parser.add_argument("--sigma-gpu1", type=str, default=os.environ.get("SIGMA_GPU1", "1"))
     parser.add_argument("--csv", type=str, default="")
     parser.add_argument("--json", type=str, default="")
     args = parser.parse_args()
@@ -183,7 +204,8 @@ def main():
         sigma_bin = sigma_dir / "tests" / "fss" / gate
         if not sigma_bin.exists():
             raise FileNotFoundError(f"Sigma binary not found: {sigma_bin}")
-        sigma = run_sigma_gate(str(sigma_bin), gate, gate_elems, args.addr, sigma_env)
+        sigma = run_sigma_gate(str(sigma_bin), gate, gate_elems, args.addr, sigma_env,
+                               args.sigma_gpu0, args.sigma_gpu1)
 
         sigma_per_gate_key_ms = sigma["keygen_us"] / 1000.0
         sigma_per_gate_eval_ms = sigma["eval_us"] / 1000.0

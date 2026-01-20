@@ -29,6 +29,10 @@
 #include "gpu_window.h"
 #include "gpu_lut.h"
 
+#if defined(SUF_HAVE_CUDA)
+extern "C" bool suf_layernorm_enabled();
+extern "C" void suf_sigma_consume_key();
+#else
 inline bool suf_layernorm_enabled()
 {
     const char* v = std::getenv("SUF_LAYERNORM");
@@ -38,6 +42,7 @@ inline bool suf_layernorm_enabled()
     v = std::getenv("SUF_ACTIVATION");
     return (v && std::atoi(v) != 0);
 }
+#endif
 
 template <typename T>
 struct GPUSqKey
@@ -94,6 +99,8 @@ GPULayerNormKey<T> readGPULayerNormKey(AvgPoolParams p, u8** key_as_bytes, bool 
     k.sqKey = readGPUSqKey<T>(inSz, key_as_bytes);
     if (suf_layernorm_enabled()) {
         k.rsqrtTrKey = readGPUTruncateKey<u16>(TruncateType::TrWithSlack, key_as_bytes);
+        // Skip SUF rsqrt key bytes before reading window-mul keys.
+        suf_sigma_consume_key();
     }
     // printf("Num sq=%ld\n", inSz);
     // k.invSqrtKey = readGPULUTKey<T>(key_as_bytes);

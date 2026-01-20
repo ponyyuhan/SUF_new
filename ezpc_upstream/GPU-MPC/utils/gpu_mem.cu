@@ -34,6 +34,10 @@ cudaMemPool_t mempool;
 
 extern "C" void initGPUMemPool()
 {
+    const char *disable_env = std::getenv("SIGMA_MEMPOOL_DISABLE");
+    if (disable_env && std::atoi(disable_env) != 0) {
+        return;
+    }
     int isMemPoolSupported = 0;
     int device = 0;
     // is it okay to use device=0?
