@@ -1,2 +1,0 @@
-comm_bytes,eval_us,gen_us,key_bytes,sigma_mae,sigma_max_abs,sigma_rel_rmse,sigma_rmse,sigma_top1,sigma_top5,tag
-18167938.0,33163.0,45767.0,268587008.0,0.0,0.0,0.0,0.0,1.0,0.0,suf_nexp10_inv10_rsqrt9

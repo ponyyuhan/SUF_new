@@ -1,0 +1,343 @@
+[
+  {
+    "id": "bert_tiny_sst2",
+    "family": "bert_seqcls",
+    "task": "glue/sst2",
+    "seq_len": 128,
+    "n_bits": 37,
+    "frac_bits": 12,
+    "train_size": 67349,
+    "val_size": 872,
+    "pytorch": {
+      "acc": 0.8038990825688074,
+      "acc_pct": 80.38990825688074
+    },
+    "suf": {
+      "acc": 0.8038990825688074,
+      "acc_pct": 80.38990825688074
+    },
+    "sigma_ref": {
+      "train_size": 67000,
+      "val_size": 872,
+      "pytorch_acc": 82.45,
+      "sigma_acc": 82.57
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.0,
+      "suf_minus_sigma_pp": -2.180091743119249,
+      "pytorch_minus_sigma_pp": -2.180091743119249
+    },
+    "notes": "HF: takedarn/bert-tiny-sst2",
+    "runtime_s": 6.611730575561523
+  },
+  {
+    "id": "bert_tiny_mrpc",
+    "family": "bert_seqcls",
+    "task": "glue/mrpc",
+    "seq_len": 128,
+    "n_bits": 37,
+    "frac_bits": 12,
+    "train_size": 3668,
+    "val_size": 408,
+    "pytorch": {
+      "acc": 0.7352941176470589,
+      "acc_pct": 73.52941176470588
+    },
+    "suf": {
+      "acc": 0.7352941176470589,
+      "acc_pct": 73.52941176470588
+    },
+    "sigma_ref": {
+      "train_size": 3700,
+      "val_size": 408,
+      "pytorch_acc": 71.07,
+      "sigma_acc": 70.34
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.0,
+      "suf_minus_sigma_pp": 3.1894117647058806,
+      "pytorch_minus_sigma_pp": 3.1894117647058806
+    },
+    "notes": "HF: M-FAC/bert-tiny-finetuned-mrpc",
+    "runtime_s": 7.273154258728027
+  },
+  {
+    "id": "bert_tiny_qnli",
+    "family": "bert_seqcls",
+    "task": "glue/qnli",
+    "seq_len": 128,
+    "n_bits": 37,
+    "frac_bits": 12,
+    "train_size": 104743,
+    "val_size": 5463,
+    "pytorch": {
+      "acc": 0.8156690463115505,
+      "acc_pct": 81.56690463115504
+    },
+    "suf": {
+      "acc": 0.8160351455244371,
+      "acc_pct": 81.60351455244371
+    },
+    "sigma_ref": {
+      "train_size": 105000,
+      "val_size": 5463,
+      "pytorch_acc": 81.42,
+      "sigma_acc": 81.93
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.036609921288672354,
+      "suf_minus_sigma_pp": -0.32648544755629416,
+      "pytorch_minus_sigma_pp": -0.3630953688449665
+    },
+    "notes": "HF: M-FAC/bert-tiny-finetuned-qnli",
+    "runtime_s": 11.804597616195679
+  },
+  {
+    "id": "bert_base_sst2",
+    "family": "bert_seqcls",
+    "task": "glue/sst2",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 67349,
+    "val_size": 872,
+    "pytorch": {
+      "acc": 0.9243119266055045,
+      "acc_pct": 92.43119266055045
+    },
+    "suf": {
+      "acc": 0.9243119266055045,
+      "acc_pct": 92.43119266055045
+    },
+    "sigma_ref": {
+      "train_size": 67000,
+      "val_size": 872,
+      "pytorch_acc": 92.55,
+      "sigma_acc": 92.55
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.0,
+      "suf_minus_sigma_pp": -0.11880733944954613,
+      "pytorch_minus_sigma_pp": -0.11880733944954613
+    },
+    "notes": "HF: textattack/bert-base-uncased-SST-2",
+    "runtime_s": 11.2389235496521
+  },
+  {
+    "id": "bert_base_mrpc",
+    "family": "bert_seqcls",
+    "task": "glue/mrpc",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 3668,
+    "val_size": 408,
+    "pytorch": {
+      "acc": 0.8774509803921569,
+      "acc_pct": 87.74509803921569
+    },
+    "suf": {
+      "acc": 0.8774509803921569,
+      "acc_pct": 87.74509803921569
+    },
+    "sigma_ref": {
+      "train_size": 3700,
+      "val_size": 408,
+      "pytorch_acc": 84.31,
+      "sigma_acc": 87.25
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.0,
+      "suf_minus_sigma_pp": 0.49509803921569073,
+      "pytorch_minus_sigma_pp": 0.49509803921569073
+    },
+    "notes": "HF: textattack/bert-base-uncased-MRPC",
+    "runtime_s": 9.02618932723999
+  },
+  {
+    "id": "bert_base_qnli",
+    "family": "bert_seqcls",
+    "task": "glue/qnli",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 104743,
+    "val_size": 5463,
+    "pytorch": {
+      "acc": 0.9154310818231741,
+      "acc_pct": 91.54310818231741
+    },
+    "suf": {
+      "acc": 0.9152480322167308,
+      "acc_pct": 91.52480322167308
+    },
+    "sigma_ref": {
+      "train_size": 105000,
+      "val_size": 5463,
+      "pytorch_acc": 91.6,
+      "sigma_acc": 91.63
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": -0.01830496064432907,
+      "suf_minus_sigma_pp": -0.10519677832691343,
+      "pytorch_minus_sigma_pp": -0.08689181768258436
+    },
+    "notes": "HF: textattack/bert-base-uncased-QNLI",
+    "runtime_s": 34.57168793678284
+  },
+  {
+    "id": "bert_large_sst2",
+    "family": "bert_seqcls",
+    "task": "glue/sst2",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 67349,
+    "val_size": 872,
+    "pytorch": {
+      "acc": 0.9346330275229358,
+      "acc_pct": 93.46330275229357
+    },
+    "suf": {
+      "acc": 0.9334862385321101,
+      "acc_pct": 93.34862385321101
+    },
+    "sigma_ref": {
+      "train_size": 67000,
+      "val_size": 872,
+      "pytorch_acc": 93.58,
+      "sigma_acc": 93.35
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": -0.11467889908256268,
+      "suf_minus_sigma_pp": -0.001376146788985011,
+      "pytorch_minus_sigma_pp": 0.11330275229357767
+    },
+    "notes": "HF: yoshitomo-matsubara/bert-large-uncased-sst2",
+    "runtime_s": 22.823960065841675
+  },
+  {
+    "id": "bert_large_mrpc",
+    "family": "bert_seqcls",
+    "task": "glue/mrpc",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 3668,
+    "val_size": 408,
+    "pytorch": {
+      "acc": 0.8799019607843137,
+      "acc_pct": 87.99019607843137
+    },
+    "suf": {
+      "acc": 0.8799019607843137,
+      "acc_pct": 87.99019607843137
+    },
+    "sigma_ref": {
+      "train_size": 3700,
+      "val_size": 408,
+      "pytorch_acc": 87.99,
+      "sigma_acc": 88.48
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.0,
+      "suf_minus_sigma_pp": -0.4898039215686367,
+      "pytorch_minus_sigma_pp": -0.4898039215686367
+    },
+    "notes": "HF: yoshitomo-matsubara/bert-large-uncased-mrpc",
+    "runtime_s": 14.085302591323853
+  },
+  {
+    "id": "bert_large_qnli",
+    "family": "bert_seqcls",
+    "task": "glue/qnli",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 104743,
+    "val_size": 5463,
+    "pytorch": {
+      "acc": 0.9223869668680212,
+      "acc_pct": 92.23869668680213
+    },
+    "suf": {
+      "acc": 0.9225700164744646,
+      "acc_pct": 92.25700164744646
+    },
+    "sigma_ref": {
+      "train_size": 105000,
+      "val_size": 5463,
+      "pytorch_acc": 92.23,
+      "sigma_acc": 92.26
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.01830496064432907,
+      "suf_minus_sigma_pp": -0.002998352553547079,
+      "pytorch_minus_sigma_pp": -0.02130331319787615
+    },
+    "notes": "HF: yoshitomo-matsubara/bert-large-uncased-qnli",
+    "runtime_s": 109.24012517929077
+  },
+  {
+    "id": "gpt2_lambada",
+    "family": "gpt_lm",
+    "task": "lambada (lambada:test)",
+    "seq_len": 128,
+    "n_bits": 50,
+    "frac_bits": 12,
+    "train_size": 0,
+    "val_size": 5153,
+    "pytorch": {
+      "acc": 0.6058606636910537,
+      "acc_pct": 60.586066369105374
+    },
+    "suf": {
+      "acc": 0.606054725402678,
+      "acc_pct": 60.605472540267805
+    },
+    "sigma_ref": {
+      "train_size": 0,
+      "val_size": 5153,
+      "pytorch_acc": 32.46,
+      "sigma_acc": 33.28
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.01940617116243004,
+      "suf_minus_sigma_pp": 27.325472540267803,
+      "pytorch_minus_sigma_pp": 27.306066369105373
+    },
+    "notes": "HF: gpt2 | dataset=lambada:test",
+    "runtime_s": 118.00199913978577
+  },
+  {
+    "id": "gpt_neo_1p3b_lambada",
+    "family": "gpt_lm",
+    "task": "lambada (lambada:test)",
+    "seq_len": 128,
+    "n_bits": 51,
+    "frac_bits": 12,
+    "train_size": 0,
+    "val_size": 5153,
+    "pytorch": {
+      "acc": 0.7209392586842616,
+      "acc_pct": 72.09392586842615
+    },
+    "suf": {
+      "acc": 0.7209392586842616,
+      "acc_pct": 72.09392586842615
+    },
+    "sigma_ref": {
+      "train_size": 0,
+      "val_size": 5153,
+      "pytorch_acc": 57.46,
+      "sigma_acc": 57.81
+    },
+    "delta": {
+      "suf_minus_pytorch_pp": 0.0,
+      "suf_minus_sigma_pp": 14.283925868426152,
+      "pytorch_minus_sigma_pp": 14.283925868426152
+    },
+    "notes": "HF: EleutherAI/gpt-neo-1.3B | dataset=lambada:test",
+    "runtime_s": 455.24931621551514
+  }
+]

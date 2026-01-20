@@ -44,3 +44,19 @@ third_party/EzPC/GPU-MPC/experiments/**/datasets/
 third_party/EzPC/GPU-MPC/experiments/**/keys/
 ezpc_upstream/GPU-MPC/experiments/**/datasets/
 ezpc_upstream/GPU-MPC/experiments/**/keys/
+
+# runtime artifacts / binaries
+accuracy_sweep/**
+third_party/EzPC/GPU-MPC/experiments/**/output/
+third_party/EzPC_vendor/GPU-MPC/experiments/**/output/
+ezpc_upstream/GPU-MPC/experiments/**/output/
+third_party/EzPC/GPU-MPC/experiments/sigma/sigma
+third_party/EzPC_vendor/GPU-MPC/experiments/sigma/sigma
+ezpc_upstream/GPU-MPC/experiments/sigma/sigma
+ezpc_upstream/GPU-MPC/tests/fss/gelu
+ezpc_upstream/GPU-MPC/tests/fss/layernorm
+ezpc_upstream/GPU-MPC/tests/fss/silu
+ezpc_upstream/GPU-MPC/tests/fss/softmax
+ezpc_upstream/GPU-MPC/tests/fss/truncate
+third_party/EzPC_vendor/GPU-MPC/tests/fss/gelu
+third_party/EzPC_vendor/GPU-MPC/tests/fss/silu

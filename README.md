@@ -235,7 +235,27 @@ SUF_NEXP_BITS=10 SUF_INV_BITS=10 SUF_RSQRT_BITS=9
 
 ## 10. 准确性
 
-- `accuracy_sweep/bert_tiny_accuracy.csv`：MAE / RMSE / MaxAbs = 0（当前 sweep 设置下与 Sigma 完全一致）。
+- **Table 4 风格准确性评估**：使用 PyTorch float32 + Sigma Table 4 参考值 + SUF fixed‑point emulation（`frac_bits=12`，bitwidth 与 Sigma 对齐）。  
+  入口脚本与配置：
+  - `bench/accuracy_compare.py`
+  - `bench/configs/accuracy_table4.json`
+
+示例命令（完整评估）：  
+```bash
+python bench/accuracy_compare.py \
+  --config bench/configs/accuracy_table4.json \
+  --out-json bench/results/accuracy/table4.json \
+  --out-md accuracy_report.md \
+  --device cuda \
+  --batch-size 8 \
+  --lm-batch-size 1
+```
+
+说明：
+- Sigma 数值来自其 Table 4，用作参考对比列。
+- SUF 列为 cleartext fixed‑point emulation（四舍五入 + 二补码 wrap），不涉及 MPC 通信。
+- Llama2 权重为 gated，默认 `skip=true`。
+- 依赖：`torch`, `transformers`, `datasets`, `tqdm`。
 
 ---
 

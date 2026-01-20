@@ -1,8 +1,0 @@
-{
-  "model": "bert-tiny",
-  "shape": [128, 128],
-  "scale": 12,
-  "bw": 37,
-  "dtype": "u64",
-  "signed": true
-}
