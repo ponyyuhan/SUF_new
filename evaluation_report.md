@@ -35,23 +35,43 @@ CUDA_VISIBLE_DEVICES=0/1, CPU threads=32
 
 **Not run (resource/operational constraints)**:
 - **GPT‑Neo‑large**: previous attempt overloaded the server; per request, we did not rerun that command.
-- **Llama‑7B / Llama‑13B**: Sigma key buffers are hard‑coded to **300 GB** and **450 GB** respectively; with 314 GiB total RAM (~227 GiB available during runs), these exceed memory and are not feasible in this environment.
+- **Llama‑7B / Llama‑13B**: Sigma key buffers are hard‑coded to **300 GB** and **450 GB** per party, requiring ~600 GB / 900 GB total; with 314 GiB total RAM (~227 GiB available during runs), these exceed memory and are not feasible in this environment.
 
-### 2.1 SHAFT comparison (per 2025‑2287‑paper.pdf)
+### 2.1 Additional sequence points (GPT‑2 / GPT‑Neo)
+| Model | Seq | Sigma time (ms) | SUF time (ms) | Speedup | Sigma comm (GB) | SUF comm (GB) |
+|---|---:|---:|---:|---:|---:|---:|
+| GPT‑2 | 64 | 621.83 | 474.10 | 1.31x | 0.370 | 0.335 |
+| GPT‑2 | 128 | 1679.97 | 804.87 | 2.09x | 0.824 | 0.724 |
+| GPT‑2 | 256 | 2494.41 | 1573.46 | 1.59x | 1.983 | 1.663 |
+| GPT‑Neo | 64 | 3320.82 | 2726.24 | 1.22x | 1.900 | 1.750 |
+| GPT‑Neo | 128 | 6053.52 | 4271.14 | 1.42x | 4.029 | 3.648 |
+
+### 2.2 SHAFT comparison (per 2025‑2287‑paper.pdf)
 SHAFT computes reported runtime as:
 ```
 T = comp_time + 2 * comm_bytes / bandwidth + rounds * latency
 ```
-Network settings in the paper: **LAN (1 Gbps, 0.5 ms)**, **WAN (400 Mbps, 4 ms)**.
+Network settings in the paper: **LAN (1 GB/s, 0.5 ms)**, **WAN (400 MB/s, 4 ms)**.
 
 | Model | SHAFT comp (s) | Comm (GB) | Rounds | Projected LAN (s) | Projected WAN (s) |
 |---|---:|---:|---:|---:|---:|
-| BERT‑base‑128 | 2.82 | 10.46 | 1496 | 170.93 | 427.20 |
-| BERT‑large‑128 | 7.28 | 28.46 | 2936 | 464.11 | 1157.42 |
+| BERT‑base‑128 | 2.82 | 10.46 | 1496 | 24.49 | 61.10 |
+| BERT‑large‑128 | 7.28 | 28.46 | 2936 | 65.67 | 161.32 |
 
 **Notes**:
 - SHAFT logs provide comp time, comm bytes, and rounds; projected times above follow the paper’s formula/network settings.
 - Sigma/SUF logs do not expose round counts, so we report measured online time and comm only; direct projected‑time comparison is not possible.
+
+### 2.3 Unified comparison (Sigma / SUF / SHAFT)
+SHAFT numbers below are taken from Table VII in the SHAFT paper (2025‑2287‑paper.pdf). Times are **projected** using their LAN/WAN settings (LAN 1 GB/s, 0.5 ms; WAN 400 MB/s, 4 ms); comm is in GB.
+
+| Model | Sigma online (ms) | SUF online (ms) | Sigma comm (GB) | SUF comm (GB) | SHAFT LAN (s) | SHAFT WAN (s) | SHAFT comm (GB) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| BERT‑base‑128 | 1631.10 | 928.72 | 0.989 | 0.830 | 28.60 | 66.46 | 10.46 |
+| BERT‑large‑128 | 4960.80 | 2405.52 | 2.638 | 2.213 | 77.13 | 176.21 | 28.46 |
+| GPT‑2‑128 | 1679.97 | 804.87 | 0.824 | 0.724 | 32.59 | 73.47 | 11.27 |
+| GPT‑2‑64 | 621.83 | 474.10 | 0.370 | 0.335 | 19.32 | 42.37 | 5.76 |
+| ViT‑base | — | — | — | — | 45.66 | 108.24 | 18.41 |
 
 ## 3. Scaling (BERT‑base, seq length sweep)
 **Setup**: same as Section 2.
@@ -82,7 +102,7 @@ The SHAFT paper (2025‑2287) reports runtime using:
 ```
 T = comp_time + 2 * comm_bytes / bandwidth + rounds * latency
 ```
-with LAN **(1 Gbps, 0.5 ms)** and WAN **(400 Mbps, 4 ms)**.
+with LAN **(1 GB/s, 0.5 ms)** and WAN **(400 MB/s, 4 ms)**.
 
 ### 5.1 Unit‑test microbench
 **Softmax** (`examples/unit-test/run_test_softmax.py`):
