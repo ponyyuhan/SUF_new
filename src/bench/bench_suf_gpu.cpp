@@ -136,16 +136,31 @@ int main(int argc, char** argv) {
             << " helpers=" << cfg.helpers << " avg_ms=" << avg_ms << " throughput=" << elems_per_s << " elems/s\n";
 
   if (cfg.verify) {
-    std::vector<u64> h_out(cfg.n);
-    cudaMemcpy(h_out.data(), d_out, cfg.n * sizeof(u64), cudaMemcpyDeviceToHost);
+    std::vector<u64> h_out0(cfg.n);
+    cudaMemcpy(h_out0.data(), d_out, cfg.n * sizeof(u64), cudaMemcpyDeviceToHost);
+    std::vector<u64> h_out1;
+    if (cfg.secure) {
+      u64* d_out1 = nullptr;
+      cudaMalloc(&d_out1, cfg.n * sizeof(u64));
+      auto prog1 = std::make_unique<GpuSecureSufProgram>(desc, 1, 1234, 0, cfg.mask_aware, cfg.mask_in);
+      prog1->eval(d_in, cfg.n, d_out1, nullptr, 0);
+      cudaDeviceSynchronize();
+      h_out1.resize(cfg.n);
+      cudaMemcpy(h_out1.data(), d_out1, cfg.n * sizeof(u64), cudaMemcpyDeviceToHost);
+      cudaFree(d_out1);
+    }
     for (std::size_t i = 0; i < std::min<std::size_t>(cfg.n, 1024); ++i) {
       u64 x = h_in[i];
       if (cfg.mask_aware) {
         x -= cfg.mask_in;
       }
       auto ref = eval_suf_ref(desc, x);
-      if (h_out[i] != ref.arith) {
-        std::cerr << "verify mismatch at " << i << " got " << h_out[i] << " expected " << ref.arith << "\n";
+      u64 got = h_out0[i];
+      if (cfg.secure) {
+        got += h_out1[i];
+      }
+      if (got != ref.arith) {
+        std::cerr << "verify mismatch at " << i << " got " << got << " expected " << ref.arith << "\n";
         return 1;
       }
     }

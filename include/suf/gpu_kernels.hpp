@@ -18,6 +18,13 @@ void launch_eval_poly(const u64* d_in, std::size_t n,
                       const u64* d_coeffs, int degree,
                       u64* d_out, cudaStream_t stream);
 
+void launch_eval_poly_from_coeffs(const u64* d_in,
+                                  const u64* d_coeffs,
+                                  std::size_t n,
+                                  int degree,
+                                  u64* d_out,
+                                  cudaStream_t stream);
+
 void launch_eval_helper(const u8* d_pred_bits, std::size_t n,
                         const GpuBoolNode* d_nodes, int num_nodes, int root,
                         u64* d_out, cudaStream_t stream);

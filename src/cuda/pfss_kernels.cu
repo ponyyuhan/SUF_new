@@ -71,6 +71,23 @@ __global__ void kernel_eval_poly(const u64* x, std::size_t n,
   out[idx] = y;
 }
 
+__global__ void kernel_eval_poly_from_coeffs(const u64* x,
+                                             const u64* coeffs,
+                                             std::size_t n,
+                                             int degree,
+                                             u64* out) {
+  const std::size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+  if (idx >= n) return;
+  const u64 xi = x[idx];
+  const std::size_t stride = static_cast<std::size_t>(degree + 1);
+  const u64* coeff = coeffs + idx * stride;
+  u64 y = 0;
+  for (int k = degree; k >= 0; --k) {
+    y = y * xi + coeff[k];
+  }
+  out[idx] = y;
+}
+
 __global__ void kernel_eval_helper(const u8* pred_bits, std::size_t n,
                                    const GpuBoolNode* nodes, int num_nodes, int root,
                                    u64* out) {
@@ -144,6 +161,17 @@ void launch_eval_poly(const u64* d_in, std::size_t n,
   const int threads = 256;
   const int blocks = static_cast<int>((n + threads - 1) / threads);
   kernel_eval_poly<<<blocks, threads, 0, stream>>>(d_in, n, d_cuts, num_cuts, d_coeffs, degree, d_out);
+}
+
+void launch_eval_poly_from_coeffs(const u64* d_in,
+                                  const u64* d_coeffs,
+                                  std::size_t n,
+                                  int degree,
+                                  u64* d_out,
+                                  cudaStream_t stream) {
+  const int threads = 256;
+  const int blocks = static_cast<int>((n + threads - 1) / threads);
+  kernel_eval_poly_from_coeffs<<<blocks, threads, 0, stream>>>(d_in, d_coeffs, n, degree, d_out);
 }
 
 void launch_eval_helper(const u8* d_pred_bits, std::size_t n,

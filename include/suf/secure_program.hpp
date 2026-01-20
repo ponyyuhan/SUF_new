@@ -36,6 +36,7 @@ public:
 private:
   u8* ensure_pred_bits(std::size_t n) const;
   u8* ensure_query_bits(std::size_t n) const;
+  u64* ensure_coeffs(std::size_t n) const;
 
   SUFDescriptor desc_;
   PfssPlan plan_;
@@ -55,8 +56,13 @@ private:
   int* d_query_to_pred_ = nullptr;
   u8* d_const_pred_bits_ = nullptr;
 
+  int poly_degree_ = 0;
   bool use_interval_lut_ = false;
   IntervalLutKeyV2Gpu interval_key_{};
+  bool use_coeff_lut_ = false;
+  IntervalLutKeyV2Gpu coeff_key_{};
+  mutable u64* d_coeffs_ = nullptr;
+  mutable std::size_t coeff_capacity_ = 0;
 };
 
 #endif // SUF_HAVE_CUDA

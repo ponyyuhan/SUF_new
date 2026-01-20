@@ -1,9 +1,8 @@
 #include "suf/sigma_bridge.hpp"
 
-#include "suf/interval_lut.hpp"
-#include "suf/masked_compile.hpp"
 #include "suf/ir.hpp"
 
+#include "utils/gpu_data_types.h"
 #include "utils/gpu_mem.h"
 #include "utils/sigma_comms.h"
 
@@ -11,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -18,6 +18,119 @@
 #include <random>
 #include <unordered_map>
 #include <vector>
+
+struct AESGlobalContext {
+  u32 *t0_g;
+  u8 *Sbox_g;
+  u32 *t4_0G;
+  u32 *t4_1G;
+  u32 *t4_2G;
+  u32 *t4_3G;
+};
+
+void initAESContext(AESGlobalContext *g);
+
+template <typename T>
+struct GPUSelectKey {
+  int N;
+  T *a;
+  T *b;
+  T *c;
+  T *d1;
+  T *d2;
+};
+
+template <typename T>
+static GPUSelectKey<T> readGPUSelectKey(uint8_t **key_as_bytes, int N) {
+  GPUSelectKey<T> k;
+  k.N = N;
+
+  const std::size_t size_in_bytes = static_cast<std::size_t>(N) * sizeof(T);
+
+  k.a = reinterpret_cast<T *>(*key_as_bytes);
+  *key_as_bytes += size_in_bytes;
+
+  k.b = reinterpret_cast<T *>(*key_as_bytes);
+  *key_as_bytes += size_in_bytes;
+
+  k.c = reinterpret_cast<T *>(*key_as_bytes);
+  *key_as_bytes += size_in_bytes;
+
+  k.d1 = reinterpret_cast<T *>(*key_as_bytes);
+  *key_as_bytes += size_in_bytes;
+
+  k.d2 = reinterpret_cast<T *>(*key_as_bytes);
+  *key_as_bytes += size_in_bytes;
+
+  return k;
+}
+
+struct GPUSSTabKey {
+  int bin;
+  int N;
+  u8 *ss;
+  u64 memSzSS;
+  u64 memSzOut;
+};
+
+struct GPUDPFTreeKey {
+  int bin;
+  int N;
+  int evalAll;
+  AESBlock *scw;
+  AESBlock *l0;
+  AESBlock *l1;
+  u32 *tR;
+  u64 szScw;
+  u64 memSzScw;
+  u64 memSzL;
+  u64 memSzT;
+  u64 memSzOut;
+};
+
+struct GPUDPFKey {
+  int bin;
+  int M;
+  int B;
+  u64 memSzOut;
+  GPUDPFTreeKey *dpfTreeKey;
+  GPUSSTabKey ssKey;
+};
+
+GPUDPFKey readGPUDPFKey(u8 **key_as_bytes);
+
+template <typename T>
+struct GPULUTKey {
+  int bout;
+  GPUDPFKey k;
+  u32 *maskU;
+  GPUSelectKey<T> s;
+};
+
+template <typename T>
+static GPULUTKey<T> readGPULUTKey(uint8_t **key_as_bytes) {
+  GPULUTKey<T> l;
+  l.bout = static_cast<int>(**key_as_bytes);
+  *key_as_bytes += sizeof(int);
+  l.k = readGPUDPFKey(reinterpret_cast<u8 **>(key_as_bytes));
+  l.maskU = reinterpret_cast<u32 *>(*key_as_bytes);
+  *key_as_bytes += l.k.memSzOut;
+  l.s = readGPUSelectKey<T>(key_as_bytes, l.k.M);
+  return l;
+}
+
+template <typename TIn, typename TOut>
+TOut *gpuKeyGenLUT(uint8_t **key_as_bytes, int party, int bin, int bout, int N,
+                   TIn *d_rin, AESGlobalContext *gaes);
+
+template <typename TIn, typename TOut>
+TOut *gpuDpfLUT(GPULUTKey<TOut> k0, SigmaPeer *peer, int party, TIn *d_X, TOut *d_tab,
+               AESGlobalContext *g, Stats *s, bool opMasked = true);
+
+extern template u64 *gpuKeyGenLUT<u16, u64>(uint8_t **key_as_bytes, int party, int bin, int bout, int N,
+                                           u16 *d_rin, AESGlobalContext *gaes);
+extern template u64 *gpuDpfLUT<u16, u64>(GPULUTKey<u64> k0, SigmaPeer *peer, int party, u16 *d_X,
+                                        u64 *d_tab, AESGlobalContext *g, Stats *s, bool opMasked);
 
 namespace {
 
@@ -86,12 +199,28 @@ std::mutex g_desc_mutex;
 std::unordered_map<DescKey, suf::SUFDescriptor, DescKeyHash> g_desc_cache;
 std::mutex g_table_mutex;
 std::unordered_map<TableKey, std::vector<std::uint64_t>, TableKeyHash> g_table_cache;
+std::uint8_t** g_keybuf_ptr = nullptr;
+AESGlobalContext g_aes{};
+bool g_aes_ready = false;
+
+void ensure_aes_ready() {
+  if (!g_aes_ready) {
+    initAESContext(&g_aes);
+    g_aes_ready = true;
+  }
+}
 
 int env_int(const char* name, int fallback) {
   const char* v = std::getenv(name);
   if (!v || !*v) return fallback;
   return std::atoi(v);
 }
+
+bool env_enabled(const char* name) {
+  const char* v = std::getenv(name);
+  return v && *v && std::atoi(v) != 0;
+}
+
 
 double env_double(const char* name, double fallback) {
   const char* v = std::getenv(name);
@@ -101,6 +230,22 @@ double env_double(const char* name, double fallback) {
   if (end == v) return fallback;
   return val;
 }
+
+} // namespace
+
+extern "C" void suf_sigma_set_keybuf_ptr(std::uint8_t** keybuf_ptr) {
+  g_keybuf_ptr = keybuf_ptr;
+}
+
+extern "C" bool suf_softmax_enabled() {
+  return env_enabled("SUF_SOFTMAX") || env_enabled("SUF_NONLINEAR");
+}
+
+extern "C" bool suf_layernorm_enabled() {
+  return env_enabled("SUF_LAYERNORM") || env_enabled("SUF_NONLINEAR");
+}
+
+namespace {
 
 int bits_needed(std::uint64_t v) {
   int bits = 0;
@@ -122,6 +267,54 @@ std::uint64_t mod_pow2(std::int64_t v, int bw) {
   __int128 x = static_cast<__int128>(v) % mod;
   if (x < 0) x += mod;
   return static_cast<std::uint64_t>(x);
+}
+
+std::uint64_t mul_mod_bw(std::uint64_t a, std::uint64_t b, std::uint64_t mask) {
+  const unsigned __int128 prod = static_cast<unsigned __int128>(a) * static_cast<unsigned __int128>(b);
+  return static_cast<std::uint64_t>(prod) & mask;
+}
+
+std::vector<std::vector<std::uint64_t>> build_binom_mod(int degree, std::uint64_t mask) {
+  std::vector<std::vector<std::uint64_t>> binom(static_cast<std::size_t>(degree + 1),
+                                                std::vector<std::uint64_t>(static_cast<std::size_t>(degree + 1), 0));
+  binom[0][0] = 1;
+  for (int k = 1; k <= degree; ++k) {
+    binom[k][0] = 1;
+    binom[k][k] = 1;
+    for (int i = 1; i < k; ++i) {
+      binom[k][i] = (binom[k - 1][i - 1] + binom[k - 1][i]) & mask;
+    }
+  }
+  return binom;
+}
+
+std::vector<std::uint64_t> build_pow_neg_r_mod(int degree, std::uint64_t r, std::uint64_t mask) {
+  std::vector<std::uint64_t> pow(static_cast<std::size_t>(degree + 1), 0);
+  pow[0] = 1;
+  const std::uint64_t r_neg = (0ULL - r) & mask;
+  for (int i = 1; i <= degree; ++i) {
+    pow[static_cast<std::size_t>(i)] = mul_mod_bw(pow[static_cast<std::size_t>(i - 1)], r_neg, mask);
+  }
+  return pow;
+}
+
+std::vector<std::uint64_t> shift_poly_coeffs_mod(const std::vector<std::uint64_t>& coeffs,
+                                                 int degree,
+                                                 const std::vector<std::vector<std::uint64_t>>& binom,
+                                                 const std::vector<std::uint64_t>& pow_neg_r,
+                                                 std::uint64_t mask) {
+  std::vector<std::uint64_t> out(static_cast<std::size_t>(degree + 1), 0);
+  const int max_k = std::min<int>(degree, static_cast<int>(coeffs.size()) - 1);
+  for (int k = 0; k <= max_k; ++k) {
+    const std::uint64_t c = coeffs[static_cast<std::size_t>(k)] & mask;
+    if (c == 0) continue;
+    for (int i = 0; i <= k; ++i) {
+      const std::uint64_t term0 = mul_mod_bw(c, binom[k][i], mask);
+      const std::uint64_t term = mul_mod_bw(term0, pow_neg_r[static_cast<std::size_t>(k - i)], mask);
+      out[static_cast<std::size_t>(i)] = (out[static_cast<std::size_t>(i)] + term) & mask;
+    }
+  }
+  return out;
 }
 
 suf::SUFDescriptor build_activation_desc(bool silu, int bw, int scale, int intervals) {
@@ -182,29 +375,43 @@ std::vector<std::uint64_t> build_table(const TableKey& key) {
   const long double scale_out = static_cast<long double>(1ULL << key.scale_out);
   for (std::size_t i = 0; i < table_size; ++i) {
     std::uint64_t x_fixed = static_cast<std::uint64_t>(i);
-    if (x_fixed < key.clamp_min) x_fixed = key.clamp_min;
-    if (x_fixed > key.clamp_max) x_fixed = key.clamp_max;
-    const long double x_real = static_cast<long double>(x_fixed) / scale_in;
     long double y_real = 0.0L;
-    switch (key.kind) {
-      case GateKind::NExp:
-        y_real = std::exp(-x_real);
-        break;
-      case GateKind::Inv:
-        y_real = (x_real <= 0.0L) ? 0.0L : (1.0L / x_real);
-        break;
-      case GateKind::Rsqrt: {
-        if (x_real <= 0.0L) {
-          y_real = 0.0L;
-        } else {
-          const long double denom = x_real / static_cast<long double>(key.extra);
-          y_real = (denom <= 0.0L) ? 0.0L : (1.0L / std::sqrt(denom));
-        }
-        break;
+    if (key.kind == GateKind::Gelu || key.kind == GateKind::Silu) {
+      const std::uint64_t sign_bit = (key.in_bits >= 64) ? (1ULL << 63) : (1ULL << (key.in_bits - 1));
+      const __int128 domain = (__int128)1 << key.in_bits;
+      __int128 signed_x = (x_fixed & sign_bit) ? (static_cast<__int128>(x_fixed) - domain)
+                                               : static_cast<__int128>(x_fixed);
+      const long double x_real = static_cast<long double>(signed_x) / scale_in;
+      if (key.kind == GateKind::Silu) {
+        y_real = x_real / (1.0L + std::exp(-x_real));
+      } else {
+        const long double t = x_real / std::sqrt(2.0L);
+        y_real = x_real * 0.5L * (1.0L + std::erf(t));
       }
-      default:
-        y_real = 0.0L;
-        break;
+    } else {
+      if (x_fixed < key.clamp_min) x_fixed = key.clamp_min;
+      if (x_fixed > key.clamp_max) x_fixed = key.clamp_max;
+      const long double x_real = static_cast<long double>(x_fixed) / scale_in;
+      switch (key.kind) {
+        case GateKind::NExp:
+          y_real = std::exp(-x_real);
+          break;
+        case GateKind::Inv:
+          y_real = (x_real <= 0.0L) ? 0.0L : (1.0L / x_real);
+          break;
+        case GateKind::Rsqrt: {
+          if (x_real <= 0.0L) {
+            y_real = 0.0L;
+          } else {
+            const long double denom = x_real / static_cast<long double>(key.extra);
+            y_real = (denom <= 0.0L) ? 0.0L : (1.0L / std::sqrt(denom));
+          }
+          break;
+        }
+        default:
+          y_real = 0.0L;
+          break;
+      }
     }
     const long double y_scaled = y_real * scale_out;
     const std::int64_t y_fixed = llroundl(y_scaled);
@@ -222,44 +429,6 @@ const std::vector<std::uint64_t>& get_table(const TableKey& key) {
   return res.first->second;
 }
 
-suf::IntervalLutKeyV2 build_direct_table_key(const std::vector<std::uint64_t>& table,
-                                             int in_bits,
-                                             int out_bits,
-                                             int party,
-                                             std::mt19937_64& rng,
-                                             std::uint64_t r_in) {
-  suf::IntervalLutKeyV2 key;
-  key.hdr.magic = 0x53494C32;
-  key.hdr.version = 2;
-  key.hdr.in_bits = static_cast<u8>(in_bits);
-  key.hdr.out_bits = 64;
-  key.hdr.out_words = 1;
-  key.hdr.intervals = static_cast<u32>(table.size());
-  key.hdr.flags |= suf::kIntervalLutFlagDirectTable;
-  key.base_share.assign(1, 0);
-
-  const std::size_t table_size = table.size();
-  key.dmpf.in_bits = in_bits;
-  key.dmpf.points = table_size;
-  key.dmpf.out_words = 1;
-  key.dmpf.dcf_batch.n_bits = in_bits;
-  key.dmpf.deltas.resize(table_size);
-
-  const std::uint64_t mask = mask_for_bw(in_bits);
-  const std::uint64_t r = r_in & mask;
-  for (std::size_t h = 0; h < table_size; ++h) {
-    const std::uint64_t idx = static_cast<std::uint64_t>(h) & mask;
-    const std::uint64_t x = (idx + table_size - r) & mask;
-    const std::uint64_t value = table[static_cast<std::size_t>(x)];
-    const std::uint64_t share0 = rng();
-    key.dmpf.deltas[h] = (party == 0) ? share0 : (value - share0);
-  }
-
-  key.hdr.core_bytes = 0;
-  key.hdr.payload_bytes = static_cast<u32>(key.dmpf.deltas.size() * sizeof(u64));
-  return key;
-}
-
 struct SufGateState {
   GateKind kind = GateKind::Gelu;
   int bw = 0;
@@ -268,16 +437,14 @@ struct SufGateState {
   int scale_in = 0;
   std::uint64_t extra = 0;
   std::size_t n = 0;
-  std::uint64_t r_in_share = 0;
-  std::vector<std::uint64_t> input_mask_share;
-  std::vector<std::uint64_t> output_mask_share;
-  std::uint64_t* d_input_mask = nullptr;
-  std::uint64_t* d_output_mask = nullptr;
-  suf::IntervalLutKeyV2Gpu lut_key;
+  std::uint8_t* key_bytes = nullptr;
+  std::size_t key_bytes_len = 0;
+  std::uint64_t* d_table = nullptr;
 };
 
 std::vector<SufGateState> g_suf_gates;
 std::size_t g_suf_eval_idx = 0;
+std::size_t g_suf_key_idx = 0;
 std::mt19937_64 g_master_rng(0x53C0FFEEu);
 
 std::uint64_t next_gate_seed() {
@@ -289,36 +456,17 @@ __device__ __forceinline__ std::uint64_t mod_pow2_dev(std::uint64_t v, int bw) {
   return v & ((std::uint64_t(1) << bw) - 1ULL);
 }
 
-__global__ void kernel_remask(const std::uint64_t* masked_in,
-                              const std::uint64_t* mask_in,
-                              std::uint64_t* out,
-                              std::uint64_t r_in_share,
-                              int bw,
-                              std::size_t n) {
-  const std::size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if (idx >= n) return;
-  std::uint64_t v = masked_in[idx] - mask_in[idx];
-  v = mod_pow2_dev(v, bw);
-  v = mod_pow2_dev(v + r_in_share, bw);
-  out[idx] = v;
-}
-
-__global__ void kernel_u16_to_u64(const std::uint16_t* in,
-                                  std::uint64_t* out,
+__global__ void kernel_u64_to_u16(const std::uint64_t* in,
+                                  std::uint16_t* out,
+                                  int in_bits,
                                   std::size_t n) {
   const std::size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= n) return;
-  out[idx] = static_cast<std::uint64_t>(in[idx]);
-}
-
-__global__ void kernel_add_mask(std::uint64_t* out,
-                                const std::uint64_t* mask,
-                                int bw,
-                                std::size_t n) {
-  const std::size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if (idx >= n) return;
-  std::uint64_t v = out[idx] + mask[idx];
-  out[idx] = mod_pow2_dev(v, bw);
+  std::uint64_t v = in[idx];
+  if (in_bits < 16) {
+    v &= (std::uint64_t(1) << in_bits) - 1ULL;
+  }
+  out[idx] = static_cast<std::uint16_t>(v);
 }
 
 std::uint64_t* keygen_table_gate_u64(GateKind kind,
@@ -332,32 +480,8 @@ std::uint64_t* keygen_table_gate_u64(GateKind kind,
                                      int party,
                                      const std::uint64_t* d_input_mask,
                                      std::size_t n) {
-  const std::uint64_t in_mask = mask_for_bw(in_bits);
-  const std::uint64_t out_mask = mask_for_bw(bw_out);
-  const auto seed = next_gate_seed();
-  std::mt19937_64 rng(seed);
-
-  const std::uint64_t r_in = rng() & in_mask;
-  const std::uint64_t r_in0 = rng() & in_mask;
-  std::uint64_t r_in_share = (party == 0) ? r_in0 : (r_in - r_in0);
-  if (in_bits < 64) r_in_share &= in_mask;
-
-  std::vector<std::uint64_t> input_mask_share(n);
-  cudaMemcpy(input_mask_share.data(), d_input_mask, n * sizeof(std::uint64_t), cudaMemcpyDeviceToHost);
-  if (in_bits < 64) {
-    for (auto& v : input_mask_share) v &= in_mask;
-  }
-
-  std::vector<std::uint64_t> output_mask_share(n);
-  for (std::size_t i = 0; i < n; ++i) {
-    const std::uint64_t r_out = rng() & out_mask;
-    const std::uint64_t r_out0 = rng() & out_mask;
-    output_mask_share[i] = (party == 0) ? r_out0 : (r_out - r_out0);
-    if (bw_out < 64) output_mask_share[i] &= out_mask;
-  }
-
-  std::uint64_t* d_out = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  cudaMemcpy(d_out, output_mask_share.data(), n * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
+  if (!g_keybuf_ptr || !*g_keybuf_ptr) return nullptr;
+  ensure_aes_ready();
 
   TableKey tkey;
   tkey.kind = kind;
@@ -370,9 +494,23 @@ std::uint64_t* keygen_table_gate_u64(GateKind kind,
   tkey.extra = extra;
   const auto& table = get_table(tkey);
 
-  auto lut_key = build_direct_table_key(table, in_bits, bw_out, party, rng, r_in);
-  suf::IntervalLutKeyV2Gpu lut_gpu{};
-  suf::upload_interval_lut_v2(lut_key, lut_gpu);
+  std::uint64_t* d_table = reinterpret_cast<std::uint64_t*>(gpuMalloc(table.size() * sizeof(std::uint64_t)));
+  cudaMemcpy(d_table, table.data(), table.size() * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
+
+  std::uint16_t* d_input_u16 = reinterpret_cast<std::uint16_t*>(gpuMalloc(n * sizeof(std::uint16_t)));
+  const int threads = 256;
+  const int blocks = static_cast<int>((n + threads - 1) / threads);
+  kernel_u64_to_u16<<<blocks, threads>>>(d_input_mask, d_input_u16, in_bits, n);
+  cudaDeviceSynchronize();
+
+  std::uint8_t* key_begin = *g_keybuf_ptr;
+  auto d_out = gpuKeyGenLUT<u16, u64>(g_keybuf_ptr, party,
+                                      in_bits, bw_out,
+                                      static_cast<int>(n),
+                                      d_input_u16,
+                                      &g_aes);
+  gpuFree(d_input_u16);
+  const std::size_t key_size = static_cast<std::size_t>(*g_keybuf_ptr - key_begin);
 
   SufGateState state;
   state.kind = kind;
@@ -382,15 +520,16 @@ std::uint64_t* keygen_table_gate_u64(GateKind kind,
   state.scale_in = scale_in;
   state.extra = extra;
   state.n = n;
-  state.r_in_share = r_in_share;
-  state.input_mask_share = std::move(input_mask_share);
-  state.output_mask_share = std::move(output_mask_share);
-  state.d_input_mask = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  state.d_output_mask = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  cudaMemcpy(state.d_input_mask, state.input_mask_share.data(), n * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
-  cudaMemcpy(state.d_output_mask, state.output_mask_share.data(), n * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
-  state.lut_key = lut_gpu;
+  state.key_bytes = key_begin;
+  state.key_bytes_len = key_size;
+  state.d_table = d_table;
   g_suf_gates.push_back(std::move(state));
+  if (env_enabled("SUF_DEBUG")) {
+    std::fprintf(stderr,
+                 "[suf] keygen gate kind=%d bw=%d scale=%d in_bits=%d scale_in=%d extra=%llu n=%zu key_bytes=%zu\n",
+                 static_cast<int>(kind), bw_out, scale_out, in_bits, scale_in,
+                 static_cast<unsigned long long>(extra), n, key_size);
+  }
 
   return d_out;
 }
@@ -406,16 +545,51 @@ std::uint64_t* keygen_table_gate_u16(GateKind kind,
                                      int party,
                                      const std::uint16_t* d_input_mask,
                                      std::size_t n) {
-  std::uint64_t* d_input_u64 = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  const int threads = 256;
-  const int blocks = static_cast<int>((n + threads - 1) / threads);
-  kernel_u16_to_u64<<<blocks, threads>>>(d_input_mask, d_input_u64, n);
-  cudaDeviceSynchronize();
-  auto* out = keygen_table_gate_u64(kind, bw_out, scale_out, in_bits, scale_in,
-                                    clamp_min, clamp_max, extra,
-                                    party, d_input_u64, n);
-  gpuFree(d_input_u64);
-  return out;
+  if (!g_keybuf_ptr || !*g_keybuf_ptr) return nullptr;
+  ensure_aes_ready();
+
+  TableKey tkey;
+  tkey.kind = kind;
+  tkey.in_bits = in_bits;
+  tkey.scale_in = scale_in;
+  tkey.scale_out = scale_out;
+  tkey.out_bits = bw_out;
+  tkey.clamp_min = clamp_min;
+  tkey.clamp_max = clamp_max;
+  tkey.extra = extra;
+  const auto& table = get_table(tkey);
+
+  std::uint64_t* d_table = reinterpret_cast<std::uint64_t*>(gpuMalloc(table.size() * sizeof(std::uint64_t)));
+  cudaMemcpy(d_table, table.data(), table.size() * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
+
+  std::uint8_t* key_begin = *g_keybuf_ptr;
+  auto d_out = gpuKeyGenLUT<std::uint16_t, std::uint64_t>(g_keybuf_ptr, party,
+                                                          in_bits, bw_out,
+                                                          static_cast<int>(n),
+                                                          const_cast<std::uint16_t*>(d_input_mask),
+                                                          &g_aes);
+  const std::size_t key_size = static_cast<std::size_t>(*g_keybuf_ptr - key_begin);
+
+  SufGateState state;
+  state.kind = kind;
+  state.bw = bw_out;
+  state.scale = scale_out;
+  state.in_bits = in_bits;
+  state.scale_in = scale_in;
+  state.extra = extra;
+  state.n = n;
+  state.key_bytes = key_begin;
+  state.key_bytes_len = key_size;
+  state.d_table = d_table;
+  g_suf_gates.push_back(std::move(state));
+  if (env_enabled("SUF_DEBUG")) {
+    std::fprintf(stderr,
+                 "[suf] keygen gate kind=%d bw=%d scale=%d in_bits=%d scale_in=%d extra=%llu n=%zu key_bytes=%zu\n",
+                 static_cast<int>(kind), bw_out, scale_out, in_bits, scale_in,
+                 static_cast<unsigned long long>(extra), n, key_size);
+  }
+
+  return d_out;
 }
 
 std::uint64_t* eval_gate_u64(GateKind expected_kind,
@@ -429,31 +603,51 @@ std::uint64_t* eval_gate_u64(GateKind expected_kind,
                              const std::uint64_t* d_input_masked,
                              std::size_t n,
                              Stats* s) {
-  if (g_suf_eval_idx >= g_suf_gates.size()) return nullptr;
+  if (g_suf_eval_idx >= g_suf_gates.size()) {
+    if (env_enabled("SUF_DEBUG")) {
+      std::fprintf(stderr,
+                   "[suf] eval out of range idx=%zu size=%zu kind=%d n=%zu\n",
+                   g_suf_eval_idx, g_suf_gates.size(), static_cast<int>(expected_kind), n);
+    }
+    return nullptr;
+  }
   auto& gate = g_suf_gates[g_suf_eval_idx++];
+  if (env_enabled("SUF_DEBUG")) {
+    std::fprintf(stderr,
+                 "[suf] eval gate idx=%zu kind=%d bw=%d scale=%d in_bits=%d scale_in=%d extra=%llu n=%zu\n",
+                 g_suf_eval_idx - 1, static_cast<int>(gate.kind), gate.bw, gate.scale,
+                 gate.in_bits, gate.scale_in,
+                 static_cast<unsigned long long>(gate.extra), gate.n);
+  }
   if (gate.kind != expected_kind || gate.n != n || gate.bw != bw_out ||
       gate.scale != scale_out || gate.scale_in != scale_in ||
       gate.in_bits != in_bits || gate.extra != extra) {
+    if (env_enabled("SUF_DEBUG")) {
+      std::fprintf(stderr,
+                   "[suf] eval mismatch kind=%d/%d bw=%d/%d scale=%d/%d in_bits=%d/%d scale_in=%d/%d extra=%llu/%llu n=%zu/%zu\n",
+                   static_cast<int>(gate.kind), static_cast<int>(expected_kind),
+                   gate.bw, bw_out, gate.scale, scale_out, gate.in_bits, in_bits,
+                   gate.scale_in, scale_in,
+                   static_cast<unsigned long long>(gate.extra),
+                   static_cast<unsigned long long>(extra),
+                   gate.n, n);
+    }
     return nullptr;
   }
+  ensure_aes_ready();
+  peer->reconstructInPlace(const_cast<std::uint64_t*>(d_input_masked), gate.in_bits, n, s);
 
-  const std::size_t bytes = n * sizeof(std::uint64_t);
-  auto d_hat = reinterpret_cast<std::uint64_t*>(gpuMalloc(bytes));
+  std::uint8_t* key_ptr = gate.key_bytes;
+  auto lut_key = readGPULUTKey<std::uint64_t>(&key_ptr);
+  std::uint16_t* d_input_u16 = reinterpret_cast<std::uint16_t*>(gpuMalloc(n * sizeof(std::uint16_t)));
   const int threads = 256;
   const int blocks = static_cast<int>((n + threads - 1) / threads);
-  kernel_remask<<<blocks, threads>>>(d_input_masked, gate.d_input_mask, d_hat,
-                                     gate.r_in_share, gate.in_bits, n);
+  kernel_u64_to_u16<<<blocks, threads>>>(d_input_masked, d_input_u16, gate.in_bits, n);
   cudaDeviceSynchronize();
-
-  peer->reconstructInPlace(d_hat, gate.in_bits, n, s);
-
-  auto d_out = reinterpret_cast<std::uint64_t*>(gpuMalloc(bytes));
-  suf::eval_interval_lut_v2_gpu(d_hat, n, gate.lut_key, d_out, nullptr);
-  gpuFree(d_hat);
-
-  kernel_add_mask<<<blocks, threads>>>(d_out, gate.d_output_mask, gate.bw, n);
-  cudaDeviceSynchronize();
-  peer->reconstructInPlace(d_out, gate.bw, n, s);
+  auto d_out = gpuDpfLUT<std::uint16_t, std::uint64_t>(lut_key, peer, party,
+                                                       d_input_u16,
+                                                       gate.d_table, &g_aes, s);
+  gpuFree(d_input_u16);
   return d_out;
 }
 
@@ -468,43 +662,91 @@ std::uint64_t* eval_gate_u16(GateKind expected_kind,
                              const std::uint16_t* d_input_masked,
                              std::size_t n,
                              Stats* s) {
-  auto d_input_u64 = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  const int threads = 256;
-  const int blocks = static_cast<int>((n + threads - 1) / threads);
-  kernel_u16_to_u64<<<blocks, threads>>>(d_input_masked, d_input_u64, n);
-  cudaDeviceSynchronize();
+  if (g_suf_eval_idx >= g_suf_gates.size()) {
+    if (env_enabled("SUF_DEBUG")) {
+      std::fprintf(stderr,
+                   "[suf] eval out of range idx=%zu size=%zu kind=%d n=%zu\n",
+                   g_suf_eval_idx, g_suf_gates.size(), static_cast<int>(expected_kind), n);
+    }
+    return nullptr;
+  }
+  auto& gate = g_suf_gates[g_suf_eval_idx++];
+  if (env_enabled("SUF_DEBUG")) {
+    std::fprintf(stderr,
+                 "[suf] eval gate idx=%zu kind=%d bw=%d scale=%d in_bits=%d scale_in=%d extra=%llu n=%zu\n",
+                 g_suf_eval_idx - 1, static_cast<int>(gate.kind), gate.bw, gate.scale,
+                 gate.in_bits, gate.scale_in,
+                 static_cast<unsigned long long>(gate.extra), gate.n);
+  }
+  if (gate.kind != expected_kind || gate.n != n || gate.bw != bw_out ||
+      gate.scale != scale_out || gate.scale_in != scale_in ||
+      gate.in_bits != in_bits || gate.extra != extra) {
+    if (env_enabled("SUF_DEBUG")) {
+      std::fprintf(stderr,
+                   "[suf] eval mismatch kind=%d/%d bw=%d/%d scale=%d/%d in_bits=%d/%d scale_in=%d/%d extra=%llu/%llu n=%zu/%zu\n",
+                   static_cast<int>(gate.kind), static_cast<int>(expected_kind),
+                   gate.bw, bw_out, gate.scale, scale_out, gate.in_bits, in_bits,
+                   gate.scale_in, scale_in,
+                   static_cast<unsigned long long>(gate.extra),
+                   static_cast<unsigned long long>(extra),
+                   gate.n, n);
+    }
+    return nullptr;
+  }
+  ensure_aes_ready();
+  peer->reconstructInPlace(const_cast<std::uint16_t*>(d_input_masked), gate.in_bits, n, s);
 
-  auto* out = eval_gate_u64(expected_kind, bw_out, scale_out, scale_in, in_bits, extra,
-                            peer, party, d_input_u64, n, s);
-  gpuFree(d_input_u64);
-  return out;
+  std::uint8_t* key_ptr = gate.key_bytes;
+  auto lut_key = readGPULUTKey<std::uint64_t>(&key_ptr);
+  auto d_out = gpuDpfLUT<std::uint16_t, std::uint64_t>(lut_key, peer, party,
+                                                       const_cast<std::uint16_t*>(d_input_masked),
+                                                       gate.d_table, &g_aes, s);
+  return d_out;
 }
 
 } // namespace
 
 extern "C" void suf_sigma_reset_keygen() {
   for (auto& gate : g_suf_gates) {
-    suf::free_interval_lut_v2(gate.lut_key);
-    if (gate.d_input_mask) gpuFree(gate.d_input_mask);
-    if (gate.d_output_mask) gpuFree(gate.d_output_mask);
+    if (gate.d_table) gpuFree(gate.d_table);
   }
   g_suf_gates.clear();
   g_suf_eval_idx = 0;
+  g_suf_key_idx = 0;
   g_master_rng.seed(0x53C0FFEEu);
 }
 
 extern "C" void suf_sigma_reset_eval() {
   g_suf_eval_idx = 0;
+  g_suf_key_idx = 0;
 }
 
 extern "C" void suf_sigma_clear() {
   for (auto& gate : g_suf_gates) {
-    suf::free_interval_lut_v2(gate.lut_key);
-    if (gate.d_input_mask) gpuFree(gate.d_input_mask);
-    if (gate.d_output_mask) gpuFree(gate.d_output_mask);
+    if (gate.d_table) gpuFree(gate.d_table);
   }
   g_suf_gates.clear();
   g_suf_eval_idx = 0;
+  g_suf_key_idx = 0;
+}
+
+extern "C" void suf_sigma_consume_key() {
+  if (!g_keybuf_ptr || !*g_keybuf_ptr) return;
+  if (g_suf_key_idx >= g_suf_gates.size()) {
+    if (env_enabled("SUF_DEBUG")) {
+      std::fprintf(stderr,
+                   "[suf] consume out of range idx=%zu size=%zu\n",
+                   g_suf_key_idx, g_suf_gates.size());
+    }
+    return;
+  }
+  const auto& gate = g_suf_gates[g_suf_key_idx++];
+  if (env_enabled("SUF_DEBUG")) {
+    std::fprintf(stderr,
+                 "[suf] consume key idx=%zu bytes=%zu\n",
+                 g_suf_key_idx - 1, gate.key_bytes_len);
+  }
+  *g_keybuf_ptr = gate.key_bytes + gate.key_bytes_len;
 }
 
 extern "C" std::uint64_t* suf_sigma_keygen_activation(int party,
@@ -515,61 +757,12 @@ extern "C" std::uint64_t* suf_sigma_keygen_activation(int party,
                                                        std::size_t n) {
   const int intervals = env_int(silu ? "SUF_SILU_INTERVALS" : "SUF_GELU_INTERVALS",
                                 silu ? 1024 : 256);
-  const std::uint64_t mask = mask_for_bw(bw);
-
-  const auto seed = next_gate_seed();
-  std::mt19937_64 rng(seed);
-
-  std::uint64_t r_in = rng() & mask;
-  std::uint64_t r_in0 = rng() & mask;
-  std::uint64_t r_in_share = (party == 0) ? r_in0 : (r_in - r_in0);
-  if (bw < 64) r_in_share &= mask;
-
-  std::vector<std::uint64_t> input_mask_share(n);
-  cudaMemcpy(input_mask_share.data(), d_input_mask, n * sizeof(std::uint64_t), cudaMemcpyDeviceToHost);
-
-  std::vector<std::uint64_t> output_mask_share(n);
-  for (std::size_t i = 0; i < n; ++i) {
-    const std::uint64_t r_out = rng() & mask;
-    const std::uint64_t r_out0 = rng() & mask;
-    output_mask_share[i] = (party == 0) ? r_out0 : (r_out - r_out0);
-    if (bw < 64) output_mask_share[i] &= mask;
-  }
-
-  std::uint64_t* d_out = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  cudaMemcpy(d_out, output_mask_share.data(), n * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
-
-  const auto& base_desc = get_activation_desc(silu, bw, scale, intervals);
-  auto inst = suf::compile_masked_gate_instance(base_desc, bw, r_in, party, rng);
-
-  std::vector<std::vector<std::uint64_t>> payloads(inst.desc.polys.size());
-  for (std::size_t i = 0; i < inst.desc.polys.size(); ++i) {
-    payloads[i] = inst.desc.polys[i].coeffs;
-  }
-
-  auto lut_key = suf::gen_interval_lut_v2(inst.desc.cuts, payloads, bw, party, rng);
-  suf::IntervalLutKeyV2Gpu lut_gpu{};
-  suf::upload_interval_lut_v2(lut_key, lut_gpu);
-
-  SufGateState state;
-  state.kind = silu ? GateKind::Silu : GateKind::Gelu;
-  state.bw = bw;
-  state.scale = scale;
-  state.in_bits = bw;
-  state.scale_in = scale;
-  state.extra = 0;
-  state.n = n;
-  state.r_in_share = r_in_share;
-  state.input_mask_share = std::move(input_mask_share);
-  state.output_mask_share = std::move(output_mask_share);
-  state.d_input_mask = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  state.d_output_mask = reinterpret_cast<std::uint64_t*>(gpuMalloc(n * sizeof(std::uint64_t)));
-  cudaMemcpy(state.d_input_mask, state.input_mask_share.data(), n * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
-  cudaMemcpy(state.d_output_mask, state.output_mask_share.data(), n * sizeof(std::uint64_t), cudaMemcpyHostToDevice);
-  state.lut_key = lut_gpu;
-  g_suf_gates.push_back(std::move(state));
-
-  return d_out;
+  const int default_bits = bits_needed(static_cast<std::uint64_t>(intervals - 1));
+  const int in_bits = env_int(silu ? "SUF_SILU_BITS" : "SUF_GELU_BITS", default_bits);
+  const std::uint64_t clamp_max = mask_for_bw(in_bits);
+  return keygen_table_gate_u64(silu ? GateKind::Silu : GateKind::Gelu,
+                               bw, scale, in_bits, scale,
+                               0, clamp_max, 0, party, d_input_mask, n);
 }
 
 extern "C" std::uint64_t* suf_sigma_keygen_nexp(int party,
@@ -663,12 +856,19 @@ extern "C" std::uint64_t* suf_sigma_keygen_rsqrt(int party,
                                                  std::size_t n) {
   const int target_frac = env_int("SUF_RSQRT_FRAC", 6);
   const int shift = std::max(0, 2 * scale - target_frac);
-  const int in_bits = std::max(1, std::min(16, bw - shift));
+  const int max_bits = std::max(1, std::min(16, bw - shift));
   const int scale_in = 2 * scale - shift;
   const double vmax_real = env_double("SUF_RSQRT_VMAX", 16.0);
   const double eps_real = env_double("SUF_RSQRT_EPS", 0.0);
   const std::uint64_t clamp_min = std::max<std::uint64_t>(1, static_cast<std::uint64_t>(llroundl(eps_real * (1ULL << scale_in))));
   const std::uint64_t vmax_fixed = static_cast<std::uint64_t>(llroundl(vmax_real * (1ULL << scale_in)));
+  int in_bits = env_int("SUF_RSQRT_BITS", 0);
+  if (in_bits <= 0) {
+    in_bits = bits_needed(vmax_fixed);
+    in_bits = std::max(8, std::min(max_bits, in_bits));
+  } else {
+    in_bits = std::max(1, std::min(max_bits, in_bits));
+  }
   std::uint64_t clamp_max = std::min<std::uint64_t>(vmax_fixed, mask_for_bw(in_bits));
   if (clamp_max < clamp_min) clamp_max = clamp_min;
   return keygen_table_gate_u16(GateKind::Rsqrt, bw, scale, in_bits, scale_in,
@@ -686,10 +886,17 @@ extern "C" std::uint64_t* suf_sigma_eval_rsqrt(SigmaPeer* peer,
                                                Stats* s) {
   const int target_frac = env_int("SUF_RSQRT_FRAC", 6);
   const int shift = std::max(0, 2 * scale - target_frac);
-  const int in_bits = std::max(1, std::min(16, bw - shift));
+  const int max_bits = std::max(1, std::min(16, bw - shift));
   const int scale_in = 2 * scale - shift;
   const double vmax_real = env_double("SUF_RSQRT_VMAX", 16.0);
   const std::uint64_t vmax_fixed = static_cast<std::uint64_t>(llroundl(vmax_real * (1ULL << scale_in)));
+  int in_bits = env_int("SUF_RSQRT_BITS", 0);
+  if (in_bits <= 0) {
+    in_bits = bits_needed(vmax_fixed);
+    in_bits = std::max(8, std::min(max_bits, in_bits));
+  } else {
+    in_bits = std::max(1, std::min(max_bits, in_bits));
+  }
   return eval_gate_u16(GateKind::Rsqrt, bw, scale, scale_in, in_bits, static_cast<std::uint64_t>(extradiv),
                        peer, party, d_input_masked, n, s);
 }
@@ -702,6 +909,14 @@ extern "C" std::uint64_t* suf_sigma_eval_activation(SigmaPeer* peer,
                                                     const std::uint64_t* d_input_masked,
                                                     std::size_t n,
                                                     Stats* s) {
+  const int intervals = env_int(silu ? "SUF_SILU_INTERVALS" : "SUF_GELU_INTERVALS",
+                                silu ? 1024 : 256);
+  const int default_bits = bits_needed(static_cast<std::uint64_t>(intervals - 1));
+  const int in_bits = env_int(silu ? "SUF_SILU_BITS" : "SUF_GELU_BITS", default_bits);
   const GateKind kind = silu ? GateKind::Silu : GateKind::Gelu;
-  return eval_gate_u64(kind, bw, scale, scale, bw, 0, peer, party, d_input_masked, n, s);
+  auto out = eval_gate_u64(kind, bw, scale, scale, in_bits, 0, peer, party, d_input_masked, n, s);
+  if (out) {
+    suf_sigma_consume_key();
+  }
+  return out;
 }

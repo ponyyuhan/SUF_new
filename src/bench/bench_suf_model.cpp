@@ -249,13 +249,26 @@ int main(int argc, char** argv) {
   const double total_eval_ms = per_gate_eval_ms * gate_count;
 
   if (cfg.verify) {
-    std::vector<u64> h_out(gate_elems);
-    cudaMemcpy(h_out.data(), d_out, gate_elems * sizeof(u64), cudaMemcpyDeviceToHost);
+    std::vector<u64> h_out0(gate_elems);
+    cudaMemcpy(h_out0.data(), d_out, gate_elems * sizeof(u64), cudaMemcpyDeviceToHost);
+    std::vector<u64> h_out1;
+    u64* d_out1 = nullptr;
+    cudaMalloc(&d_out1, gate_elems * sizeof(u64));
+    GpuSecureSufProgram prog1(desc, 1, 1234, in_bits, cfg.mask_aware, cfg.mask_in);
+    prog1.eval(d_in, gate_elems, d_out1, nullptr, 0);
+    cudaDeviceSynchronize();
+    h_out1.resize(gate_elems);
+    cudaMemcpy(h_out1.data(), d_out1, gate_elems * sizeof(u64), cudaMemcpyDeviceToHost);
+    cudaFree(d_out1);
     for (std::size_t i = 0; i < std::min<std::size_t>(gate_elems, 1024); ++i) {
       const u64 x = cfg.mask_aware ? h_x[i] : h_in[i];
       auto ref = eval_suf_ref(desc, x);
-      if (h_out[i] != ref.arith) {
-        std::cerr << "verify mismatch at " << i << " got " << h_out[i] << " expected " << ref.arith << "\n";
+      u64 got = h_out0[i];
+      if (!h_out1.empty()) {
+        got += h_out1[i];
+      }
+      if (got != ref.arith) {
+        std::cerr << "verify mismatch at " << i << " got " << got << " expected " << ref.arith << "\n";
         return 1;
       }
     }

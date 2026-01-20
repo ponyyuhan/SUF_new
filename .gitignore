@@ -20,3 +20,27 @@ Testing/
 # editor
 .DS_Store
 .vscode/
+
+# local deps and packages
+.deps/
+*.deb
+
+# python env/cache
+**/.venv/
+**/.hf_cache/
+**/.cache/
+**/.pytest_cache/
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+**/build/
+**/dist/
+
+# vendored repo git metadata backups (kept out of tree)
+/.git_backups/
+
+# large datasets/keys from EzPC experiments
+third_party/EzPC/GPU-MPC/experiments/**/datasets/
+third_party/EzPC/GPU-MPC/experiments/**/keys/
+ezpc_upstream/GPU-MPC/experiments/**/datasets/
+ezpc_upstream/GPU-MPC/experiments/**/keys/

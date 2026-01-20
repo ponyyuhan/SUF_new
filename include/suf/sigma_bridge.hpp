@@ -8,7 +8,11 @@ struct Stats;
 
 extern "C" void suf_sigma_reset_keygen();
 extern "C" void suf_sigma_reset_eval();
+extern "C" void suf_sigma_consume_key();
 extern "C" void suf_sigma_clear();
+extern "C" void suf_sigma_set_keybuf_ptr(std::uint8_t** keybuf_ptr);
+extern "C" bool suf_softmax_enabled();
+extern "C" bool suf_layernorm_enabled();
 
 extern "C" std::uint64_t* suf_sigma_keygen_activation(int party,
                                                        int bw,

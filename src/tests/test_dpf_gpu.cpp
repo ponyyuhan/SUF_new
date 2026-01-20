@@ -63,8 +63,9 @@ int main() {
 
   for (std::size_t i = 0; i < N; ++i) {
     auto ref = eval_suf_ref(desc, h_in[i]);
-    if (h_out0[i] != ref.arith || h_out1[i] != ref.arith) {
-      std::cerr << "arith mismatch at " << i << "\n";
+    const u64 got = h_out0[i] + h_out1[i];
+    if (got != ref.arith) {
+      std::cerr << "arith mismatch at " << i << " got " << got << " expected " << ref.arith << "\n";
       return 1;
     }
     for (int h = 0; h < 4; ++h) {
