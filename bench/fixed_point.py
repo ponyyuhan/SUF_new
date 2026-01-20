@@ -12,6 +12,7 @@ class FixedPointConfig:
     n_bits: int
     frac_bits: int
     signed: bool = True
+    rounding: str = "round"  # round | trunc | floor
 
     @property
     def scale(self) -> float:
@@ -25,10 +26,21 @@ def _wrap_signed(q: torch.Tensor, n_bits: int) -> torch.Tensor:
     return torch.where(q >= max_pos, q - mod, q)
 
 
+def _apply_rounding(x: torch.Tensor, mode: str) -> torch.Tensor:
+    mode = mode.lower()
+    if mode == "round":
+        return torch.round(x)
+    if mode == "trunc":
+        return torch.trunc(x)
+    if mode == "floor":
+        return torch.floor(x)
+    raise ValueError(f"Unsupported rounding mode: {mode}")
+
+
 def quantize(x: torch.Tensor, cfg: FixedPointConfig) -> torch.Tensor:
     if not torch.is_floating_point(x):
         x = x.float()
-    q = torch.round(x * cfg.scale).to(torch.int64)
+    q = _apply_rounding(x * cfg.scale, cfg.rounding).to(torch.int64)
     if cfg.signed:
         q = _wrap_signed(q, cfg.n_bits)
     else:

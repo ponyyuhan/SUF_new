@@ -59,6 +59,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default=None, help="Legacy alias for --pytorch-device")
     parser.add_argument("--pytorch-device", default=None, help="Device for float32 baseline (cpu or cuda)")
     parser.add_argument("--suf-device", default=None, help="Device for SUF emulation (cpu or cuda)")
+    parser.add_argument("--mpc-device", default=None, help="Device for SUF MPC emulation (cpu or cuda)")
+    parser.add_argument("--run-mpc", action="store_true", help="Run SUF MPC emulation")
+    parser.add_argument("--skip-pytorch", action="store_true", help="Skip PyTorch baseline eval")
+    parser.add_argument("--skip-suf", action="store_true", help="Skip SUF emulation eval")
+    parser.add_argument("--skip-mpc", action="store_true", help="Skip MPC emulation eval")
+    parser.add_argument("--mpc-rounding", default=None, help="Rounding for MPC emulation (round|trunc|floor)")
     parser.add_argument("--only", default=None, help="Comma-separated list of row ids to run")
     parser.add_argument("--append", action="store_true", help="Append to existing outputs if present")
     parser.add_argument("--batch-size", type=int, default=8, help="Batch size for GLUE")
@@ -294,6 +300,7 @@ def main() -> int:
 
     pytorch_device = args.pytorch_device or args.device or global_cfg.get("default_device", "cpu")
     suf_device = args.suf_device or pytorch_device
+    mpc_device = args.mpc_device or suf_device
 
     if pytorch_device == "cuda" and not torch.cuda.is_available():
         print("[warn] CUDA requested for baseline but not available, falling back to CPU")
@@ -301,6 +308,9 @@ def main() -> int:
     if suf_device == "cuda" and not torch.cuda.is_available():
         print("[warn] CUDA requested for SUF but not available, falling back to CPU")
         suf_device = "cpu"
+    if mpc_device == "cuda" and not torch.cuda.is_available():
+        print("[warn] CUDA requested for MPC but not available, falling back to CPU")
+        mpc_device = "cpu"
 
     seed = args.seed if args.seed is not None else global_cfg.get("seed", 0)
     set_seed(seed)
@@ -314,10 +324,21 @@ def main() -> int:
     if args.only:
         only_ids = {rid.strip() for rid in args.only.split(",") if rid.strip()}
 
+    existing_by_id: Dict[str, Dict[str, Any]] = {}
+    out_json = Path(args.out_json)
+    if args.append and out_json.exists():
+        with out_json.open("r", encoding="utf-8") as f:
+            existing = json.load(f)
+        if isinstance(existing, list):
+            existing_by_id = {item.get("id"): item for item in existing}
+
+    run_mpc_global = (args.run_mpc or global_cfg.get("run_mpc", False)) and not args.skip_mpc
+
     for row in cfg.get("rows", []):
         row_id = row.get("id", "")
         if only_ids is not None and row_id not in only_ids:
             continue
+        existing_row = existing_by_id.get(row_id)
         if row.get("skip", False):
             results.append({
                 "id": row_id,
@@ -343,6 +364,9 @@ def main() -> int:
         sigma_ref = row.get("sigma_ref", {})
         row_pytorch_device = row.get("pytorch_device", pytorch_device)
         row_suf_device = row.get("suf_device", suf_device)
+        row_mpc_device = row.get("mpc_device", mpc_device)
+        suf_rounding = row.get("suf_rounding", global_cfg.get("suf_rounding", "round"))
+        mpc_rounding = row.get("mpc_rounding", args.mpc_rounding or global_cfg.get("mpc_rounding", "trunc"))
 
         if row_pytorch_device == "cuda" and not torch.cuda.is_available():
             print(f"[warn] {row_id}: CUDA requested for baseline but not available, falling back to CPU")
@@ -350,14 +374,25 @@ def main() -> int:
         if row_suf_device == "cuda" and not torch.cuda.is_available():
             print(f"[warn] {row_id}: CUDA requested for SUF but not available, falling back to CPU")
             row_suf_device = "cpu"
+        if row_mpc_device == "cuda" and not torch.cuda.is_available():
+            print(f"[warn] {row_id}: CUDA requested for MPC but not available, falling back to CPU")
+            row_mpc_device = "cpu"
 
         print(f"[info] running {row_id} ({task}) on {checkpoint}")
-        print(f"[info] devices: baseline={row_pytorch_device}, suf={row_suf_device}")
+        print(f"[info] devices: baseline={row_pytorch_device}, suf={row_suf_device}, mpc={row_mpc_device}")
         t0 = time.time()
 
         tokenizer = load_tokenizer(row.get("tokenizer", checkpoint), cache_dir)
 
         extra_note = None
+        run_pytorch = not args.skip_pytorch
+        run_suf = not args.skip_suf and n_bits is not None
+        run_mpc = run_mpc_global and n_bits is not None
+
+        if not (run_pytorch or run_suf or run_mpc) and existing_row:
+            results.append(existing_row)
+            continue
+
         if family == "bert_seqcls":
             glue_task = task.split("/")[-1]
             dataloader, train_size, val_size = build_glue_dataloader(
@@ -369,21 +404,39 @@ def main() -> int:
                 args.max_examples,
             )
 
-            model = load_model_for_row(family, checkpoint, cache_dir).to(row_pytorch_device)
-            pytorch_acc = eval_seqcls(model, dataloader, row_pytorch_device, debug_sync=args.debug_sync)
-            del model
-            if row_pytorch_device == "cuda":
-                torch.cuda.empty_cache()
+            pytorch_acc = None
+            if run_pytorch:
+                model = load_model_for_row(family, checkpoint, cache_dir).to(row_pytorch_device)
+                pytorch_acc = eval_seqcls(model, dataloader, row_pytorch_device, debug_sync=args.debug_sync)
+                del model
+                if row_pytorch_device == "cuda":
+                    torch.cuda.empty_cache()
+            elif existing_row and existing_row.get("pytorch"):
+                pytorch_acc = existing_row["pytorch"].get("acc")
 
             suf_acc = None
-            if n_bits is not None:
+            if run_suf:
                 model = load_model_for_row(family, checkpoint, cache_dir).to(row_suf_device)
-                cfg_fp = FixedPointConfig(n_bits=n_bits, frac_bits=row_frac_bits)
+                cfg_fp = FixedPointConfig(n_bits=n_bits, frac_bits=row_frac_bits, rounding=suf_rounding)
                 apply_fixed_point_emulation(model, cfg_fp, quantize_weights=True)
                 suf_acc = eval_seqcls(model, dataloader, row_suf_device, debug_sync=args.debug_sync)
                 del model
                 if row_suf_device == "cuda":
                     torch.cuda.empty_cache()
+            elif existing_row and existing_row.get("suf"):
+                suf_acc = existing_row["suf"].get("acc")
+
+            mpc_acc = None
+            if run_mpc:
+                model = load_model_for_row(family, checkpoint, cache_dir).to(row_mpc_device)
+                cfg_fp = FixedPointConfig(n_bits=n_bits, frac_bits=row_frac_bits, rounding=mpc_rounding)
+                apply_fixed_point_emulation(model, cfg_fp, quantize_weights=True)
+                mpc_acc = eval_seqcls(model, dataloader, row_mpc_device, debug_sync=args.debug_sync)
+                del model
+                if row_mpc_device == "cuda":
+                    torch.cuda.empty_cache()
+            elif existing_row and existing_row.get("mpc"):
+                mpc_acc = existing_row["mpc"].get("acc")
 
         elif family == "gpt_lm":
             dataset, val_size, dataset_name, split_name = load_lambada_dataset(cache_dir, args.max_examples)
@@ -393,26 +446,30 @@ def main() -> int:
             extra_note = dataset_note
             train_size = sigma_ref.get("train_size")
 
-            model = load_model_for_row(family, checkpoint, cache_dir).to(row_pytorch_device)
-            pytorch_acc, used = eval_lambada(
-                model,
-                tokenizer,
-                dataset,
-                row_pytorch_device,
-                row_seq_len,
-                row.get("batch_size", args.lm_batch_size),
-                debug_sync=args.debug_sync,
-            )
-            if used and used != val_size:
-                val_size = used
-            del model
-            if row_pytorch_device == "cuda":
-                torch.cuda.empty_cache()
+            pytorch_acc = None
+            if run_pytorch:
+                model = load_model_for_row(family, checkpoint, cache_dir).to(row_pytorch_device)
+                pytorch_acc, used = eval_lambada(
+                    model,
+                    tokenizer,
+                    dataset,
+                    row_pytorch_device,
+                    row_seq_len,
+                    row.get("batch_size", args.lm_batch_size),
+                    debug_sync=args.debug_sync,
+                )
+                if used and used != val_size:
+                    val_size = used
+                del model
+                if row_pytorch_device == "cuda":
+                    torch.cuda.empty_cache()
+            elif existing_row and existing_row.get("pytorch"):
+                pytorch_acc = existing_row["pytorch"].get("acc")
 
             suf_acc = None
-            if n_bits is not None:
+            if run_suf:
                 model = load_model_for_row(family, checkpoint, cache_dir).to(row_suf_device)
-                cfg_fp = FixedPointConfig(n_bits=n_bits, frac_bits=row_frac_bits)
+                cfg_fp = FixedPointConfig(n_bits=n_bits, frac_bits=row_frac_bits, rounding=suf_rounding)
                 apply_fixed_point_emulation(model, cfg_fp, quantize_weights=True)
                 suf_acc, used = eval_lambada(
                     model,
@@ -428,16 +485,43 @@ def main() -> int:
                 del model
                 if row_suf_device == "cuda":
                     torch.cuda.empty_cache()
+            elif existing_row and existing_row.get("suf"):
+                suf_acc = existing_row["suf"].get("acc")
+
+            mpc_acc = None
+            if run_mpc:
+                model = load_model_for_row(family, checkpoint, cache_dir).to(row_mpc_device)
+                cfg_fp = FixedPointConfig(n_bits=n_bits, frac_bits=row_frac_bits, rounding=mpc_rounding)
+                apply_fixed_point_emulation(model, cfg_fp, quantize_weights=True)
+                mpc_acc, used = eval_lambada(
+                    model,
+                    tokenizer,
+                    dataset,
+                    row_mpc_device,
+                    row_seq_len,
+                    row.get("batch_size", args.lm_batch_size),
+                    debug_sync=args.debug_sync,
+                )
+                if used and used != val_size:
+                    val_size = used
+                del model
+                if row_mpc_device == "cuda":
+                    torch.cuda.empty_cache()
+            elif existing_row and existing_row.get("mpc"):
+                mpc_acc = existing_row["mpc"].get("acc")
             task = f"{task} ({dataset_name}:{split_name})"
         else:
             raise ValueError(f"Unknown family: {family}")
 
-        pytorch_pct = pytorch_acc * 100.0
+        pytorch_pct = pytorch_acc * 100.0 if pytorch_acc is not None else None
         suf_pct = suf_acc * 100.0 if suf_acc is not None else None
+        mpc_pct = mpc_acc * 100.0 if mpc_acc is not None else None
         sigma_pytorch = sigma_ref.get("pytorch_acc")
         sigma_acc = sigma_ref.get("sigma_acc")
 
         if args.strict_sigma_match and sigma_pytorch is not None:
+            if pytorch_pct is None:
+                raise RuntimeError(f"{row_id}: strict match requested but pytorch acc missing")
             if abs(pytorch_pct - sigma_pytorch) > args.sigma_tol_pp:
                 raise RuntimeError(
                     f"{row_id}: PyTorch acc {pytorch_pct:.2f} diverges from sigma ref {sigma_pytorch:.2f}"
@@ -462,48 +546,47 @@ def main() -> int:
             "val_size": val_size,
             "pytorch": {"acc": pytorch_acc, "acc_pct": pytorch_pct},
             "suf": {"acc": suf_acc, "acc_pct": suf_pct},
+            "mpc": {"acc": mpc_acc, "acc_pct": mpc_pct},
             "sigma_ref": sigma_ref,
             "delta": {
-                "suf_minus_pytorch_pp": None if suf_pct is None else suf_pct - pytorch_pct,
+                "suf_minus_pytorch_pp": None if (suf_pct is None or pytorch_pct is None) else suf_pct - pytorch_pct,
+                "mpc_minus_pytorch_pp": None if (mpc_pct is None or pytorch_pct is None) else mpc_pct - pytorch_pct,
+                "mpc_minus_suf_pp": None if (mpc_pct is None or suf_pct is None) else mpc_pct - suf_pct,
                 "suf_minus_sigma_pp": None if (suf_pct is None or sigma_acc is None) else suf_pct - sigma_acc,
-                "pytorch_minus_sigma_pp": None if sigma_acc is None else pytorch_pct - sigma_acc,
+                "mpc_minus_sigma_pp": None if (mpc_pct is None or sigma_acc is None) else mpc_pct - sigma_acc,
+                "pytorch_minus_sigma_pp": None if (pytorch_pct is None or sigma_acc is None) else pytorch_pct - sigma_acc,
             },
             "notes": notes,
             "runtime_s": time.time() - t0,
         }
         results.append(result)
 
-    out_json = Path(args.out_json)
     out_json.parent.mkdir(parents=True, exist_ok=True)
     merged_results = results
-    if args.append and out_json.exists():
-        with out_json.open("r", encoding="utf-8") as f:
-            existing = json.load(f)
-        if isinstance(existing, list):
-            existing_by_id = {item.get("id"): item for item in existing}
-            for item in results:
-                existing_by_id[item.get("id")] = item
-            merged_results = list(existing_by_id.values())
+    if existing_by_id:
+        for item in results:
+            existing_by_id[item.get("id")] = item
+        merged_results = list(existing_by_id.values())
     with out_json.open("w", encoding="utf-8") as f:
         json.dump(merged_results, f, indent=2)
 
     out_md = Path(args.out_md)
     out_md.parent.mkdir(parents=True, exist_ok=True)
     with out_md.open("w", encoding="utf-8") as f:
-        f.write("| Model | Dataset | Train Size | Val Size | PyTorch Acc | Sigma Acc | SUF Acc | Bitwidth | frac_bits | Notes |\n")
-        f.write("|---|---|---:|---:|---:|---:|---:|---:|---:|---|\n")
+        f.write("| Model | Dataset | Train Size | Val Size | PyTorch Acc | Sigma Acc | SUF Acc | SUF MPC Acc | Bitwidth | frac_bits | Notes |\n")
+        f.write("|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|\n")
         for r in merged_results:
             if r.get("status") == "skipped":
                 sigma_ref = r.get("sigma_ref", {})
                 f.write(
-                    f"| {escape_md(r.get('id',''))} | SKIPPED | {sigma_ref.get('train_size','-')} | {sigma_ref.get('val_size','-')} | - | {sigma_ref.get('sigma_acc','-')} | - | {r.get('n_bits','-')} | {r.get('frac_bits','-')} | {escape_md(r.get('notes',''))} |\n"
+                    f"| {escape_md(r.get('id',''))} | SKIPPED | {sigma_ref.get('train_size','-')} | {sigma_ref.get('val_size','-')} | - | {sigma_ref.get('sigma_acc','-')} | - | - | {r.get('n_bits','-')} | {r.get('frac_bits','-')} | {escape_md(r.get('notes',''))} |\n"
                 )
                 continue
             sigma_ref = r.get("sigma_ref", {})
             model_name = escape_md(r.get("id", ""))
             dataset = escape_md(r.get("task", ""))
             f.write(
-                "| {model} | {dataset} | {train} | {val} | {pt} | {sigma} | {suf} | {bits} | {frac} | {notes} |\n".format(
+                "| {model} | {dataset} | {train} | {val} | {pt} | {sigma} | {suf} | {mpc} | {bits} | {frac} | {notes} |\n".format(
                     model=model_name,
                     dataset=dataset,
                     train=r.get("train_size", "-"),
@@ -511,6 +594,7 @@ def main() -> int:
                     pt=format_pct(r.get("pytorch", {}).get("acc_pct")),
                     sigma=format_pct(sigma_ref.get("sigma_acc")),
                     suf=format_pct(r.get("suf", {}).get("acc_pct")),
+                    mpc=format_pct(r.get("mpc", {}).get("acc_pct")),
                     bits=r.get("n_bits", "-"),
                     frac=r.get("frac_bits", "-"),
                     notes=escape_md(r.get("notes", "")),

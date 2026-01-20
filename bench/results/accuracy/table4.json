@@ -16,6 +16,10 @@
       "acc": 0.8038990825688074,
       "acc_pct": 80.38990825688074
     },
+    "mpc": {
+      "acc": 0.8027522935779816,
+      "acc_pct": 80.27522935779817
+    },
     "sigma_ref": {
       "train_size": 67000,
       "val_size": 872,
@@ -24,11 +28,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.0,
+      "mpc_minus_pytorch_pp": -0.11467889908257689,
+      "mpc_minus_suf_pp": -0.11467889908257689,
       "suf_minus_sigma_pp": -2.180091743119249,
+      "mpc_minus_sigma_pp": -2.2947706422018257,
       "pytorch_minus_sigma_pp": -2.180091743119249
     },
     "notes": "HF: takedarn/bert-tiny-sst2",
-    "runtime_s": 6.611730575561523
+    "runtime_s": 5.762966871261597
   },
   {
     "id": "bert_tiny_mrpc",
@@ -47,6 +54,10 @@
       "acc": 0.7352941176470589,
       "acc_pct": 73.52941176470588
     },
+    "mpc": {
+      "acc": 0.7328431372549019,
+      "acc_pct": 73.2843137254902
+    },
     "sigma_ref": {
       "train_size": 3700,
       "val_size": 408,
@@ -55,11 +66,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.0,
+      "mpc_minus_pytorch_pp": -0.24509803921569073,
+      "mpc_minus_suf_pp": -0.24509803921569073,
       "suf_minus_sigma_pp": 3.1894117647058806,
+      "mpc_minus_sigma_pp": 2.94431372549019,
       "pytorch_minus_sigma_pp": 3.1894117647058806
     },
     "notes": "HF: M-FAC/bert-tiny-finetuned-mrpc",
-    "runtime_s": 7.273154258728027
+    "runtime_s": 6.388557195663452
   },
   {
     "id": "bert_tiny_qnli",
@@ -78,6 +92,10 @@
       "acc": 0.8160351455244371,
       "acc_pct": 81.60351455244371
     },
+    "mpc": {
+      "acc": 0.8151198974922204,
+      "acc_pct": 81.51198974922204
+    },
     "sigma_ref": {
       "train_size": 105000,
       "val_size": 5463,
@@ -86,11 +104,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.036609921288672354,
+      "mpc_minus_pytorch_pp": -0.054914881933001425,
+      "mpc_minus_suf_pp": -0.09152480322167378,
       "suf_minus_sigma_pp": -0.32648544755629416,
+      "mpc_minus_sigma_pp": -0.41801025077796794,
       "pytorch_minus_sigma_pp": -0.3630953688449665
     },
     "notes": "HF: M-FAC/bert-tiny-finetuned-qnli",
-    "runtime_s": 11.804597616195679
+    "runtime_s": 7.940727472305298
   },
   {
     "id": "bert_base_sst2",
@@ -109,6 +130,10 @@
       "acc": 0.9243119266055045,
       "acc_pct": 92.43119266055045
     },
+    "mpc": {
+      "acc": 0.9231651376146789,
+      "acc_pct": 92.31651376146789
+    },
     "sigma_ref": {
       "train_size": 67000,
       "val_size": 872,
@@ -117,11 +142,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.0,
+      "mpc_minus_pytorch_pp": -0.11467889908256268,
+      "mpc_minus_suf_pp": -0.11467889908256268,
       "suf_minus_sigma_pp": -0.11880733944954613,
+      "mpc_minus_sigma_pp": -0.23348623853210881,
       "pytorch_minus_sigma_pp": -0.11880733944954613
     },
     "notes": "HF: textattack/bert-base-uncased-SST-2",
-    "runtime_s": 11.2389235496521
+    "runtime_s": 7.338019371032715
   },
   {
     "id": "bert_base_mrpc",
@@ -140,6 +168,10 @@
       "acc": 0.8774509803921569,
       "acc_pct": 87.74509803921569
     },
+    "mpc": {
+      "acc": 0.8725490196078431,
+      "acc_pct": 87.25490196078431
+    },
     "sigma_ref": {
       "train_size": 3700,
       "val_size": 408,
@@ -148,11 +180,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.0,
+      "mpc_minus_pytorch_pp": -0.49019607843138147,
+      "mpc_minus_suf_pp": -0.49019607843138147,
       "suf_minus_sigma_pp": 0.49509803921569073,
+      "mpc_minus_sigma_pp": 0.004901960784309267,
       "pytorch_minus_sigma_pp": 0.49509803921569073
     },
     "notes": "HF: textattack/bert-base-uncased-MRPC",
-    "runtime_s": 9.02618932723999
+    "runtime_s": 6.533440113067627
   },
   {
     "id": "bert_base_qnli",
@@ -171,6 +206,10 @@
       "acc": 0.9152480322167308,
       "acc_pct": 91.52480322167308
     },
+    "mpc": {
+      "acc": 0.9163463298553908,
+      "acc_pct": 91.63463298553907
+    },
     "sigma_ref": {
       "train_size": 105000,
       "val_size": 5463,
@@ -179,11 +218,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": -0.01830496064432907,
+      "mpc_minus_pytorch_pp": 0.09152480322165957,
+      "mpc_minus_suf_pp": 0.10982976386598864,
       "suf_minus_sigma_pp": -0.10519677832691343,
+      "mpc_minus_sigma_pp": 0.004632985539075207,
       "pytorch_minus_sigma_pp": -0.08689181768258436
     },
     "notes": "HF: textattack/bert-base-uncased-QNLI",
-    "runtime_s": 34.57168793678284
+    "runtime_s": 15.372599840164185
   },
   {
     "id": "bert_large_sst2",
@@ -202,6 +244,10 @@
       "acc": 0.9334862385321101,
       "acc_pct": 93.34862385321101
     },
+    "mpc": {
+      "acc": 0.9334862385321101,
+      "acc_pct": 93.34862385321101
+    },
     "sigma_ref": {
       "train_size": 67000,
       "val_size": 872,
@@ -210,11 +256,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": -0.11467889908256268,
+      "mpc_minus_pytorch_pp": -0.11467889908256268,
+      "mpc_minus_suf_pp": 0.0,
       "suf_minus_sigma_pp": -0.001376146788985011,
+      "mpc_minus_sigma_pp": -0.001376146788985011,
       "pytorch_minus_sigma_pp": 0.11330275229357767
     },
     "notes": "HF: yoshitomo-matsubara/bert-large-uncased-sst2",
-    "runtime_s": 22.823960065841675
+    "runtime_s": 11.192729234695435
   },
   {
     "id": "bert_large_mrpc",
@@ -233,6 +282,10 @@
       "acc": 0.8799019607843137,
       "acc_pct": 87.99019607843137
     },
+    "mpc": {
+      "acc": 0.8799019607843137,
+      "acc_pct": 87.99019607843137
+    },
     "sigma_ref": {
       "train_size": 3700,
       "val_size": 408,
@@ -241,11 +294,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.0,
+      "mpc_minus_pytorch_pp": 0.0,
+      "mpc_minus_suf_pp": 0.0,
       "suf_minus_sigma_pp": -0.4898039215686367,
+      "mpc_minus_sigma_pp": -0.4898039215686367,
       "pytorch_minus_sigma_pp": -0.4898039215686367
     },
     "notes": "HF: yoshitomo-matsubara/bert-large-uncased-mrpc",
-    "runtime_s": 14.085302591323853
+    "runtime_s": 7.26643180847168
   },
   {
     "id": "bert_large_qnli",
@@ -264,6 +320,10 @@
       "acc": 0.9225700164744646,
       "acc_pct": 92.25700164744646
     },
+    "mpc": {
+      "acc": 0.9234852645066813,
+      "acc_pct": 92.34852645066813
+    },
     "sigma_ref": {
       "train_size": 105000,
       "val_size": 5463,
@@ -272,11 +332,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.01830496064432907,
+      "mpc_minus_pytorch_pp": 0.10982976386600285,
+      "mpc_minus_suf_pp": 0.09152480322167378,
       "suf_minus_sigma_pp": -0.002998352553547079,
+      "mpc_minus_sigma_pp": 0.0885264506681267,
       "pytorch_minus_sigma_pp": -0.02130331319787615
     },
     "notes": "HF: yoshitomo-matsubara/bert-large-uncased-qnli",
-    "runtime_s": 109.24012517929077
+    "runtime_s": 29.08616352081299
   },
   {
     "id": "gpt2_lambada",
@@ -295,6 +358,10 @@
       "acc": 0.606054725402678,
       "acc_pct": 60.605472540267805
     },
+    "mpc": {
+      "acc": 0.6089656510770425,
+      "acc_pct": 60.89656510770425
+    },
     "sigma_ref": {
       "train_size": 0,
       "val_size": 5153,
@@ -303,11 +370,14 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.01940617116243004,
+      "mpc_minus_pytorch_pp": 0.31049873859887356,
+      "mpc_minus_suf_pp": 0.2910925674364435,
       "suf_minus_sigma_pp": 27.325472540267803,
+      "mpc_minus_sigma_pp": 27.616565107704247,
       "pytorch_minus_sigma_pp": 27.306066369105373
     },
     "notes": "HF: gpt2 | dataset=lambada:test",
-    "runtime_s": 118.00199913978577
+    "runtime_s": 53.34288001060486
   },
   {
     "id": "gpt_neo_1p3b_lambada",
@@ -326,6 +396,10 @@
       "acc": 0.7209392586842616,
       "acc_pct": 72.09392586842615
     },
+    "mpc": {
+      "acc": 0.7209392586842616,
+      "acc_pct": 72.09392586842615
+    },
     "sigma_ref": {
       "train_size": 0,
       "val_size": 5153,
@@ -334,10 +408,13 @@
     },
     "delta": {
       "suf_minus_pytorch_pp": 0.0,
+      "mpc_minus_pytorch_pp": 0.0,
+      "mpc_minus_suf_pp": 0.0,
       "suf_minus_sigma_pp": 14.283925868426152,
+      "mpc_minus_sigma_pp": 14.283925868426152,
       "pytorch_minus_sigma_pp": 14.283925868426152
     },
     "notes": "HF: EleutherAI/gpt-neo-1.3B | dataset=lambada:test",
-    "runtime_s": 455.24931621551514
+    "runtime_s": 320.97536444664
   }
 ]
