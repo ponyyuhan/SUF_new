@@ -73,6 +73,8 @@ SHAFT numbers below are taken from Table VII in the SHAFT paper (2025‑2287‑p
 | GPT‑2‑64 | 621.83 | 474.10 | 0.370 | 0.335 | 19.32 | 42.37 | 5.76 |
 | ViT‑base | — | — | — | — | 45.66 | 108.24 | 18.41 |
 
+**Note**: SHAFT rows are from the paper’s Table VII; our local SHAFT GPT‑2 run failed, so we do not report local GPT‑2 measurements.
+
 ## 3. Scaling (BERT‑base, seq length sweep)
 **Setup**: same as Section 2.
 
