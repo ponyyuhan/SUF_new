@@ -25,19 +25,33 @@ CUDA_VISIBLE_DEVICES=0/1, CPU threads=32
 
 | Model | Sigma online (ms) | SUF online (ms) | Speedup | Sigma comm (GB) | SUF comm (GB) | Sigma keygen (s) | SUF keygen (s) | Sigma key (GB) | SUF key (GB) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| BERT‑tiny‑128 | 154.00 | 34.33 | 4.49x | 0.020 | 0.017 | 0.29 | 0.04 | 0.326 | 0.250 |
 | BERT‑base‑128 | 1631.10 | 928.72 | 1.76x | 0.989 | 0.830 | 2.97 | 0.54 | 16.835 | 12.739 |
 | BERT‑large‑128 | 4960.80 | 2405.52 | 2.06x | 2.638 | 2.213 | 7.63 | 1.61 | 45.448 | 34.529 |
 | GPT‑2‑128 | 1679.97 | 804.87 | 2.09x | 0.824 | 0.724 | 3.36 | 0.50 | 14.292 | 11.101 |
+| GPT‑Neo‑128 | 6053.52 | 4271.14 | 1.42x | 4.029 | 3.648 | 7.71 | 2.88 | 76.187 | 61.215 |
 
-**Observation**: SUF is faster and communicates less on all three models while also shrinking key size and keygen time.
+**Observation**: SUF is faster and communicates less on all tested models while also shrinking key size and keygen time.
 
-### 2.1 SUF vs SHAFT (overlapping models)
-SHAFT reports **compute time only** (communication is reported separately), so the comparison below is conservative for SHAFT.
+**Not run (resource/operational constraints)**:
+- **GPT‑Neo‑large**: previous attempt overloaded the server; per request, we did not rerun that command.
+- **Llama‑7B / Llama‑13B**: Sigma key buffers are hard‑coded to **300 GB** and **450 GB** respectively; with 314 GiB total RAM (~227 GiB available during runs), these exceed memory and are not feasible in this environment.
 
-| Model | SUF online (s) | SHAFT compute (s) | Speedup | SUF comm (GB) | SHAFT comm (GB) | Comm reduction |
-|---|---:|---:|---:|---:|---:|---:|
-| BERT‑base‑128 | 0.929 | 2.82 | 3.04x | 0.830 | 10.46 | 12.6x |
-| BERT‑large‑128 | 2.406 | 7.28 | 3.03x | 2.213 | 28.46 | 12.9x |
+### 2.1 SHAFT comparison (per 2025‑2287‑paper.pdf)
+SHAFT computes reported runtime as:
+```
+T = comp_time + 2 * comm_bytes / bandwidth + rounds * latency
+```
+Network settings in the paper: **LAN (1 Gbps, 0.5 ms)**, **WAN (400 Mbps, 4 ms)**.
+
+| Model | SHAFT comp (s) | Comm (GB) | Rounds | Projected LAN (s) | Projected WAN (s) |
+|---|---:|---:|---:|---:|---:|
+| BERT‑base‑128 | 2.82 | 10.46 | 1496 | 170.93 | 427.20 |
+| BERT‑large‑128 | 7.28 | 28.46 | 2936 | 464.11 | 1157.42 |
+
+**Notes**:
+- SHAFT logs provide comp time, comm bytes, and rounds; projected times above follow the paper’s formula/network settings.
+- Sigma/SUF logs do not expose round counts, so we report measured online time and comm only; direct projected‑time comparison is not possible.
 
 ## 3. Scaling (BERT‑base, seq length sweep)
 **Setup**: same as Section 2.
@@ -64,6 +78,11 @@ SHAFT reports **compute time only** (communication is reported separately), so t
 
 ## 5. SHAFT baselines
 All SHAFT runs use `CUDA_VISIBLE_DEVICES=0` (both parties share GPU0 because the launcher does not bind GPUs by rank).
+The SHAFT paper (2025‑2287) reports runtime using:
+```
+T = comp_time + 2 * comm_bytes / bandwidth + rounds * latency
+```
+with LAN **(1 Gbps, 0.5 ms)** and WAN **(400 Mbps, 4 ms)**.
 
 ### 5.1 Unit‑test microbench
 **Softmax** (`examples/unit-test/run_test_softmax.py`):
@@ -103,6 +122,7 @@ All SHAFT runs use `CUDA_VISIBLE_DEVICES=0` (both parties share GPU0 because the
 - Updated SUF/Sigma softmax + layernorm key parsing to skip SUF‑specific nExp/inv/rsqrt bytes when `SUF_HAVE_CUDA` is enabled.
 - Extended `scripts/compare_activation.py` with explicit GPU selection and more robust Sigma log parsing.
 - **Note**: `third_party/EzPC/GPU-MPC` contains local edits and is not identical to the vendored `EzPC_vendor` copy; all evaluation runs here use `EzPC_vendor` (SUF) and `ezpc_upstream` (Sigma baseline).
+- Removed failed Llama‑13B key artifacts in `third_party/EzPC/GPU-MPC/experiments/sigma/keys/llama13b-suf-nexp9-inv9-rsqrt8` (≈335 GB) after confirming they were crash leftovers.
 
 ## 8. Remaining gaps vs Evaluation.md
 - **Block‑level bench** (`bench_softmax_norm`) and **extensibility case study** are not present in this repo; not executed.

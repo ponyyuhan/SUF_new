@@ -217,6 +217,8 @@ SUF_NEXP_BITS=10 SUF_INV_BITS=10 SUF_RSQRT_BITS=9
 | GPT‑2‑128 | 1679.97 | 804.87 | 2.09× | 0.824 | 0.724 | 3.36 | 0.50 | 14.292 | 11.101 |
 
 **对 SHAFT 的对比（BERT‑base/large）**：SHAFT 报告的 compute time 为 2.82s / 7.28s，通信 10.46 GB / 28.46 GB；SUF 在线时间 0.929s / 2.406s，通信 0.830 GB / 2.213 GB（约 3× 更快、约 13× 更少通信，详见 `evaluation_report.md`）。
+
+**更多模型**：已补充 `BERT‑tiny‑128` 与 `GPT‑Neo‑128` 的端到端对比；`GPT‑Neo‑large`（前次命令导致服务器过载）以及 `Llama‑7B/13B`（Sigma 需要 300GB/450GB key buffer，内存不足）未运行，详见 `evaluation_report.md`。
 ### 9.2 Seq 长度扩展（BERT‑base）
 
 | Seq | Sigma time (ms) | SUF time (ms) | Speedup | Sigma comm (GB) | SUF comm (GB) |
