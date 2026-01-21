@@ -251,6 +251,7 @@ python bench/accuracy_compare.py \
   --lm-batch-size 1
 ```
 
+
 说明：
 - Sigma 数值来自其 Table 4，用作参考对比列。
 - SUF 列为 cleartext fixed‑point emulation（四舍五入 + 二补码 wrap），不涉及 MPC 通信。

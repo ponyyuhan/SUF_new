@@ -3,12 +3,13 @@
 Date: 2026-01-20
 
 ## 1. Overview
-本报告在现有 PyTorch / SUF fixed‑point 结果基础上，新增 **SUF MPC emulation**（不做真实通信，仅模拟 MPC 定点数值语义）。指标与 Sigma Table 4 对齐：GLUE（SST‑2 / MRPC / QNLI）和 LAMBADA next‑token accuracy。
+本报告在现有 PyTorch / SUF fixed‑point 结果基础上，新增 **SUF MPC emulation**（不做真实通信，仅模拟 MPC 定点数值语义），并保留 **Sigma 论文参考值**。
 
 ## 2. Methodology
 - **Seq length**: 128（统一截断/填充）。
 - **Fixed‑point**: frac_bits=12，bitwidth 按 Sigma Table 4（BERT‑tiny=37，BERT‑base/large=50，GPT‑2=50，GPT‑Neo=51）。
 - **PyTorch baseline**: HF Transformers float32 inference。
+- **Sigma (paper)**: 论文 Table 4 报告值。
 - **SUF emulation**: `bench/fixed_point.py` 量化权重+激活，四舍五入 + 二补码 wrap（与之前一致）。
 - **SUF MPC emulation**:
   - 仍为单机清文模拟（无通信），仅模拟 **MPC 的截断/舍入语义**。
@@ -48,7 +49,7 @@ SUF/SUF‑MPC 结果接近 PyTorch 的主要原因：
 | bert_large_mrpc | glue/mrpc | 3668 | 408 | 87.99 | 88.48 | 87.99 | 87.99 | 50 | 12 | HF: yoshitomo-matsubara/bert-large-uncased-mrpc |
 | bert_large_qnli | glue/qnli | 104743 | 5463 | 92.24 | 92.26 | 92.26 | 92.35 | 50 | 12 | HF: yoshitomo-matsubara/bert-large-uncased-qnli |
 | gpt2_lambada | lambada (lambada:test) | 0 | 5153 | 60.59 | 33.28 | 60.61 | 60.90 | 50 | 12 | HF: gpt2 \| dataset=lambada:test |
-| gpt_neo_1p3b_lambada | lambada (lambada:test) | 0 | 5153 | 72.09 | 57.81 | 72.09 | 72.09 | 51 | 12 | HF: EleutherAI/gpt-neo-1.3B \| dataset=lambada:test \| mpc_rounding=round |
+| gpt_neo_1p3b_lambada | lambada (lambada:test) | 0 | 5153 | 72.09 | 57.81 | 72.09 | 72.09 | 51 | 12 | HF: EleutherAI/gpt-neo-1.3B \| dataset=lambada:test |
 
 ## 7. Notes
 - Sigma Acc 列为论文 Table 4 报告值（参考基线），并未在本次运行中重新复现。

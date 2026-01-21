@@ -47,10 +47,12 @@ ezpc_upstream/GPU-MPC/experiments/**/keys/
 
 # runtime artifacts / binaries
 accuracy_sweep/**
+artifacts/**
 third_party/EzPC/GPU-MPC/experiments/**/output/
 third_party/EzPC_vendor/GPU-MPC/experiments/**/output/
 ezpc_upstream/GPU-MPC/experiments/**/output/
 third_party/EzPC/GPU-MPC/experiments/sigma/sigma
+third_party/EzPC/GPU-MPC/experiments/accuracy/mpc_lambada
 third_party/EzPC_vendor/GPU-MPC/experiments/sigma/sigma
 ezpc_upstream/GPU-MPC/experiments/sigma/sigma
 ezpc_upstream/GPU-MPC/tests/fss/gelu
