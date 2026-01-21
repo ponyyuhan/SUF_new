@@ -3,6 +3,7 @@
 #include "suf/interval_lut.hpp"
 #include "suf/secure_program.hpp"
 #include "suf/ref_eval.hpp"
+#include "suf/masked_compile.hpp"
 
 #include <cuda_runtime.h>
 #include <chrono>
@@ -26,6 +27,8 @@ struct BenchConfig {
   bool json = false;
   bool mask_aware = false;
   u64 mask_in = 0;
+  bool template_cache = true;
+  bool cpu_eval = false;
 };
 
 struct ModelSpec {
@@ -71,6 +74,8 @@ static BenchConfig parse_args(int argc, char** argv) {
     else if (!std::strcmp(argv[i], "--json")) cfg.json = true;
     else if (!std::strcmp(argv[i], "--mask-aware")) cfg.mask_aware = true;
     else if (!std::strcmp(argv[i], "--mask") && i + 1 < argc) cfg.mask_in = std::stoull(argv[++i]);
+    else if (!std::strcmp(argv[i], "--no-template-cache")) cfg.template_cache = false;
+    else if (!std::strcmp(argv[i], "--cpu-eval")) cfg.cpu_eval = true;
     else {
       std::cerr << "Unknown arg: " << argv[i] << "\n";
       std::exit(1);
@@ -121,6 +126,17 @@ static SUFDescriptor make_bench_desc(const BenchConfig& cfg, int in_bits) {
   return d;
 }
 
+static SUFDescriptor make_effective_desc(const SUFDescriptor& base,
+                                         int in_bits,
+                                         bool mask_aware,
+                                         u64 mask_in,
+                                         int party) {
+  if (!mask_aware) return base;
+  std::mt19937_64 rng(1234);
+  auto inst = compile_masked_gate_instance(base, in_bits, mask_in, party, rng);
+  return inst.desc;
+}
+
 static std::size_t bytes_dpf_batch(const DpfKeyBatch& batch) {
   return batch.keys.size() * sizeof(DpfKeyPacked) + batch.scw.size() * sizeof(Seed);
 }
@@ -165,22 +181,18 @@ static KeyStats measure_keygen(const SUFDescriptor& desc, int party, int in_bits
 
   IntervalLutKeyV2 lut_key;
   auto lut_start = pred_end;
-  if (piecewise_constant) {
-    std::vector<std::vector<u64>> payloads(desc.polys.size());
-    for (std::size_t i = 0; i < desc.polys.size(); ++i) {
-      payloads[i] = desc.polys[i].coeffs;
-    }
-    lut_start = std::chrono::high_resolution_clock::now();
-    lut_key = gen_interval_lut_v2(desc.cuts, payloads, in_bits, party, rng);
+  std::vector<std::vector<u64>> payloads(desc.polys.size());
+  for (std::size_t i = 0; i < desc.polys.size(); ++i) {
+    payloads[i] = desc.polys[i].coeffs;
   }
+  lut_start = std::chrono::high_resolution_clock::now();
+  lut_key = gen_interval_lut_v2(desc.cuts, payloads, in_bits, party, rng);
   auto end = std::chrono::high_resolution_clock::now();
   stats.pred_ms = std::chrono::duration<double, std::milli>(pred_end - pred_start).count();
-  stats.lut_ms = piecewise_constant
-               ? std::chrono::duration<double, std::milli>(end - lut_start).count()
-               : 0.0;
+  stats.lut_ms = std::chrono::duration<double, std::milli>(end - lut_start).count();
   stats.keygen_ms = std::chrono::duration<double, std::milli>(end - start).count();
   stats.pred_bytes = bytes_dpf_batch(dpf_batch);
-  stats.lut_bytes = piecewise_constant ? bytes_interval_lut(lut_key) : 0;
+  stats.lut_bytes = bytes_interval_lut(lut_key);
   return stats;
 }
 
@@ -205,8 +217,9 @@ int main(int argc, char** argv) {
   const int gate_count = model->n_layer;
 
   auto desc = make_bench_desc(cfg, in_bits);
+  auto effective_desc = make_effective_desc(desc, in_bits, cfg.mask_aware, cfg.mask_in, 0);
 
-  KeyStats key_stats = measure_keygen(desc, 0, in_bits);
+  KeyStats key_stats = measure_keygen(effective_desc, 0, in_bits);
   const std::size_t per_gate_key_bytes = key_stats.pred_bytes + key_stats.lut_bytes;
   const double per_gate_key_ms = key_stats.keygen_ms;
   const std::size_t total_key_bytes = per_gate_key_bytes * static_cast<std::size_t>(gate_count);
@@ -229,24 +242,81 @@ int main(int argc, char** argv) {
   if (cfg.helpers > 0) cudaMalloc(&d_helpers, gate_elems * cfg.helpers * sizeof(u64));
   cudaMemcpy(d_in, h_in.data(), gate_elems * sizeof(u64), cudaMemcpyHostToDevice);
 
-  GpuSecureSufProgram prog(desc, 0, 1234, in_bits, cfg.mask_aware, cfg.mask_in);
+  double init_ms = 0.0;
+  double total_init_ms = 0.0;
+  double per_gate_eval_ms = 0.0;
+  double total_eval_ms = 0.0;
 
-  prog.eval(d_in, gate_elems, d_out, d_helpers, 0);
-  cudaDeviceSynchronize();
+  if (cfg.template_cache) {
+    auto init_start = std::chrono::high_resolution_clock::now();
+    GpuSecureSufProgram prog(effective_desc, 0, 1234, in_bits, cfg.mask_aware, cfg.mask_in);
+    auto init_end = std::chrono::high_resolution_clock::now();
+    init_ms = std::chrono::duration<double, std::milli>(init_end - init_start).count();
 
-  cudaEvent_t start_evt, stop_evt;
-  cudaEventCreate(&start_evt);
-  cudaEventCreate(&stop_evt);
-  cudaEventRecord(start_evt);
-  for (int i = 0; i < cfg.iters; ++i) {
     prog.eval(d_in, gate_elems, d_out, d_helpers, 0);
+    cudaDeviceSynchronize();
+
+    cudaEvent_t start_evt, stop_evt;
+    cudaEventCreate(&start_evt);
+    cudaEventCreate(&stop_evt);
+    cudaEventRecord(start_evt);
+    for (int i = 0; i < cfg.iters; ++i) {
+      prog.eval(d_in, gate_elems, d_out, d_helpers, 0);
+    }
+    cudaEventRecord(stop_evt);
+    cudaEventSynchronize(stop_evt);
+    float ms = 0.0f;
+    cudaEventElapsedTime(&ms, start_evt, stop_evt);
+    per_gate_eval_ms = ms / cfg.iters;
+    total_eval_ms = per_gate_eval_ms * gate_count;
+    cudaEventDestroy(start_evt);
+    cudaEventDestroy(stop_evt);
+  } else {
+    double eval_sum_ms = 0.0;
+    for (int g = 0; g < gate_count; ++g) {
+      auto init_start = std::chrono::high_resolution_clock::now();
+      GpuSecureSufProgram prog(effective_desc, 0, 1234, in_bits, cfg.mask_aware, cfg.mask_in);
+      auto init_end = std::chrono::high_resolution_clock::now();
+      total_init_ms += std::chrono::duration<double, std::milli>(init_end - init_start).count();
+
+      prog.eval(d_in, gate_elems, d_out, d_helpers, 0);
+      cudaDeviceSynchronize();
+
+      cudaEvent_t start_evt, stop_evt;
+      cudaEventCreate(&start_evt);
+      cudaEventCreate(&stop_evt);
+      cudaEventRecord(start_evt);
+      for (int i = 0; i < cfg.iters; ++i) {
+        prog.eval(d_in, gate_elems, d_out, d_helpers, 0);
+      }
+      cudaEventRecord(stop_evt);
+      cudaEventSynchronize(stop_evt);
+      float ms = 0.0f;
+      cudaEventElapsedTime(&ms, start_evt, stop_evt);
+      eval_sum_ms += (ms / cfg.iters);
+      cudaEventDestroy(start_evt);
+      cudaEventDestroy(stop_evt);
+    }
+    per_gate_eval_ms = eval_sum_ms / gate_count;
+    total_eval_ms = eval_sum_ms;
   }
-  cudaEventRecord(stop_evt);
-  cudaEventSynchronize(stop_evt);
-  float ms = 0.0f;
-  cudaEventElapsedTime(&ms, start_evt, stop_evt);
-  const double per_gate_eval_ms = ms / cfg.iters;
-  const double total_eval_ms = per_gate_eval_ms * gate_count;
+
+  double cpu_per_gate_ms = 0.0;
+  double cpu_total_ms = 0.0;
+  if (cfg.cpu_eval) {
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < cfg.iters; ++i) {
+      for (std::size_t j = 0; j < gate_elems; ++j) {
+        const u64 x = cfg.mask_aware ? h_x[j] : h_in[j];
+        auto ref = eval_suf_ref(effective_desc, x);
+        (void)ref;
+      }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    double ms = std::chrono::duration<double, std::milli>(end - start).count();
+    cpu_per_gate_ms = ms / cfg.iters;
+    cpu_total_ms = cpu_per_gate_ms * gate_count;
+  }
 
   if (cfg.verify) {
     std::vector<u64> h_out0(gate_elems);
@@ -254,7 +324,7 @@ int main(int argc, char** argv) {
     std::vector<u64> h_out1;
     u64* d_out1 = nullptr;
     cudaMalloc(&d_out1, gate_elems * sizeof(u64));
-    GpuSecureSufProgram prog1(desc, 1, 1234, in_bits, cfg.mask_aware, cfg.mask_in);
+    GpuSecureSufProgram prog1(effective_desc, 1, 1234, in_bits, cfg.mask_aware, cfg.mask_in);
     prog1.eval(d_in, gate_elems, d_out1, nullptr, 0);
     cudaDeviceSynchronize();
     h_out1.resize(gate_elems);
@@ -262,7 +332,7 @@ int main(int argc, char** argv) {
     cudaFree(d_out1);
     for (std::size_t i = 0; i < std::min<std::size_t>(gate_elems, 1024); ++i) {
       const u64 x = cfg.mask_aware ? h_x[i] : h_in[i];
-      auto ref = eval_suf_ref(desc, x);
+      auto ref = eval_suf_ref(effective_desc, x);
       u64 got = h_out0[i];
       if (!h_out1.empty()) {
         got += h_out1[i];
@@ -287,6 +357,7 @@ int main(int argc, char** argv) {
               << "\"helpers\":" << cfg.helpers << ","
               << "\"mask_aware\":" << (cfg.mask_aware ? "true" : "false") << ","
               << "\"mask_in\":" << cfg.mask_in << ","
+              << "\"template_cache\":" << (cfg.template_cache ? "true" : "false") << ","
               << "\"pred_bytes\":" << key_stats.pred_bytes << ","
               << "\"lut_bytes\":" << key_stats.lut_bytes << ","
               << "\"per_gate_key_bytes\":" << per_gate_key_bytes << ","
@@ -295,8 +366,12 @@ int main(int argc, char** argv) {
               << "\"lut_ms\":" << key_stats.lut_ms << ","
               << "\"per_gate_key_ms\":" << per_gate_key_ms << ","
               << "\"total_key_ms\":" << total_key_ms << ","
+              << "\"init_ms\":" << init_ms << ","
+              << "\"total_init_ms\":" << total_init_ms << ","
               << "\"per_gate_eval_ms\":" << per_gate_eval_ms << ","
-              << "\"total_eval_ms\":" << total_eval_ms
+              << "\"total_eval_ms\":" << total_eval_ms << ","
+              << "\"cpu_per_gate_ms\":" << cpu_per_gate_ms << ","
+              << "\"cpu_total_ms\":" << cpu_total_ms
               << "}\n";
   } else {
     std::cout << "SUF model bench: model=" << cfg.model
@@ -310,6 +385,7 @@ int main(int argc, char** argv) {
               << " helpers=" << cfg.helpers
               << " mask_aware=" << (cfg.mask_aware ? 1 : 0)
               << " mask_in=" << cfg.mask_in
+              << " template_cache=" << (cfg.template_cache ? 1 : 0)
               << " pred_bytes=" << key_stats.pred_bytes
               << " lut_bytes=" << key_stats.lut_bytes
               << " per_gate_key_bytes=" << per_gate_key_bytes
@@ -318,16 +394,18 @@ int main(int argc, char** argv) {
               << " lut_ms=" << key_stats.lut_ms
               << " per_gate_key_ms=" << per_gate_key_ms
               << " total_key_ms=" << total_key_ms
+              << " init_ms=" << init_ms
+              << " total_init_ms=" << total_init_ms
               << " per_gate_eval_ms=" << per_gate_eval_ms
               << " total_eval_ms=" << total_eval_ms
+              << " cpu_per_gate_ms=" << cpu_per_gate_ms
+              << " cpu_total_ms=" << cpu_total_ms
               << "\n";
   }
 
   cudaFree(d_in);
   cudaFree(d_out);
   if (d_helpers) cudaFree(d_helpers);
-  cudaEventDestroy(start_evt);
-  cudaEventDestroy(stop_evt);
 
   return 0;
 }

@@ -27,6 +27,7 @@
 #include "utils/gpu_comms.h"
 
 #include <cassert>
+#include <cstdlib>
 
 #include <sytorch/tensor.h>
 #include <sytorch/backend/cleartext.h>
@@ -51,7 +52,11 @@ int main(int argc, char *argv[])
     int N = atoi(argv[3]);
     int party = atoi(argv[1]);
 
-    auto peer = new GpuPeer(true);
+    bool compress = true;
+    const char *compress_env = std::getenv("SIGMA_COMPRESS");
+    if (compress_env)
+        compress = std::atoi(compress_env) != 0;
+    auto peer = new GpuPeer(compress);
     peer->connect(party, argv[2]);
 
     uint8_t *startPtr, *curPtr;
