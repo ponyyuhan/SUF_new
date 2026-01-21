@@ -70,6 +70,15 @@ int main(int __argc, char **__argv)
 {
     sytorch_init();
 
+    int batch = 1;
+    for (int i = 1; i < __argc; ++i)
+    {
+        if (!std::strcmp(__argv[i], "--batch") && i + 1 < __argc)
+        {
+            batch = std::max(1, std::atoi(__argv[++i]));
+        }
+    }
+
     u64 n_embd = 0;
     u64 n_head = 0;
     u64 n_layer = 0;
@@ -215,10 +224,11 @@ int main(int __argc, char **__argv)
         net->init(scale, input);
         net->zero();
     }
+    keyBufSz *= batch;
     srand(time(NULL));
     std::string outDir = "output/P" + std::to_string(party) + "/models/";
     makeDir(outDir);
-    auto inferenceDir = outDir + model + "-" + std::to_string(n_seq) + "/";
+    auto inferenceDir = outDir + model + "-" + std::to_string(n_seq) + "-b" + std::to_string(batch) + "/";
     makeDir(inferenceDir);
 
     auto sigmaKeygen = new SIGMAKeygen<u64>(party, bw, scale, "", keyBufSz);
@@ -226,8 +236,13 @@ int main(int __argc, char **__argv)
     net->optimize();
     auto start = std::chrono::high_resolution_clock::now();
     input.d_data = (u64 *)moveToGPU((u8 *)input.data, input.size() * sizeof(u64), (Stats *)NULL);
-    auto &activation = net->forward(input);
-    sigmaKeygen->output(activation);
+    Tensor<u64> *last_act = nullptr;
+    for (int b = 0; b < batch; ++b)
+    {
+        auto &activation = net->forward(input);
+        sigmaKeygen->output(activation);
+        last_act = &activation;
+    }
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     sigmaKeygen->close();
@@ -247,21 +262,31 @@ int main(int __argc, char **__argv)
     sigma->keySize = sigmaKeygen->keySize;
     net->setBackend(sigma);
     sigma->peer->sync();
+    sigma->s.reset();
     start = std::chrono::high_resolution_clock::now();
     input.d_data = (u64 *)moveToGPU((u8 *)input.data, input.size() * sizeof(u64), (Stats *)NULL);
-    activation = net->forward(input);
-    sigma->output(activation);
+    Tensor<u64> *last_eval = nullptr;
+    for (int b = 0; b < batch; ++b)
+    {
+        auto &activation = net->forward(input);
+        if (b == batch - 1)
+        {
+            sigma->output(activation);
+        }
+        sigma->keyBuf += activation.size() * sizeof(u64);
+        last_eval = &activation;
+    }
     end = std::chrono::high_resolution_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     sigma->close();
-    auto signedAct = Tensor<i64>((i64 *)activation.data, activation.shape).as_2d();
+    auto signedAct = Tensor<i64>((i64 *)last_eval->data, last_eval->shape).as_2d();
     // print(signedAct.as_nd(), scale, (u64) bw);
     auto maxIdx = signedAct.argmax(0);
-    printf("%d, %ld\n", maxIdx, activation.data[maxIdx]);
+    printf("%d, %ld\n", maxIdx, last_eval->data[maxIdx]);
     if (dump_output && party == SERVER0)
     {
-        writeTensorBin(inferenceDir + "output.bin", activation);
-        writeTensorMeta(inferenceDir + "output_meta.json", activation, model, scale, bw);
+        writeTensorBin(inferenceDir + "output.bin", *last_eval);
+        writeTensorMeta(inferenceDir + "output_meta.json", *last_eval, model, scale, bw);
     }
     if (clear_ref)
     {
@@ -271,6 +296,10 @@ int main(int __argc, char **__argv)
     ss.clear();
 
     ss << "Total time=" + std::to_string(elapsed.count()) + " us";
+    ss << std::endl;
+    ss << "Batch=" + std::to_string(batch);
+    ss << std::endl;
+    ss << "Avg time per batch=" + std::to_string(elapsed.count() / std::max(1, batch)) + " us";
     ss << std::endl;
     ss << "Comm time=" + std::to_string(sigma->s.comm_time) + " us";
     ss << std::endl;

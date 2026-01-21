@@ -20,6 +20,7 @@
 // SOFTWARE.
 
 #include <chrono>
+#include <cstdlib>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -32,8 +33,27 @@
 
 cudaMemPool_t mempool;
 
+static bool useAsyncMalloc()
+{
+    const char *disable_async = std::getenv("SIGMA_DISABLE_ASYNC_MALLOC");
+    return !(disable_async && disable_async[0] && std::atoi(disable_async) != 0);
+}
+
 extern "C" void initGPUMemPool()
 {
+    if (!useAsyncMalloc())
+    {
+        return;
+    }
+    const char *mempool_env = std::getenv("SIGMA_MEMPOOL_GB");
+    if (mempool_env && mempool_env[0])
+    {
+        uint64_t gb = std::strtoull(mempool_env, nullptr, 10);
+        if (gb == 0)
+        {
+            return;
+        }
+    }
     int isMemPoolSupported = 0;
     int device = 0;
     // is it okay to use device=0?
@@ -48,6 +68,11 @@ extern "C" void initGPUMemPool()
     checkCudaErrors(cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold));
     uint64_t *d_dummy_ptr;
     uint64_t bytes = 40 * (1ULL << 30);
+    if (mempool_env && mempool_env[0])
+    {
+        uint64_t gb = std::strtoull(mempool_env, nullptr, 10);
+        bytes = gb * (1ULL << 30);
+    }
     checkCudaErrors(cudaMallocAsync(&d_dummy_ptr, bytes, 0));
     checkCudaErrors(cudaFreeAsync(d_dummy_ptr, 0));
     uint64_t reserved_read, threshold_read;
@@ -59,7 +84,14 @@ extern "C" void initGPUMemPool()
 extern "C" uint8_t *gpuMalloc(size_t size_in_bytes)
 {
     uint8_t *d_a;
-    checkCudaErrors(cudaMallocAsync(&d_a, size_in_bytes, 0));
+    if (useAsyncMalloc())
+    {
+        cudaError_t err = cudaMallocAsync(&d_a, size_in_bytes, 0);
+        if (err == cudaSuccess)
+            return d_a;
+        cudaGetLastError();
+    }
+    checkCudaErrors(cudaMalloc(&d_a, size_in_bytes));
     return d_a;
 }
 
@@ -76,7 +108,14 @@ extern "C" uint8_t *cpuMalloc(size_t size_in_bytes, bool pin)
 
 extern "C" void gpuFree(void *d_a)
 {
-    checkCudaErrors(cudaFreeAsync(d_a, 0));
+    if (useAsyncMalloc())
+    {
+        cudaError_t err = cudaFreeAsync(d_a, 0);
+        if (err == cudaSuccess)
+            return;
+        cudaGetLastError();
+    }
+    checkCudaErrors(cudaFree(d_a));
 }
 
 extern "C" void cpuFree(void *h_a, bool pinned)

@@ -71,7 +71,15 @@ from .module import (
     Unsqueeze,
     Where,
 )
-from .onnx_converter import from_onnx, from_pytorch, from_tensorflow, TF_AND_TF2ONNX
+try:
+    from .onnx_converter import from_onnx, from_pytorch, from_tensorflow, TF_AND_TF2ONNX
+except Exception as exc:
+    def _onnx_unavailable(*args, **kwargs):
+        raise ImportError(f"onnx_converter unavailable: {exc}")
+    from_onnx = _onnx_unavailable
+    from_pytorch = _onnx_unavailable
+    from_tensorflow = _onnx_unavailable
+    TF_AND_TF2ONNX = False
 
 
 # expose contents of package

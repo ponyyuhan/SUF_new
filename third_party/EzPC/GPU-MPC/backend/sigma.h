@@ -131,7 +131,11 @@ public:
         else
             llama->initClient(ip, (char **)&keyBuf);
 
-        peer = new GpuPeer(true);
+        bool compress = true;
+        const char* compress_env = std::getenv("SIGMA_COMPRESS");
+        if (compress_env)
+            compress = std::atoi(compress_env) != 0;
+        peer = new GpuPeer(compress);
         peer->peer = LlamaConfig::peer;
         if (use_suf_any) {
             suf_sigma_reset_eval();

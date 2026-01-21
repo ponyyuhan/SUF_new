@@ -44,6 +44,10 @@ if (SUF_ENABLE_BENCH)
   add_executable(bench_suf_model src/bench/bench_suf_model.cpp)
   target_link_libraries(bench_suf_model PRIVATE suf_core $<$<BOOL:${SUF_ENABLE_CUDA}>:suf_cuda>)
   target_compile_definitions(bench_suf_model PRIVATE SUF_ENABLE_BENCH=1)
+
+  add_executable(bench_sigmoid src/bench/bench_sigmoid.cpp)
+  target_link_libraries(bench_sigmoid PRIVATE suf_core $<$<BOOL:${SUF_ENABLE_CUDA}>:suf_cuda>)
+  target_compile_definitions(bench_sigmoid PRIVATE SUF_ENABLE_BENCH=1)
 endif()
 
 if (SUF_ENABLE_TESTS)

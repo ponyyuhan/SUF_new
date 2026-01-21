@@ -30,6 +30,7 @@
 #include <sytorch/layers/layers.h>
 #include <omp.h>
 #include <filesystem>
+#include <cstdlib>
 
 char *readFile(std::string filename)
 {
@@ -66,12 +67,20 @@ public:
         // input_prng_init();
     }
 
+    static int portBase()
+    {
+        const char* env = std::getenv("LLAMA_PORT_BASE");
+        if (env && env[0])
+            return std::atoi(env);
+        return 42002;
+    }
+
     void initServer(std::string ip, char **kBuf)
     {
         assert(LlamaConfig::party == 2);
         initPrngs();
         LlamaConfig::dealer = new Dealer(kBuf);
-        LlamaConfig::client = waitForPeer(42002);
+        LlamaConfig::client = waitForPeer(portBase());
         LlamaConfig::peer = LlamaConfig::client;
         // input_prng_init();
     }
@@ -81,7 +90,7 @@ public:
         assert(LlamaConfig::party == 3);
         initPrngs();
         LlamaConfig::dealer = new Dealer(kBuf);
-        LlamaConfig::server = new Peer(ip, 42002);
+        LlamaConfig::server = new Peer(ip, portBase());
         LlamaConfig::peer = LlamaConfig::server;
         // input_prng_init();
     }
@@ -105,7 +114,7 @@ public:
             {
                 initPrngs();
                 LlamaConfig::dealer = new Dealer("server.dat");
-                LlamaConfig::client = waitForPeer(42005);
+                LlamaConfig::client = waitForPeer(portBase() + 3);
                 LlamaConfig::peer = LlamaConfig::client;
             }
         }
@@ -120,7 +129,7 @@ public:
             {
                 initPrngs();
                 LlamaConfig::dealer = new Dealer("client.dat");
-                LlamaConfig::server = new Peer(ip, 42005);
+                LlamaConfig::server = new Peer(ip, portBase() + 3);
                 LlamaConfig::peer = LlamaConfig::server;
             }
         }
