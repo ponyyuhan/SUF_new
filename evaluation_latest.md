@@ -73,6 +73,14 @@ T = comp_time + 2 * comm_bytes / bandwidth + rounds * latency
 ## 4. Kernel microbench (activation)
 **Source**: `python3 scripts/compare_activation_fair.py` (seq=128, real comm on both Sigma/SUF).
 
+**Repro flags**:
+- Default rows (bert‑base/large, llama7b): run once with default env from the script:
+  - `SIGMA_KEYBUF_MB=4096`, `SIGMA_MEMPOOL_DISABLE=0`, `SIGMA_SKIP_VERIFY=1`
+  - `SUF_GELU_INTERVALS=256`, `SUF_SILU_INTERVALS=1024` (implicit defaults)
+- gpt2 tuned row: median of 5 runs with:
+  - `SIGMA_MEMPOOL_MB=1024 SUF_GELU_INTERVALS=512`
+  - command: `python3 scripts/compare_activation_fair.py --models gpt2 --seq 128`
+
 | Model / Gate | Sigma keygen (ms) | SUF keygen (ms) | Sigma eval (ms) | SUF eval (ms) | Eval speedup | Sigma key (bytes) | SUF key (bytes) | Sigma eval (bytes) | SUF eval (bytes) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | bert‑base GELU | 19.095 | 2.767 | 18.153 | 15.066 | 1.20x | 226246736 | 36225052 | 13664260 | 10321924 |
@@ -111,6 +119,13 @@ Projection formula uses the same LAN/WAN settings as Section 2.
 
 **GPT‑2**: `examples/text-generation/test_gpt2_64_comp.sh` failed with device mismatch (`cuda:0` vs `cpu`) in `run_generation_private.py` (log: `/tmp/shaft_gpt2_64_comp.log`).
 
+**Repro commands (cost‑estimated comm/rounds)**:
+```
+cd shaft/examples/text-classification
+bash test_bert_base_128_comm.sh
+bash test_bert_large_128_comm.sh
+```
+
 ### 5.3 End‑to‑end (SHAFT, dual‑GPU, real comm, local loopback)
 **Note**: Attempted `tc netem` LAN/WAN shaping on `lo`, but the container lacks permission (no `CAP_NET_ADMIN`). Results below are **without** LAN/WAN emulation.
 
@@ -120,6 +135,13 @@ Projection formula uses the same LAN/WAN settings as Section 2.
 | BERT‑large‑128 | 31.54 | 2 | 49184 |
 
 Logs: `/tmp/shaft_bert_base_dual_real.log`, `/tmp/shaft_bert_large_dual_real.log`.
+
+**Repro commands (real comm, dual‑GPU)**:
+```
+cd shaft/examples/text-classification
+SHAFT_GPU0=0 SHAFT_GPU1=1 CUDA_VISIBLE_DEVICES=0,1 bash test_bert_base_128_comm.sh
+SHAFT_GPU0=0 SHAFT_GPU1=1 CUDA_VISIBLE_DEVICES=0,1 bash test_bert_large_128_comm.sh
+```
 
 ## 6. Unified comparison (Sigma / SUF / SHAFT)
 SHAFT numbers below are from local runs in Section 5; Sigma/SUF are measured online time + comm.
