@@ -27,6 +27,7 @@
 #include "utils/gpu_comms.h"
 
 #include <cassert>
+#include <cstdlib>
 
 #include <sytorch/tensor.h>
 #include <sytorch/backend/cleartext.h>
@@ -55,15 +56,30 @@ int main(int argc, char *argv[])
     peer->connect(party, argv[2]);
 
     uint8_t *startPtr, *curPtr;
-    getKeyBuf(&startPtr, &curPtr, 50 * OneGB);
+    size_t keybuf_bytes = 50 * OneGB;
+    const char *keybuf_mb = std::getenv("SIGMA_KEYBUF_MB");
+    const char *keybuf_gb = std::getenv("SIGMA_KEYBUF_GB");
+    if (keybuf_mb && keybuf_mb[0]) {
+        keybuf_bytes = std::strtoull(keybuf_mb, nullptr, 10) * (1ULL << 20);
+    } else if (keybuf_gb && keybuf_gb[0]) {
+        keybuf_bytes = std::strtoull(keybuf_gb, nullptr, 10) * (1ULL << 30);
+    }
+    getKeyBuf(&startPtr, &curPtr, keybuf_bytes);
 
     initGPURandomness();
     auto d_mask_X = randomGEOnGpu<T>(N, bw);
     auto h_mask_X = (T *)moveToCPU((u8 *)d_mask_X, N * sizeof(T), NULL);
     T *h_X;
     auto d_masked_X = getMaskedInputOnGpu(N, bw, d_mask_X, &h_X, true, 15);
+    const char *skip_verify_env = std::getenv("SIGMA_SKIP_VERIFY");
+    const bool skip_verify = (skip_verify_env && skip_verify_env[0] != '\0' && skip_verify_env[0] != '0');
+    auto keygen_start = std::chrono::high_resolution_clock::now();
     auto d_mask_O = gpuKeyGenGelu<T, u8, 8>(&curPtr, party, bw, bin, scale, N, d_mask_X, &g);
+    auto keygen_end = std::chrono::high_resolution_clock::now();
     auto h_mask_O = (T *)moveToCPU((u8 *)d_mask_O, N * sizeof(T), NULL);
+    auto keygen_us = std::chrono::duration_cast<std::chrono::microseconds>(keygen_end - keygen_start).count();
+    printf("Keygen time=%lu micros\n", static_cast<unsigned long>(keygen_us));
+    printf("Key size=%lu\n", static_cast<unsigned long>(curPtr - startPtr));
 
     auto k = readGpuGeluKey<T, u8>(&startPtr);
     T *d_O;
@@ -80,23 +96,26 @@ int main(int argc, char *argv[])
         printf("Comm time=%lu micros\n", s.comm_time);
         printf("Transfer time=%lu micros\n", s.transfer_time);
         printf("Gelu time=%lu micros\n", std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
+        printf("Eval comm bytes=%lu\n", static_cast<unsigned long>(peer->bytesSent() + peer->bytesReceived()));
     }
     unmaskValues(bw, N, d_O, h_mask_O, NULL);
     auto h_O = (T *)moveToCPU((uint8_t *)d_O, N * sizeof(T), (Stats *)NULL);
     gpuFree(d_O);
     destroyGPURandomness();
-    Tensor<i64> tIn((i64 *)h_X, {(u64)N});
-    Tensor<i64> tOut({(u64)N});
-    ct->gelu(tIn, tOut, (u64)scale, 0);
-    for (int i = 0; i < N; i++)
-    {
-        if(i < 10) {
-            printf("%d=%ld, %ld\n", i, tOut.data[i], h_O[i]);
-        }
-        if ((u64)tOut.data[i] != h_O[i])
+    if (!skip_verify) {
+        Tensor<i64> tIn((i64 *)h_X, {(u64)N});
+        Tensor<i64> tOut({(u64)N});
+        ct->gelu(tIn, tOut, (u64)scale, 0);
+        for (int i = 0; i < N; i++)
         {
-            printf("%d=%ld, %ld, %ld, %ld\n", i, h_X[i], tOut.data[i], h_O[i], h_mask_O[i]);
-            assert(0);
+            if(i < 10) {
+                printf("%d=%ld, %ld\n", i, tOut.data[i], h_O[i]);
+            }
+            if ((u64)tOut.data[i] != h_O[i])
+            {
+                printf("%d=%ld, %ld, %ld, %ld\n", i, h_X[i], tOut.data[i], h_O[i], h_mask_O[i]);
+                assert(0);
+            }
         }
     }
     gpuFree(d_reluSubGelu);
