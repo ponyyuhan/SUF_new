@@ -19,8 +19,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <cfloat>
+#ifndef FLT_MIN
+#define FLT_MIN __FLT_MIN__
+#endif
+#ifndef DBL_MAX
+#define DBL_MAX __DBL_MAX__
+#endif
+#ifndef DBL_MIN
+#define DBL_MIN __DBL_MIN__
+#endif
+
 #include <sytorch/module.h>
 #include <sytorch/utils.h>
+#include <cstdlib>
 #include "gpt2.h"
 #include "bert.h"
 #include "llama2.h"
@@ -29,6 +41,14 @@
 inline std::string toGB(u64 bytes)
 {
     return std::to_string(bytes) + " B (" + std::to_string((float)bytes / (1024.0f * 1024.0f * 1024.0f)) + " GB)";
+}
+
+inline u64 envU64(const char *name, u64 fallback)
+{
+    const char *v = std::getenv(name);
+    if (!v || !v[0])
+        return fallback;
+    return std::strtoull(v, nullptr, 10);
 }
 
 int main(int __argc, char **__argv)
@@ -44,6 +64,9 @@ int main(int __argc, char **__argv)
     u64 scale = 12;
     u64 n_seq = atoi(__argv[2]);
     int party = atoi(__argv[3]);
+    u64 batch = envU64("SIGMA_BATCH", 1);
+    if (batch < 1)
+        batch = 1;
 
     std::string model(__argv[1]);
     printf("Model=%s\n", model.data());
@@ -167,24 +190,53 @@ int main(int __argc, char **__argv)
         net->init(scale, input);
         net->zero();
     }
+    bool keybuf_override = false;
+    const char *keybuf_mb = std::getenv("SIGMA_KEYBUF_MB");
+    const char *keybuf_gb = std::getenv("SIGMA_KEYBUF_GB");
+    if (keybuf_mb && keybuf_mb[0]) {
+        keyBufSz = std::strtoull(keybuf_mb, nullptr, 10) * 1024ULL * 1024ULL;
+        keybuf_override = true;
+    } else if (keybuf_gb && keybuf_gb[0]) {
+        keyBufSz = std::strtoull(keybuf_gb, nullptr, 10) * 1024ULL * 1024ULL * 1024ULL;
+        keybuf_override = true;
+    }
+    if (!keybuf_override && batch > 1) {
+        keyBufSz *= batch;
+    }
+    printf("KeyBufSz=%s\n", toGB(keyBufSz).c_str());
     srand(time(NULL));
     std::string outDir = "output/P" + std::to_string(party) + "/models/";
     makeDir(outDir);
-    auto inferenceDir = outDir + model + "-" + std::to_string(n_seq) + "/";
+    auto inferenceDir = outDir + model + "-" + std::to_string(n_seq);
+    if (batch > 1)
+        inferenceDir += "-b" + std::to_string(batch);
+    inferenceDir += "/";
     makeDir(inferenceDir);
 
     auto sigmaKeygen = new SIGMAKeygen<u64>(party, bw, scale, "", keyBufSz);
     net->setBackend(sigmaKeygen);
     net->optimize();
     auto start = std::chrono::high_resolution_clock::now();
-    input.d_data = (u64 *)moveToGPU((u8 *)input.data, input.size() * sizeof(u64), (Stats *)NULL);
-    auto &activation = net->forward(input);
-    sigmaKeygen->output(activation);
+    const size_t input_bytes = input.size() * sizeof(u64);
+    input.d_data = (u64 *)moveToGPU((u8 *)input.data, input_bytes, (Stats *)NULL);
+    for (u64 i = 0; i < batch; ++i)
+    {
+        if (i > 0)
+            moveIntoGPUMem((u8 *)input.d_data, (u8 *)input.data, input_bytes, (Stats *)NULL);
+        auto &activation = net->forward(input);
+        sigmaKeygen->output(activation);
+    }
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     sigmaKeygen->close();
     std::stringstream ss;
-    ss << "Total time=" + std::to_string(elapsed.count()) + " us";
+    u64 total_us = static_cast<u64>(elapsed.count());
+    u64 per_us = total_us / batch;
+    ss << "Batch=" + std::to_string(batch);
+    ss << std::endl;
+    ss << "Total time=" + std::to_string(total_us) + " us";
+    ss << std::endl;
+    ss << "Per-inference time=" + std::to_string(per_us) + " us";
     ss << std::endl;
     ss << "Key size=" + toGB(sigmaKeygen->keySize);
     ss << std::endl;
@@ -200,12 +252,20 @@ int main(int __argc, char **__argv)
     net->setBackend(sigma);
     sigma->peer->sync();
     start = std::chrono::high_resolution_clock::now();
-    input.d_data = (u64 *)moveToGPU((u8 *)input.data, input.size() * sizeof(u64), (Stats *)NULL);
-    activation = net->forward(input);
-    sigma->output(activation);
+    input.d_data = (u64 *)moveToGPU((u8 *)input.data, input_bytes, (Stats *)NULL);
+    Tensor<u64> *activation_ptr = nullptr;
+    for (u64 i = 0; i < batch; ++i)
+    {
+        if (i > 0)
+            moveIntoGPUMem((u8 *)input.d_data, (u8 *)input.data, input_bytes, (Stats *)NULL);
+        auto &activation = net->forward(input);
+        activation_ptr = &activation;
+        sigma->output(activation);
+    }
     end = std::chrono::high_resolution_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     sigma->close();
+    auto &activation = *activation_ptr;
     auto signedAct = Tensor<i64>((i64 *)activation.data, activation.shape).as_2d();
     // print(signedAct.as_nd(), scale, (u64) bw);
     auto maxIdx = signedAct.argmax(0);
@@ -213,7 +273,13 @@ int main(int __argc, char **__argv)
 
     ss.clear();
 
-    ss << "Total time=" + std::to_string(elapsed.count()) + " us";
+    total_us = static_cast<u64>(elapsed.count());
+    per_us = total_us / batch;
+    ss << "Batch=" + std::to_string(batch);
+    ss << std::endl;
+    ss << "Total time=" + std::to_string(total_us) + " us";
+    ss << std::endl;
+    ss << "Per-inference time=" + std::to_string(per_us) + " us";
     ss << std::endl;
     ss << "Comm time=" + std::to_string(sigma->s.comm_time) + " us";
     ss << std::endl;
@@ -232,7 +298,11 @@ int main(int __argc, char **__argv)
     ss << "Layernorm time=" + std::to_string(sigma->s.layernorm_time) + " us";
     ss << std::endl;
     ss << std::endl;
-    ss << "Total Comm=" + toGB(sigma->peer->bytesSent() + sigma->peer->bytesReceived());
+    u64 total_comm_bytes = sigma->peer->bytesSent() + sigma->peer->bytesReceived();
+    u64 per_comm_bytes = total_comm_bytes / batch;
+    ss << "Total Comm=" + toGB(total_comm_bytes);
+    ss << std::endl;
+    ss << "Per-inference Comm=" + toGB(per_comm_bytes);
     ss << std::endl;
     ss << "Gelu Comm=" + toGB(sigma->s.gelu_comm_bytes);
     ss << std::endl;

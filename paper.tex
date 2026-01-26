@@ -1,51 +1,32 @@
 %%%%%%%% ICML 2026 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
 
 \documentclass{article}
-\usepackage{amsfonts}
 
 % Recommended, but optional, packages for figures and better typesetting:
-\IfFileExists{stmaryrd.sty}{%
-  \usepackage{stmaryrd}%
-}{%
-  \providecommand{\llbracket}{\mathopen{[\![}}%
-  \providecommand{\rrbracket}{\mathclose{]\!]}}%
-}
 \usepackage{microtype}
 \usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{subcaption}
+\usepackage{booktabs} % for professional tables
 \usepackage{mathtools}
-\usepackage[Protocol]{algorithm}
-\usepackage{url}
+\usepackage{placeins}
+\usepackage{dblfloatfix}
+\usepackage{enumitem}
+\usepackage{multirow}
 
-% Avoid small overfull boxes in two-column layout.
-\setlength{\emergencystretch}{1em}
+\usepackage{siunitx}
 
-% --- Notation ---
-\newcommand{\Z}[1]{\mathbb{Z}_{#1}}
-\newcommand{\Ring}{\Z{2^n}}
-\newcommand{\bits}{\{0,1\}}
-\newcommand{\msb}{\mathrm{MSB}}
-\IfFileExists{bbm.sty}{\usepackage{bbm}}{\newcommand{\mathbbm}[1]{\mathbb{##1}}}
-\let\one\relax
-\protected\def\one[#1]{\mathbb{1}_{\left[#1\right]}}
-\newcommand{\hatx}{\hat{x}}
-\newcommand{\rin}{r_{\mathrm{in}}}
-\newcommand{\rout}{r_{\mathrm{out}}}
-\newcommand{\ashare}[1]{\llbracket #1 \rrbracket}   % additive shares over \Ring
-\newcommand{\bshare}[1]{\langle #1 \rangle}         % XOR shares over Z_2
-\let\share\ashare
+\usepackage[table]{xcolor}
+\definecolor{FuseTeal}{HTML}{8ECFC9}
+\definecolor{FuseBlue}{HTML}{82B0D2}
+\definecolor{FuseGray}{HTML}{E7DAD2}
 
-% List indentation (avoid dependency on enumitem).
-\setlength{\leftmargini}{1.25em}
-\setlength{\leftmarginii}{1.25em}
-\setlength{\leftmarginiii}{1.25em}
-
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
-\newtheorem{definition}{Definition}
-\newtheorem{corollary}{Corollary}
+\sisetup{
+  detect-all,
+  table-number-alignment=center,
+  table-text-alignment=center
+}
+\usepackage{stmaryrd}  % provides \llbracket and \rrbracket
+\newcommand{\share}[1]{\llbracket #1 \rrbracket}
 
 % hyperref makes hyperlinks in the resulting PDF.
 % If your build breaks (sometimes temporarily if a hyperlink spans a page)
@@ -53,24 +34,25 @@
 % \usepackage{icml2026} with \usepackage[nohyperref]{icml2026} above.
 \usepackage{hyperref}
 
-% `icml2026` requires the `forloop` package; some minimal TeX installations omit it.
-% Define a tiny compatible replacement so the template compiles without extra files.
-\makeatletter
-\IfFileExists{forloop.sty}{}{%
-  \@namedef{ver@forloop.sty}{2026/01/14}%
-  \providecommand{\forloop}[4]{%
-    \setcounter{##1}{##2}%
-    \@whilenum ##3\do{%
-      ##4%
-      \stepcounter{##1}%
-    }%
-  }%
-}
-\makeatother
-
 
 % Attempt to make hyperref and algorithmic work together better:
-%\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\usepackage[Protocol]{algorithm}
+% --- Notation ---
+\newcommand{\Z}[1]{\mathbb{Z}_{#1}}
+\newcommand{\ind}{\mathbb{I}}
+
+\newcommand{\Ring}{\Z{2^n}}
+\newcommand{\bits}{\{0,1\}}
+\newcommand{\msb}{\mathrm{MSB}}
+\let\one\relax
+\protected\def\one[#1]{\ind_{\left[#1\right]}}
+\newcommand{\hatx}{\hat{x}}
+\newcommand{\rin}{r_{\mathrm{in}}}
+\newcommand{\rout}{r_{\mathrm{out}}}
+\newcommand{\ashare}[1]{\llbracket #1 \rrbracket} % additive shares over \Ring
+\newcommand{\bshare}[1]{\langle #1 \rangle} % XOR shares over Z_2
+\let\share\ashare
 
 % Use the following line for the initial blind version submitted for review:
 \usepackage{icml2026}
@@ -81,32 +63,25 @@
 % If accepted, instead use the following line for the camera-ready submission:
 % \usepackage[accepted]{icml2026}
 
-% `icml2026` loads the `times` package, which sets the typewriter family to
-% Courier (`pcr`). Some minimal TeX installations may not ship Courier metrics;
-% fall back to Computer Modern Typewriter if needed.
-\IfFileExists{pcrr7t.tfm}{}{\renewcommand{\ttdefault}{cmtt}}
-\IfFileExists{phvr7t.tfm}{}{\renewcommand{\sfdefault}{cmss}}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
 
-% icml2026 loads the `algorithmic` package; provide common `algpseudocode` aliases.
-\providecommand{\State}{\STATE}
-\providecommand{\Require}{\REQUIRE}
-\providecommand{\Ensure}{\ENSURE}
-\providecommand{\algorithmicrequire}{\textbf{Require:}}
 
 % if you use cleveref..
-\IfFileExists{cleveref.sty}{%
-  \usepackage[capitalize,noabbrev]{cleveref}%
-}{%
-  \providecommand{\cref}[1]{\ref{##1}}%
-  \providecommand{\Cref}[1]{\ref{##1}}%
-}
+\usepackage[capitalize,noabbrev]{cleveref}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % THEOREMS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \theoremstyle{plain}
-
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
 \theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
 \newtheorem{assumption}[theorem]{Assumption}
 \theoremstyle{remark}
 \newtheorem{remark}[theorem]{Remark}
@@ -114,322 +89,291 @@
 % Todonotes is useful during development; simply uncomment the next line
 %    and comment out the line below the next line to turn off comments
 %\usepackage[disable,textsize=tiny]{todonotes}
-\IfFileExists{todonotes.sty}{%
-  \usepackage[textsize=tiny]{todonotes}%
-}{%
-  \providecommand{\todo}[2][]{}
-}
+\usepackage[textsize=tiny]{todonotes}
+
+
+\providecommand{\State}{\STATE}
+\providecommand{\Require}{\REQUIRE}
+\providecommand{\Ensure}{\ENSURE}
+\providecommand{\algorithmicrequire}{\textbf{Require:}}
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{Structured-Univariate Functions for Compiler-Generated FSS}
+\icmltitlerunning{FuseFSS: Efficient Secure LLM Inference with Function Secret Sharing}
 
 \begin{document}
 
 \twocolumn[
-\icmltitle{SUF: Structured-Univariate Functions for Compiler-Generated Function Secret Sharing
-in Secure Transformer Inference}
+  \icmltitle{FuseFSS: Efficient Secure LLM Inference with Function Secret Sharing}
 
-% Anonymous submission: keep authors anonymous.
-\begin{icmlauthorlist}
-\icmlauthor{Anonymous Author(s)}{anon}
-\end{icmlauthorlist}
 
-\icmlaffiliation{anon}{Anonymous Affiliation}
-\icmlcorrespondingauthor{Anonymous Author(s)}{anonymous@email.com}
+  \icmlsetsymbol{equal}{*}
 
-\icmlkeywords{secure inference, MPC, function secret sharing, transformers, GPU acceleration}
+  \begin{icmlauthorlist}
+    \icmlauthor{Firstname1 Lastname1}{equal,yyy}
+    \icmlauthor{Firstname2 Lastname2}{equal,yyy,comp}
+    \icmlauthor{Firstname3 Lastname3}{comp}
+    \icmlauthor{Firstname4 Lastname4}{sch}
+    \icmlauthor{Firstname5 Lastname5}{yyy}
+    \icmlauthor{Firstname6 Lastname6}{sch,yyy,comp}
+    \icmlauthor{Firstname7 Lastname7}{comp}
+    %\icmlauthor{}{sch}
+    \icmlauthor{Firstname8 Lastname8}{sch}
+    \icmlauthor{Firstname8 Lastname8}{yyy,comp}
+    %\icmlauthor{}{sch}
+    %\icmlauthor{}{sch}
+  \end{icmlauthorlist}
 
-\vskip 0.3in
-\begin{abstract}
-Function secret sharing (FSS) has enabled low-latency two-server secure transformer inference in the preprocessing model.
-Yet current FSS-based systems remain brittle: each fixed-point \emph{scalar} nonlinearity, including helper operations such as truncation and ARS, is implemented by decomposing the function into masked predicates and lookup structures, with key formats and masking arguments that are specific to the primitive and must be re-derived and re-verified.
+  \icmlaffiliation{yyy}{Department of XXX, University of YYY, Location, Country}
+  \icmlaffiliation{comp}{Company Name, Location, Country}
+  \icmlaffiliation{sch}{School of ZZZ, Institute of WWW, Location, Country}
 
-We introduce Structured-Univariate Functions (SUF), a typed intermediate representation for fixed-point scalar functions over $R=\mathbb{Z}_{2^n}$ with comparisons interpreted on canonical representatives.
-A SUF descriptor makes the common structure explicit: (i) piecewise low-degree polynomial arithmetic outputs, and (ii) first-class Boolean ``helper'' outputs that capture the predicate and correction structure required by faithful fixed-point semantics.
-We develop a mask-aware compiler from SUF to a template-based FSS backend interface (\textsc{tFSS}), an abstract interface capturing two standard capabilities already implemented in modern DPF/DCF-style systems: packed comparisons and vector-payload interval lookup.
+  \icmlcorrespondingauthor{Firstname1 Lastname1}{first1.last1@xxx.edu}
+  \icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
 
-For each SUF gate instance, the compiler emits at most two non-interactive \textsc{tFSS} template evaluations: one for predicate extraction and one for coefficient and constant selection on the public masked input $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$. These evaluations are followed by a uniform share-based post-processing template that batches Horner evaluation and Boolean combining using standard preprocessing (Beaver triples, AND triples, and B2A conversion). Mask-derived wrap and carry information used by the compiler is represented only as secret-shared, instance-specific constants, which prevents any additional leakage about masks beyond the explicit shape leakage.
+  % You may provide any keywords that you find helpful for describing your
+  % paper; these are used to populate the "keywords" metadata in the PDF but
+  % will not be shown in the document
+  \icmlkeywords{Secure Inference, Secure Multi-party Computation (MPC), Function Secret Sharing (FSS), Transformers}
 
-We prove correctness and semi-honest security by composition (with explicit leakage consisting of public masked openings and backend shape parameters).
-Our formal security statement assumes a standard one-key-private \textsc{tFSS} backend (DPF/DCF-style templates with public shape leakage only); any performance-oriented prototype backend that embeds instance parameters in keys is outside these proof assumptions.
-In a GPU prototype at sequence length 128 and batch size 1, SUF reduces online latency by $1.7\times$--$2.9\times$, online communication by $1.4\times$--$1.8\times$, and preprocessing material by $13\times$--$22\times$ compared to SOTA \textsc{Sigma} under matched settings.
-\end{abstract}
-
-\printAffiliationsAndNotice{}
-
-\vskip 0.15in
+  \vskip 0.3in
 ]
 
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column listing the
+% affiliations and the copyright notice. The command takes one argument, which
+% is text to display at the start of the footnote. The \icmlEqualContribution
+% command is standard text for equal contribution. Remove it (just {}) if you
+% do not need this facility.
+
+% Use ONE of the following lines. DO NOT remove the command.
+% If you have no special notice, KEEP empty braces:
+\printAffiliationsAndNotice{}  % no special notice (required even if empty)
+% Or, if applicable, use the standard equal contribution text:
+% \printAffiliationsAndNotice{\icmlEqualContribution}
+
+\begin{abstract}
+Two-server secure inference allows a client to query a hosted large language model (LLM) without revealing prompts or embeddings. Recent GPU systems based on function secret sharing (FSS) make linear layers efficient, but fixed-point nonlinearities and helper operations remain a bottleneck because each operator is typically implemented as a bespoke protocol with its own comparisons, wrap-around corrections, and preprocessing material. We present \textsc{FuseFSS}, a compiler that replaces per-operator protocol design with a single compilation pipeline. For each scalar fixed-point operator, a compact specification lists its interval partition, low-degree arithmetic pieces, and required predicate bits. The compiler emits two batched FSS evaluations on the public masked value: one packed comparison that returns all predicate bits, and one vector interval lookup that returns the active coefficients and constants. Compared to the current end-to-end state of the art for GPU secure inference, \textsc{FuseFSS} preserves accuracy while achieving a $1.27\times$--$1.41\times$ end-to-end speedup and reducing online communication by $9\%$--$16\%$ on BERT and GPT-style models; preprocessing is also lighter, with $18\%$--$32\%$ lower key-generation time and $19\%$--$24\%$ smaller keys.
+\end{abstract}
+
+
 \section{Introduction}
-Privacy-preserving inference lets a client obtain predictions from a deployed model without revealing sensitive inputs (e.g., prompts, embeddings, private features) to the party performing the computation.
-We study secure transformer inference in the standard preprocessing model, where an offline phase generates input-independent correlated randomness and an online phase evaluates the public model on secret-shared inputs.
-This setting is attractive for low-latency inference because preprocessing can be generated ahead of time (and in bulk), while the online phase aims to minimize interaction, round trips, and bandwidth.
+Large language models are increasingly deployed as hosted services~\cite{brown2020language}. Privacy-preserving inference is an active topic, with approaches based on homomorphic encryption and secure multi-party computation (MPC) for models from early CNNs to modern Transformers/LLMs~\cite{gilad2016cryptonets,wu2024ditto,zimerman2024converting}.
+In many applications, the model is public, but the input is not: private prompts, confidential embeddings, medical notes, and proprietary features~\cite{mohassel2017secureml}.
+Two-server secure inference protects these inputs by having the client secret-share~\cite{shamir1979share} its input between non-colluding servers that run MPC~\cite{rathee2020cryptflow2,gupta2023sigma,kei2025shaft}.
 
-Recent FSS-based systems show that secure transformer inference can be practical when combined with GPUs~\citep{sigma}.
-A major remaining bottleneck lies in fixed-point nonlinear components and helper operations (e.g., truncation/ARS, smooth activations, reciprocal/rsqrt, approximate exponentials), which introduce comparisons, piece selection, and mask-correct post-processing over $R=\mathbb{Z}_{2^n}$ under wrap-around semantics.
-Although these components share strong structural regularities, namely piece selection via a small predicate set followed by low-degree arithmetic evaluation, they are typically implemented as multi-stage, per-primitive pipelines. This complicates batching and inflates preprocessing material.
+We study secure transformer inference in the preprocessing model.
+An offline phase produces input-independent correlated randomness (e.g., Beaver triples) and FSS keys, while the online phase evaluates the model on secret shares with low latency~\cite{boyle2015function}.
+Recent GPU implementations show this approach can scale to transformer models~\cite{jawalkar2024orca,gupta2023sigma,kei2025shaft}.
 
-\paragraph{Why extensibility is hard.}
-State-of-the-art designs achieve speed by engineering specialized protocols for each primitive~\citep{sigma}.
-This per-primitive approach scales poorly:
-(i) adding a new nonlinearity requires re-deriving mask-correct predicates and implementing new key-generation logic;
-(ii) correctness arguments are fragile under $\mathbb{Z}_{2^n}$ wrap-around and mixed signed/unsigned conventions; and
-(iii) preprocessing material is generated independently across primitives and layers even when the underlying masked-predicate structure is shared.
-Moreover, even instance shape (e.g., key length) can accidentally become mask-dependent unless the compiler enforces mask-independent padding; since $\hat{x}=x+r_{\mathrm{in}}$ is public, any additional leakage about $r_{\mathrm{in}}$ can translate into leakage about $x$.
+\paragraph{What remains hard.}
+In GPU-accelerated secure inference, linear layers can be made fast.
+The dominant remaining costs come from elementwise nonlinearities and rescaling in fixed-point arithmetic over $R=\mathbb{Z}_{2^n}$~\cite{keller2020mp,wagh2022pika}. This fixed-point view is standard in MPC because ring arithmetic is cheap, while real-valued nonlinearities must be approximated and rescaled. These operators require comparisons and piece selection under modulo-$2^n$ wrap-around.
+In the masked-wire paradigm used by \textsc{Sigma} and related FSS-based systems~\cite{gupta2023sigma,kei2025shaft}, parties reveal a public masked value $\hat{x}=x+\rin \bmod 2^n$ and evaluate predicates on $\hat{x}$.
+Predicates must be rewritten under masking and require mask-derived carry and wrap information that must remain secret-shared.
+Today, high performance relies on bespoke per-operator pipelines.
+This per-operator approach is brittle: it complicates correctness arguments, duplicates key-generation logic, and makes it difficult to add new operators without introducing subtle wrap-around or signedness bugs.
 
-\paragraph{Our unifying view.}
-Fixed-point scalar nonlinearities used in transformer inference commonly follow the same skeleton:
-\emph{(i)} extract a small set of predicate bits (threshold tests, low-bit tests, sign/MSB),
-\emph{(ii)} evaluate a low-degree polynomial (or spline segment) for the active region, and
-\emph{(iii)} apply small Boolean or table-driven corrections indexed by helper bits.
-Moreover, in FSS-based inference these predicates are evaluated on a public masked value.
-$\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$.
-Thus predicates on the secret $x$ must be rewritten into predicates on $\hat{x}$ using constants derived from the (secret) mask; even a basic test $\one[x<\beta]$ becomes a Boolean combination of masked comparisons that depends on a wrap/carry bit.
-Handling wrap-around and mask-dependence correctly is a recurring source of subtle implementation and proof bugs.
+\paragraph{Our approach.}
+We present \textbf{FuseFSS}, a compiler that replaces per-operator protocol engineering with a uniform, GPU-friendly structure.
+FuseFSS is guided by a simple observation: across common fixed-point nonlinearities, the data-dependent part is largely the same.
+Each operator can be viewed as selecting a region using a small set of predicate bits and then applying a low-degree arithmetic form with a small number of constants.
+FuseFSS captures this pattern with an operator specification, a typed description of an elementwise fixed-point operator.
+An operator specification provides an interval partition over canonical representatives of $\mathbb{Z}_{2^n}$, a low-degree polynomial per interval for arithmetic outputs, and Boolean helper bits expressed as predicate circuits.
+Given an operator specification and preprocessing masks, FuseFSS compiles each operator instance into a uniform protocol built from two standard FSS evaluations on the public $\hat{x}$.
+A single packed-comparison evaluation returns XOR shares of all predicate bits needed by the operator, and a single vector interval lookup returns additive shares of the active coefficients and constants.
+The remaining work is a fixed share-based post-processing circuit using standard preprocessing primitives such as Beaver multiplication, Boolean AND, and bit-to-arithmetic conversion.
 
-\paragraph{SUF as a typed IR and compiler-generated FSS.}
-We make this structure explicit via Structured-Univariate Functions (SUF), a typed IR for fixed-point scalar nonlinearities over $R$.
-A SUF specifies (i) an interval partition over canonical representatives (with \emph{integer} boundaries), (ii) per-interval low-degree polynomials for arithmetic outputs, and (iii) explicit helper-bit predicates as Boolean outputs.
-We then develop a mask-aware compiler targeting a \emph{template-based FSS backend interface} (\textsc{tFSS}).
-Importantly, \textsc{tFSS} is \emph{not} a new primitive: it is a minimal interface capturing two standard FSS templates already available in DPF/DCF-style systems~\citep{gilboa-ishai-dpf,boyle-fss,boyle-fss-extensions,boyle-fss-mixedmode}, which packed comparisons and vector-payload interval lookups.
-Given a SUF gate instance and preprocessing masks, the compiler emits \emph{up to two} \textsc{tFSS} template instances
-(one for packed predicate extraction on $\hat{x}$ and one for coefficient/constant lookup),
-followed by a uniform share-based post-processing template (batched Horner evaluation and Boolean combining).
-To prevent mask leakage through key size, the compiler enforces that the \emph{public shapes} of emitted template instances depend only on the (public) SUF descriptor and fixed-point metadata, not on sampled masks.
+\paragraph{Security and leakage.}
+FuseFSS follows masked-wire semantics as in prior two-server FSS inference: it uses fresh independent masks per wire and never reuses a mask across different tensor elements.
+To prevent mask leakage through key size or public instance shape, meaning any size parameters visible from the protocol, such as the number and bit-widths of comparisons and the interval-lookup dimensions, FuseFSS enforces mask-independent shapes.
+The number and bit-widths of emitted comparisons and the interval-lookup shape depend only on the public operator specification and fixed-point metadata, not on sampled masks.
+
+\paragraph{Results.}
+We evaluate FuseFSS against state-of-the-art end-to-end two-server GPU secure inference systems.
+FuseFSS matches model accuracy and improves end-to-end performance by $1.27\times$--$1.41\times$ while reducing online communication by $9\%$--$16\%$ on BERT and GPT-style models.
+FuseFSS also reduces preprocessing overhead: key-generation time decreases by $18\%$--$32\%$, and key size shrinks by $19\%$--$24\%$.
+
+
+
 
 \paragraph{Contributions.}
-\begin{itemize}
-  \item \textbf{Typed SUF IR.} We define SUF, a typed IR for fixed-point scalar nonlinearities over $\mathbb{Z}_{2^n}$ that separates arithmetic outputs (ring elements) from helper-bit outputs (Boolean), enabling mixed-domain compilation with explicit conversions.
-  \item \textbf{Mask-correct predicate rewriting.} We give correct rewrite identities for the SUF predicate grammar under public masking $\hat{x}=x+r_{\mathrm{in}}$ in $\mathbb{Z}_{2^n}$, including the necessary wrap/carry information provided only as \emph{secret-shared instance constants}.
-  \item \textbf{Two-template compilation.} We present a SUF compiler targeting a minimal \textsc{tFSS} interface and prove an \emph{at-most-two-\textsc{tFSS}-evaluation} theorem per gate instance, with remaining interaction confined to standard preprocessing-based subprotocols (Beaver/AND/B2A).
-  \item \textbf{Composite-FSS gates.} We package compiled gates as reusable Composite-FSS modules that expose a clean unit for batching \textsc{tFSS} work and Beaver/AND openings across transformer layers.
+\begin{itemize}[nosep,leftmargin=*]
+ \item \textbf{State-of-the-art secure inference performance.}
+       FuseFSS improves end-to-end latency and preprocessing cost over state-of-the-art two-server GPU secure inference baselines, while matching model accuracy on BERT and GPT. Upon acceptance.
+ \item \textbf{A practical compiler target for fixed-point nonlinear and rescaling operators.}
+       We show that a wide range of fixed-point scalar operators can be expressed by a single operator specification format and executed using the same two FSS calls plus uniform share-based post-processing.
+\item \textbf{Mask-aware compilation with security.}
+      FuseFSS derives mask-correct predicate evaluation from public masked inputs and enforces mask-independent public shapes, enabling a single correctness and semi-honest security proof with explicit shape leakage that applies across operators.
 \end{itemize}
 
 \paragraph{Organization.}
-Section~\ref{sec:setting} defines the threat model, typed sharing domains, masking, and the \textsc{tFSS} interface.
-Section~\ref{sec:suf_compile} defines SUF and mask-aware compilation.
-Section~\ref{sec:composite_fss} formalizes Composite-FSS gates.
+Section~\ref{sec:related} reviews related works and contrasts FuseFSS with prior secure inference systems.
+Section~\ref{sec:setting} defines the setting, masking, and the backend primitives.
+Section~\ref{sec:suf_compile} defines operator specifications and the compilation procedure.
+Section~\ref{sec:composite_fss} describes how we package compiled gates for batching and proves correctness and security.
+Section~\ref{sec:evaluation} reports experimental results.
 
 \section{Related Work}
-\paragraph{Preprocessing-based MPC for inference.}
-A large literature studies privacy-preserving inference using secret sharing with offline correlated randomness (e.g., Beaver triples)~\citep{beaver-mpc,secureml}.
-Transformers stress such protocols because, beyond massive linear layers, they repeatedly invoke numerically sensitive nonlinear blocks (softmax, normalization) and fixed-point helper operations (e.g., truncation/ARS) that introduce comparisons and control flow under $\mathbb{Z}_{2^n}$ wrap-around semantics.
-Our work focuses on the cryptographic kernel layer for these scalar nonlinear and helper components, assuming standard preprocessing mechanisms supply the required correlated randomness.
+\label{sec:related}
+\paragraph{Secure inference with secret sharing.}
+A common starting point for privacy-preserving inference is preprocessing-based MPC over secret shares, where an offline phase produces correlated randomness such as Beaver triples and the online phase minimizes interaction and bandwidth~\cite{beaver1991efficient,mohassel2017secureml}.
+This approach scales well for large linear layers, but modern transformer inference still stresses it because the model repeatedly invokes fixed point scalar operators such as rescaling, smooth activations, exponentials, reciprocal, and normalization.
+These operators introduce comparisons and piece selection under $\mathbb{Z}_{2^n}$ wrap around, and they tend to dominate both interaction rounds and preprocessing material in end to end deployments.
 
-\paragraph{FSS/DPF/DCF primitives as kernels.}
-Function secret sharing (FSS) and distributed point functions (DPF) enable non-interactive evaluation of structured functions with compact keys and low online latency~\citep{gilboa-ishai-dpf,boyle-fss,boyle-fss-extensions}.
-Mixed-mode and fixed-point variants further show how to combine FSS-style primitives with arithmetic MPC to support comparisons and fixed-point computation~\citep{boyle-fss-mixedmode}.
-Vector-payload variants naturally support lookup-style functionality used for piece selection and coefficient retrieval.
-Our work does not propose new FSS primitives; instead, it compiles SUF descriptions into a small constant number of calls to standard FSS templates, while making all mask-dependence explicit at key generation time.
+\paragraph{Private transformer inference systems.}
+A rapidly growing line of work studies end-to-end secure inference for transformer models and LLMs under two-party or dealer-based settings.
+This direction spans both HE-style polynomial formulations and MPC-style runtimes; recent work also explores polynomialized Transformer operators or quantization-aware secure inference pipelines~\cite{gilad2016cryptonets,zimerman2024converting,wu2024ditto}, complementing our systems-focused compiler for fixed-point scalar kernels.
+IRON~\cite{hao2022iron} initiated private inference on transformers and developed specialized protocols for transformer-specific components such as softmax, GELU, and layer normalization.
+Later systems such as BOLT~\cite{pang2024bolt} and BumbleBee~\cite{lu2023bumblebee} further reduce communication and optimize nonlinear computations.
+These systems demonstrate that secure transformer inference can be practical, but they also highlight a recurring limitation that motivates our work: high performance typically relies on designing and validating a separate protocol pipeline for each operator, which makes extensibility and correctness under fixed-point wrap-around difficult.
 
-\paragraph{FSS-based transformer inference on GPUs.}
-\textsc{Sigma} demonstrates end-to-end secure inference of GPT-style models by combining FSS with GPU acceleration and develops specialized protocols for truncation/ARS, smooth activations, and normalization~\citep{sigma}.
-We follow the same masked-wire paradigm but address a different bottleneck: extensibility.
-Instead of designing and verifying bespoke protocols per primitive, we introduce a typed IR SUF and a mask-aware compiler that emits at most two backend-template instances per scalar nonlinearity, enabling generic correctness/security arguments and reducing preprocessing bloat under matched settings.
+\paragraph{GPU acceleration and function secret sharing.}
+GPU acceleration has become central for reducing latency and for making secure inference competitive at practical model sizes.
+FSS and its distributed point function (DPF) and distributed comparison function (DCF) instantiations offer an attractive trade-off by reducing communication and interaction for structured predicates and lookups~\cite{boyle2015function, boyle2016function, boyle2019secure, boyle2021function}.
+Sigma shows that combining FSS with GPU execution enables efficient end-to-end transformer inference at scale and develops optimized building blocks for core fixed point operators and normalization~\cite{gupta2023sigma}.
+SHAFT further explores transformer specific optimizations, especially for softmax style computation, by improving numerical stability and reducing interaction in key subroutines~\cite{kei2025shaft}. FSS has also been used beyond inference, e.g., for communication-efficient secure training~\cite{yang2023fssnn}.
+Beyond the semi-honest setting, SHARK studies actively secure inference using FSS~\cite{gupta2025shark}.
+Despite these advances, existing high performance GPU systems still require substantial per operator protocol engineering to handle mask correct predicate rewriting, wrap around corner cases, and the interaction between bit logic and fixed point arithmetic.
+FuseFSS targets this exact gap by compiling a structured operator description into a constant number of standard FSS calls plus uniform share based post processing.
 
-\paragraph{Compilers for private ML.}
-Several systems provide front-ends and IRs to express neural network computation for secure inference.
-SUF is complementary: it targets the cryptographic kernel layer for fixed-point scalar nonlinearities under public masking, where prior FSS-based transformer systems typically rely on hand-engineered per-primitive constructions.
-In contrast to fully homomorphic encryption (FHE) approaches that pursue a different trade-off surface~\citep{encryptedllm}, we focus on compiler-generated FSS kernels within preprocessing-based MPC.
 
 \section{Setting and Preliminaries}
 \label{sec:setting}
 
 \subsection{Threat model and preprocessing}
-We consider two-party computation between parties $P_0,P_1$ in the standard preprocessing model, corresponding to the common ``two non-colluding servers'' setting.
+We consider two-party computation between parties $P_0,P_1$ in the standard preprocessing model, corresponding to the common ``two non-colluding servers'' setting~\cite{damgaard2012multiparty}.
 A client may provide inputs as secret shares to $P_0,P_1$; the online protocol is run by $P_0,P_1$.
 We assume semi-honest corruption of at most one party.
-The transformer architecture and (unless stated otherwise) model parameters are public; the client inputs and intermediate activations are secret.
-Our contribution concerns scalar nonlinear/helper kernels given arithmetic shares of their inputs, and composes with either public-weight or secret-shared linear layers.
+The transformer architecture and model parameters are public unless stated otherwise; the client inputs and intermediate activations are secret.
+Our contribution concerns scalar nonlinearities and helper operations given arithmetic shares of their inputs, and composes with either public-weight or secret-shared linear layers.
 
-The protocol has:
-(i) an offline preprocessing phase producing correlated randomness and FSS keys, and
-(ii) an online phase evaluating the model on secret shares.
+The protocol has two phases.
+The offline preprocessing phase produces correlated randomness and FSS keys.
+The online phase evaluates the model on secret shares.
 We assume a conceptual dealer for preprocessing and focus on online costs and the size/time of preprocessing material.
 All preprocessing material is one-time: each gate instance consumes fresh masks/keys/triples per inference execution.
 
+\vspace{-2mm}
+\paragraph{Wire-level masking.}
+Following FSS-based systems, we treat each scalar wire (tensor element) as a distinct gate instance.
+Preprocessing samples an independent uniform input mask $r_{\mathrm{in}}$ (and an independent output mask $r_{\mathrm{out}}$ when used) per wire.
+Mask reuse across different wires is disallowed: if two wires shared the same $r_{\mathrm{in}}$, then the public masked openings would satisfy
+$\hat{x}^{(1)}-\hat{x}^{(2)} = x^{(1)}-x^{(2)}$ and would leak a relation between secret activations.
+Our implementation therefore generates masks per wire.
+
 \subsection{Ring arithmetic and fixed point}
-We compute over $R=\mathbb{Z}_{2^n}$.
-Unsigned comparisons interpret each element by its canonical representative in $\{0,\dots,2^n-1\}$.
-Signed values use two's complement; $\msb(x)=1$ iff the canonical representative of $x$ lies in $[2^{n-1},2^n)$.
-A real $\tilde{x}$ with $f$ fractional bits is encoded as $x=\lfloor 2^f\tilde{x}\rceil\in R$.
-Fixed-point rescaling is implemented via explicit truncation/ARS-style primitives.
+
+We compute over $R=\mathbb{Z}_{2^n}$. For $x\in R$, let $\operatorname{rep}(x)\in\{0,\dots,2^n-1\}$ denote its canonical representative. Unsigned comparisons interpret each element by $\operatorname{rep}(x)$. Signed values use two's complement; the most significant bit (MSB) is $\msb(x):=\one[\operatorname{rep}(x)\in[2^{n-1},2^n)]$. We write $\bits:=\{0,1\}$ and $\one[\mathcal{E}]\in\bits$ for the indicator of a predicate/event $\mathcal{E}$.
+A real $\tilde{x}$ with $f$ fractional bits is encoded as $x=\lfloor 2^f\tilde{x}\rceil\in R$, where $\lfloor\cdot\rceil$ denotes rounding to the nearest integer with a fixed tie-breaking rule. Fixed-point rescaling is implemented via explicit truncation and arithmetic right shift (ARS) primitives; for signed values, ARS denotes a two's-complement right shift with sign extension~\cite{catrina2010secure}.
+
 
 \subsection{Typed sharing domains}
 \label{sec:typed_domains}
-We use two base types and corresponding sharing domains:
-\begin{itemize}
-  \item \textbf{Arithmetic type} $\mathsf{A}_n$: values in $R=\mathbb{Z}_{2^n}$, represented as additive shares $\share{x}=(x_0,x_1)$ with $x=x_0+x_1\bmod 2^n$.
-  \item \textbf{Bit type} $\mathsf{B}$: bits in $\bits$, represented as XOR shares $\langle b\rangle=(b_0,b_1)$ with $b=b_0\oplus b_1$.
+We use two base types and corresponding sharing domains~\cite{demmler2015aby}:
+
+\begin{itemize}[nosep,leftmargin=*]
+ \item \textbf{Arithmetic type} $\mathsf{A}_n$: values in $R=\mathbb{Z}_{2^n}$, represented as additive shares $\share{x}=(x_0,x_1)$ with $x=x_0+x_1\bmod 2^n$.
+ \item \textbf{Bit type} $\mathsf{B}$: bits in $\bits$, represented as XOR shares $\langle b\rangle=(b_0,b_1)$ with $b=b_0\oplus b_1$.
 \end{itemize}
-We optionally attach fixed-point metadata to arithmetic wires; this metadata is part of the SUF gate signature and determines which predicates/corrections are required, while cryptographic operations are performed in $R$.
+We optionally attach fixed-point metadata to arithmetic wires; this metadata is part of the gate signature and determines which predicates and corrections are required, while cryptographic operations are performed in $R$.
+
 
 \paragraph{Mixed-domain conversions.}
-When a bit gates ring arithmetic, we use a standard preprocessing-based conversion $\mathsf{B2A}$ that maps $\langle b\rangle$ to additive shares of the embedded ring element $b\in\{0,1\}\subset R$.
+When a bit gates ring arithmetic, we use a standard preprocessing-based bit-to-arithmetic conversion ($\mathsf{B2A}$) that maps an XOR-sharing $\langle b\rangle$ to additive shares of the embedded ring element $b\in\{0,1\}\subset R$~\cite{mohassel2018aby3,patra2021aby2}.
+Conversely, when a ring element must be converted to a bit, we use a standard preprocessing-based arithmetic-to-bit conversion ($\mathsf{A2B}$).
 We treat these as black-box secure subprotocols and count their uses in complexity statements.
 
-
-\subsection{Beaver multiplication and Boolean AND}
-Ring multiplication of $\share{x},\share{y}\in R$ uses Beaver triples $(\share{a},\share{b},\share{c=a\cdot b})$~\citep{beaver-mpc}:
-parties open $e=\mathsf{Open}(\share{x}-\share{a})$, $f=\mathsf{Open}(\share{y}-\share{b})$, then output
-$\share{xy}=\share{c}+e\cdot \share{b}+f\cdot \share{a}+ef$.
-Boolean AND on XOR shares can be implemented analogously over $\mathbb{Z}_2$ (or via any standard preprocessed AND primitive).
-XOR/NOT on $\langle\cdot\rangle$ shares are local.
+\subsection{Standard preprocessing subprotocols}
+We use standard preprocessing-based multiplication over $R$ via Beaver triples and standard Boolean-AND correlation for XOR-shared bits~\cite{beaver1991efficient}.
+XOR and NOT on XOR shares are local.
+We treat these subprotocols as black boxes and count their invocations in our complexity statements.
 
 \subsection{Masked-wire invariant and conversions}
 \label{sec:masked_invariant}
-For FSS-based nonlinear evaluation, preprocessing samples a uniform mask $r_{\mathrm{in}}\leftarrow R$ and distributes $\share{r_{\mathrm{in}}}$.
-Online, parties may reveal the public masked value $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$.
+For FSS-based nonlinear evaluation, the offline preprocessing samples a uniform mask $r_{\mathrm{in}}\leftarrow R$ and distributes $\share{r_{\mathrm{in}}}$.
+In the online phase, parties may reveal the public masked value $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$.
 Since $r_{\mathrm{in}}$ is uniform and independent of $x$, $\hat{x}$ is uniform over $R$ and information-theoretically independent of $x$.
 Consequently, any additional leakage about $r_{\mathrm{in}}$ (including via key sizes or mask-dependent instance shapes) must be avoided; our compiler enforces mask-independent public shapes and keeps all mask-derived bits secret-shared.
 
-\begin{algorithm}[t]
-\caption{Shares $\rightarrow$ masked opening}
-\label{alg:shares_to_masked}
-\begin{algorithmic}[1]
-\Require $\share{x}=(x_0,x_1)$ and preprocessed $\share{r_{\mathrm{in}}}=(r_0,r_1)$.
-\Ensure Public $\hat{x}=x+r_{\mathrm{in}}$.
-\State Each $P_b$ computes $\hat{x}_b\gets x_b+r_b \bmod 2^n$.
-\State Parties exchange $\hat{x}_0,\hat{x}_1$ and reconstruct $\hat{x}\gets \hat{x}_0+\hat{x}_1 \bmod 2^n$.
-\end{algorithmic}
-\end{algorithm}
+We use the standard masked opening routine, shown in Protocol~\ref{alg:shares_to_masked} and~\ref{alg:masked_to_shares} in Appendix~\ref{app:masking_protocols}:
+to reveal $\hat{x}=x+r_{\mathrm{in}}$, each party locally adds its mask share and the parties reconstruct the sum; given public $\hat{x}$, parties locally recover additive shares of $x=\hat{x}-r_{\mathrm{in}}$ by subtracting their mask shares.
 
-\begin{algorithm}[t]
-\caption{Masked $\rightarrow$ shares (local)}
-\label{alg:masked_to_shares}
-\begin{algorithmic}[1]
-\Require Public $\hat{x}$ and $\share{r_{\mathrm{in}}}=(r_0,r_1)$.
-\Ensure $\share{x}$ such that $x=\hat{x}-r_{\mathrm{in}}$.
-\State $P_0$ sets $x_0\gets \hat{x}-r_0$; $P_1$ sets $x_1\gets -r_1$ (all in $R$).
-\end{algorithmic}
-\end{algorithm}
-
-A crucial detail is that $r_{\mathrm{in}}$ is sampled in preprocessing and is part of the offline material used to derive secret template constants; online resampling is incompatible with offline key generation.
-
-\subsection{A template-based FSS backend interface (\textsc{tFSS})}
+\subsection{Backend interface: two standard FSS primitives}
 \label{sec:tfss_prelim}
-To avoid committing to a specific FSS library, we define a minimal template-based backend
-interface \textsc{tFSS}. \textsc{tFSS} is not a new primitive: it is an abstract interface that
-packages two standard DPF/DCF-style templates widely used in secure inference, for example, packed comparisons and interval/LUT selection~\citep{gilboa-ishai-dpf,boyle-fss,boyle-fss-extensions,boyle-fss-mixedmode}.
-
-\paragraph{Families vs.\ instances and shape leakage.}
-A \textsc{tFSS} template family (e.g., packed comparison) is public and fixed.
-A \textsc{tFSS} instance specifies concrete parameters, which may depend on preprocessing-time secrets  and are provided only to the dealer at key generation.
-Each party receives only its key.
-As in standard FSS, we allow unavoidable shape leakage, such as the number of query bits returned, the multiset of bit-widths used by those queries, and the payload dimension of a LUT, and we treat it as public.
-Crucially, our compiler enforces that these public shapes depend only on the public SUF descriptor and fixed-point metadata, not on sampled masks.
-
-Formally, each template family provides protocols $\mathsf{Gen}$, $\mathsf{Eval}_0$, and $\mathsf{Eval}_1$.
-A dealer runs $(k_0,k_1)\leftarrow \mathsf{Gen}(1^\lambda,\mathcal{T})$ for an instance $\mathcal{T}$.
-On a public input $u$, each party outputs a share $y_b\leftarrow \mathsf{Eval}_b(k_b,u)$.
-Correctness requires that the shares reconstruct to the instance output in the appropriate domain, using XOR in $\mathbb{Z}_2$ for bits and addition in $R$ for ring vectors.
-Security is the standard single-key FSS notion with shape leakage.
-
-\paragraph{Public views of the masked input.}
-Our compiler needs comparisons not only on the full masked value $\hat{x}\in R$ but also on
-simple public views such as low bits and constant shifts.
-For any $k\le n$ and constant $c\in \mathbb{Z}_{2^k}$, define the public view map
-\[
-\mathsf{view}_{k,c}(u) \;:=\; \big((u \bmod 2^k)+c\big) \bmod 2^k \in \mathbb{Z}_{2^k},
-\]
-where $u$ is interpreted by its canonical representative.
-Since $u$ is public, each party can compute $\mathsf{view}_{k,c}(u)$ locally at evaluation time.
-
-\paragraph{Template family 1: packed comparisons (\textsc{PackCmp}).}
-An instance $\mathcal{T}_{\mathrm{cmp}}$ is a list of comparison queries
-\[
-Q = \big((k_t,c_t,\theta_t)\big)_{t=1}^{T}, \qquad k_t\le n,\; c_t\in \mathbb{Z}_{2^{k_t}},\; \theta_t\in \mathbb{Z}_{2^{k_t}}.
-\]
-On public input $u\in R$, evaluation returns XOR-shares of the bit-vector
-\[
-b_t \;=\; \one[\mathsf{view}_{k_t,c_t}(u) < \theta_t], \quad t\in[T],
-\]
-where each comparison uses the canonical order on $\{0,\ldots,2^{k_t}-1\}$.
-This single template family subsumes:
-full-width comparisons ($k_t=n,c_t=0$),
-low-bit tests ($k_t=f,c_t=0$), and
-MSB/sign predicates via thresholding at $2^{n-1}$ and/or shifting ($c_t\neq 0$).
-
-\emph{Sentinel conventions.}
-Comparisons to a ``threshold'' $\theta=0$ or $\theta=2^{k}$ are compile-time constants ($0$ and $1$ respectively) and are never emitted as backend queries; this avoids representational ambiguity for partition sentinels such as $\alpha_m=2^n$.
-
-\emph{Implementation note.}
-\textsc{PackCmp} can be implemented as a thin wrapper around any existing packed-comparison engine:
-group queries by $k_t$, instantiate the library's packed comparison for each group, concatenate the keys,
-and evaluate all groups in one batched routine (e.g., one GPU kernel launch).
-Our ``two-template'' theorem counts interface-level calls; concrete backends may realize a single \textsc{PackCmp} call as a small constant number of batched packed-comparison invocations, which is captured by the exposed shape parameters $(T,\{k_t\})$.
-
-\paragraph{Template family 2: vector-payload interval lookup (\textsc{IntervalLUT}).}
-An instance $\mathcal{T}_{\mathrm{lut}}$ specifies integer boundaries
-$0=\alpha_0<\cdots<\alpha_M=2^n$ (canonical representatives, with $\alpha_M$ a sentinel) and payload vectors $v_i\in R^p$ for $i\in\{0,\ldots,M-1\}$.
-On public input $u\in R$, evaluation returns additive shares of $v_{i^\star}$ for the unique
-$i^\star$ with $u\in[\alpha_{i^\star},\alpha_{i^\star+1})$.
-Vector payload support (returning $p$ ring elements per call) is essential for fetching all
-polynomial coefficients and per-interval constants in one lookup.
-
-\paragraph{Assumptions on the \textsc{tFSS} backend.}
-We treat \textsc{tFSS} as a black-box providing the two template families above
-(\textsc{PackCmp} and \textsc{IntervalLUT}) with (i) correctness and (ii) standard
-single-key FSS privacy with explicit \emph{shape leakage}.
-All public ``views'' required by the compiler (low bits and constant shifts) are computed
-locally from the public masked wire $\hat{x}$.
-Finally, for the real/ideal statement we require that the public shapes of emitted
-\textsc{tFSS} instances depend only on the (public) SUF descriptor and fixed-point metadata,
-and not on preprocessing-time secrets such as $r_{\mathrm{in}}$; the compiler enforces this
-by fixed query ordering and by padding the lookup partition to a fixed $M=m+1$ intervals.
+Our compiler relies on two standard FSS primitive families that are already available in modern DPF/DCF-style systems~\cite{gilboa2014distributed,boyle2016function,boyle2021function}.
+For each primitive family, preprocessing generates one key per party, and online evaluation is local on a public input.
+We allow explicit leakage of public shapes, such as the number and bit-widths of emitted comparisons and the payload dimension of a lookup, but the compiler enforces that these shapes do not depend on sampled masks.
 
 
-\section{Structured-Univariate Functions and Mask-Aware Compilation}
+\paragraph{Public views.}
+For any $k\le n$ and constant $c\in \mathbb{Z}_{2^k}$, define
+$\mathsf{view}_{k,c}(u) := ((u \bmod 2^k)+c)\bmod 2^k$.
+Here $u \bmod 2^k$ denotes $\operatorname{rep}(u)\bmod 2^k$, namely the low $k$ bits of the canonical representative.
+Since the masked wire $u=\hat{x}$ is public, each party computes such views locally.
+
+\paragraph{Packed comparisons.}
+Given a list of queries $(k_t,c_t,\theta_t)$, evaluation returns XOR shares of
+$\one[\mathsf{view}_{k_t,c_t}(u)<\theta_t]$ for all $t$.
+This covers full-width comparisons, low-bit predicates, and MSB tests through shifts and thresholds.
+
+\paragraph{Vector interval lookup.}
+Given boundaries $0=\alpha_0<\cdots<\alpha_M=2^n$ and payload vectors $v_i\in R^p$, evaluation returns additive shares of the unique $v_{i^\star}$ such that $u\in[\alpha_{i^\star},\alpha_{i^\star+1})$.
+We use this lookup to fetch all coefficients and per-interval constants for a scalar operator in one call.
+Appendix~\ref{app:tfss_interface} gives a library-agnostic formalization of these two primitives.
+
+\section{Operator Specifications and Mask-Aware Compilation}
 \label{sec:suf_compile}
-
-\subsection{Structured-Univariate Functions (SUF)}
+\subsection{Operator specifications}
 \label{sec:suf_def}
 
-\begin{definition}[Structured-Univariate Function (SUF)]
+\begin{definition}[Operator specification]
 \label{def:suf}
-Fix $n\ge 1$ and $R=\mathbb{Z}_{2^n}$.
-A typed SUF descriptor has signature
+Fix $n\ge 1$ and let $R=\mathbb{Z}_{2^n}$.
+A typed operator specification has signature
 \[
-  F:\mathsf{A}_n \to \mathsf{A}_n^r \times \mathsf{B}^\ell,
+ F:\mathsf{A}_n \to \mathsf{A}_n^r \times \mathsf{B}^\ell,
 \]
 optionally annotated with fixed-point metadata (fractional bits, signedness) for the arithmetic input/output wires.
 It is specified by:
-\begin{enumerate}
-  \item A full partition with \emph{integer} boundaries $0=\alpha_0<\alpha_1<\cdots<\alpha_m=2^n$ and intervals $I_i=[\alpha_i,\alpha_{i+1})$ over canonical representatives.
-        The boundary $\alpha_m=2^n$ is a sentinel: the predicate $\one[x<\alpha_m]$ is identically $1$ and is never emitted as a backend comparison.
-  \item For each $I_i$, a vector of degree-$\le d$ polynomials $P_i(x)\in R[x]^r$ (evaluated in $R$).
-  \item For each $I_i$, a vector of Boolean formulas $B_i(x)\in\bits^\ell$ built from primitive predicates with \emph{integer constant} parameters:
-  \[
-    \begin{aligned}
-      C_\beta(x) &= \one[x<\beta]                 && \text{for }\beta\in\{0,\ldots,2^n\}, \\
-      D_{\gamma,f}(x) &= \one[(x\bmod 2^f)<\gamma] && \text{for }\gamma\in\{0,\ldots,2^f\},
-    \end{aligned}
-  \]
-  $\msb(\cdot)$ tests, and connectives $\neg,\wedge,\vee,\oplus$ (with semantics in $\mathbb{Z}_2$).
-  Sentinel cases are constants: $C_0(x)\equiv 0$, $C_{2^n}(x)\equiv 1$, and similarly $D_{0,f}(x)\equiv 0$, $D_{2^f,f}(x)\equiv 1$.
+\begin{enumerate}[nosep,leftmargin=*]
+ \item A full partition with integer boundaries $0=\alpha_0<\alpha_1<\cdots<\alpha_m=2^n$ and intervals $I_i=[\alpha_i,\alpha_{i+1})$ over canonical representatives.
+ The boundary $\alpha_m=2^n$ is a sentinel: the predicate $\one[x<\alpha_m]$ is identically $1$ and is never emitted as a backend comparison.
+ \item For each $I_i$, a vector of degree-$\le d$ polynomials $P_i(x)\in R[x]^r$ (evaluated in $R$), where $d$ is a global (descriptor-level) degree bound.
+\item For each $I_i$, a vector of Boolean formulas $B_i(x)\in\bits^\ell$ built from primitive predicates with integer constant parameters:
+$C_\beta(x)=\one[x<\beta]$ and $D_{\gamma,f}(x)=\one[(x\bmod 2^f)<\gamma]$.
+Here $\beta\in\{0,\dots,2^n\}$, $f\in\{1,\dots,n\}$, and $\gamma\in\{0,\dots,2^f\}$.
+
+ $\msb(\cdot)$ tests, and connectives $\neg,\wedge,\vee,\oplus$ (with semantics in $\mathbb{Z}_2$).
+ Sentinel cases are constants: $C_0(x)\equiv 0$, $C_{2^n}(x)\equiv 1$, and similarly $D_{0,f}(x)\equiv 0$, $D_{2^f,f}(x)\equiv 1$.
 \end{enumerate}
 The induced function is $F(x)=(P_i(x),B_i(x))$ for the unique $i$ with $x\in I_i$.
 \end{definition}
 
-\subsection{Scope: SUF descriptors and SUF-compatible scalar gates}
+\subsection{Scope: operator specifications and compatible scalar gates}
 \label{sec:suf_scope}
 
 \paragraph{Scalar gates vs.\ vector blocks.}
-SUF is an IR for scalar fixed-point primitives that are applied elementwise. A scalar gate consumes one masked wire value $\hat{x}$, equivalently the underlying secret $x\in R$, and produces a small tuple of arithmetic outputs in $R$ together with Boolean helper bits. This matches the dominant nonlinear components in transformer inference, including activations, nExp, reciprocal and rsqrt, and truncation and ARS helpers, which are applied pointwise across tensor elements. Operations that inherently mix multiple coordinates, such as reductions like \texttt{sum} or \texttt{max}, are not SUFs; they are handled at the circuit or DAG level using standard linear MPC and comparisons.
-\paragraph{SUF-compatible scalar primitives.}
-Not every fixed-point primitive is literally a polynomial in $R$ (e.g., truncation/ARS involves dropping bits),
-so we separate the IR from a small fixed post-processing circuit.
-We formalize the compilation target as follows.
+Operator specifications (Definition~\ref{def:suf}) are an intermediate representation (IR) for scalar~\cite{kumar2020cryptflow,demmler2021improved}, elementwise fixed-point operators over
+$R=\mathbb{Z}_{2^n}$. A scalar gate consumes one masked wire $\hat{x}$ and outputs a constant-size tuple of arithmetic values in $R$ together with Boolean helper bits.
+This covers the elementwise nonlinearities and fixed-point helper operations that dominate secure transformer inference,
+e.g., activations, $\mathrm{nExp}$, reciprocal/rsqrt, and rescaling helpers such as truncation and ARS.
 
-\begin{definition}[SUF-compatible scalar gate]
+In contrast, vector-level operations that mix coordinates, such as reductions \texttt{max} and \texttt{sum}, sorting or top-$k$, and attention sparsification with data-dependent routing, are not univariate scalar maps and are handled separately by standard MPC subprotocols (e.g., comparison trees) at the circuit/directed acyclic graph (DAG) level~\cite{juvekar2018gazelle}.
+
+
+\paragraph{Specification-compatible scalar primitives.}
+Not every fixed-point primitive is literally a polynomial in $R$ (e.g., truncation/ARS involves dropping bits). We therefore separate the operator specification from a fixed post-processing circuit.
+
+\begin{definition}[Specification-compatible scalar gate]
 \label{def:suf_compatible}
-A typed scalar gate $G:\mathsf{A}_n \to \mathsf{A}_n^{r'} \times \mathsf{B}^{\ell'}$ is SUF-compatible
+A typed scalar gate $G:\mathsf{A}_n \to \mathsf{A}_n^{r'} \times \mathsf{B}^{\ell'}$ is specification-compatible
 if there exist:
-(i) a SUF descriptor $F:\mathsf{A}_n \to \mathsf{A}_n^{r} \times \mathsf{B}^{\ell}$, and
+(i) an operator specification $F:\mathsf{A}_n \to \mathsf{A}_n^{r} \times \mathsf{B}^{\ell}$, and
 (ii) a fixed, deterministic post-processing circuit $\Phi$,
 such that the following holds for every gate instance, meaning for every preprocessing mask choice.
-Specifically, for every $r_{\mathrm{in}}\in R$, let $\hat{x}=(x+r_{\mathrm{in}})\bmod 2^n$ be the public masked input,
+For every $r_{\mathrm{in}}\in R$, let $\hat{x}=(x+r_{\mathrm{in}})\bmod 2^n$ be the public masked input,
 and let $\kappa=\kappa(r_{\mathrm{in}})$ denote any mask-derived secret-shared instance constants required by compilation,
 for example carry bits that depend only on $r_{\mathrm{in}}$ and descriptor constants.
 Then for all $x\in R$,
@@ -441,35 +385,569 @@ The circuit $\Phi$ is allowed to use ring additions and a bounded number of ring
 Boolean operations using XOR, NOT, and AND on XOR-shares, and mixed-domain conversions B2A and A2B when a bit gates arithmetic.
 \end{definition}
 
-\paragraph{Examples and non-examples.}
-\begin{itemize}
-\item \textbf{Piecewise-polynomial activations:}
-take $\Phi$ as a small linear and Boolean combiner; often $\Phi$ is the identity on the SUF arithmetic output.
-\item \textbf{Truncation and ARS helpers:} the compiled predicate extraction exposes precisely the wrap, carry, and low-bit predicates needed
-to correct a shift computed from the public masked value; $\Phi$ implements the fixed correction arithmetic using those bits and mask-derived constants.
-\item \textbf{Reciprocal and rsqrt blocks:} SUF captures range-reduction predicates and coefficient lookup
-for a polynomial approximation on a reduced domain; $\Phi$ performs a fixed number of ring multiplications,
-for example, a small constant number of refinement steps, if used.
-\item \textbf{Not in scope:} operations whose semantics require data-dependent loops, unbounded iteration,
-or large data-dependent tables whose size scales with $2^n$ beyond a fixed approximation scheme, and
-true multi-input nonlinearities that cannot be decomposed into a reduction DAG plus scalar gates.
-\end{itemize}
-
-
-\paragraph{Composing vector blocks from scalar SUF-compatible gates.}
-Vector-valued blocks in transformers are expressed as DAGs built from:
+\paragraph{Composing vector blocks.}
+Transformer blocks are expressed as DAGs that compose:
 (i) linear operations over $R$ on arithmetic shares (matmul, add, sum reductions),
 (ii) comparison-based reductions (e.g., max via a comparison tree), and
-(iii) elementwise SUF-compatible gates (e.g., nExp, reciprocal/rsqrt).
-For instance, softmax over a vector is implemented as:
-max-reduction $\rightarrow$ subtract $\rightarrow$ elementwise nExp (SUF-compatible) $\rightarrow$ sum-reduction
-$\rightarrow$ reciprocal (SUF-compatible) $\rightarrow$ multiply.
-Thus SUF compilation targets the scalar nonlinear kernels, while the overall transformer is handled by
-composition at the circuit level.
+(iii) elementwise specification-compatible gates (e.g., nExp, reciprocal/rsqrt).
+Appendix~\ref{app:scope} gives concrete decompositions for Softmax and LayerNorm.
 
-\paragraph{Helper bits as first-class typed outputs.}
-The Boolean outputs are not merely ``branch conditions'': they include bits required by faithful fixed-point semantics and may feed subsequent computations.
-Typing makes mixed-domain uses explicit: if a bit gates ring arithmetic, a $\mathsf{B2A}$ conversion is inserted by the compiler.
+\paragraph{Helper bits and Boolean normalization.}
+Boolean outputs of $F$ are first-class typed results and may feed later computation.
+To avoid data-dependent control flow, we express interval indicators as
+$\one[x\in[\alpha_i,\alpha_{i+1})]=\one[x<\alpha_{i+1}]\oplus\one[x<\alpha_i]$
+and use them to normalize piecewise Boolean outputs into a single global Boolean circuit.
+Lemmas~\ref{lem:interval_indicator_xor} and~\ref{lem:boolean_normalize} are deferred to Appendix~\ref{app:indicator_lemmas}.
+
+\subsection{Mask-aware rewriting under public masking}
+\label{sec:mask_rewrite}
+Let $\hat{x}=x+r\bmod 2^n$ with uniform $r$ sampled in preprocessing.
+We rewrite predicates on $x$ into Boolean formulas over comparisons on public $\hat{x}$, with secret mask-derived constants derived from $r$.
+All equalities below are over $\bits$ with $\oplus$ denoting XOR.
+Any mask-derived wrap/carry bit is kept secret-shared: revealing such a bit would leak information about $r$ and therefore about $x$ given $\hat{x}$.
+
+\begin{lemma}[Masked rewrite for unsigned comparison]
+\label{lem:mask_rewrite_cmp}
+Let $N=2^n$ and interpret $R=\mathbb{Z}_{2^n}$ by canonical representatives in $\{0,\ldots,N-1\}$.
+Fix an integer threshold $\beta\in\{0,1,\ldots,N\}$ and a mask $r\in R$.
+Let $\hat{x}=(x+r)\bmod N$, $\theta=(r+\beta)\bmod N$, and let
+$w=\one[r+\beta\ge N]$ denote the carry bit of the integer addition $r+\beta$.
+Assume preprocessing provides an XOR-sharing $\langle w\rangle$ (equivalently, $w$ is a secret-shared constant).
+Then for all $x\in R$,
+\[
+\one[x<\beta] \;=\; \one[\hat{x}<\theta]\ \oplus\ \one[\hat{x}<r]\ \oplus\ w,
+\]
+where all comparisons are under the canonical order on $\{0,\ldots,N-1\}$.
+\end{lemma}
+
+\noindent\textbf{Low-bit predicates.} An analogous identity holds for low-bit predicates of the form $\one[(x\bmod 2^f)<\gamma]$; we defer the full statement to Lemma~\ref{lem:mask_rewrite_lowbit} in Appendix~\ref{app:lowbit_rewrite}.
+
+\paragraph{A useful corollary: masked interval indicators cancel the $\one[\hat{x}<r]$ term.}
+Combining Lemma~\ref{lem:interval_indicator_xor} with Lemma~\ref{lem:mask_rewrite_cmp}, the indicator $\one[x\in I_i]$ can be expressed using only comparisons to shifted boundaries in $\hat{x}$-space:
+\[
+ \begin{aligned}
+ \one[x\in I_i]
+ &=
+ \one[\hat{x}<(\alpha_{i+1}+r)\bmod 2^n] \\
+ &\quad\oplus
+ \one[\hat{x}<(\alpha_i+r)\bmod 2^n]
+ \oplus
+ w_{i+1}\oplus w_i.
+ \end{aligned}
+\]
+where $w_t=\one[r+\alpha_t\ge 2^n]$ are preprocessing-time carry bits (kept secret-shared for $t\in\{1,\ldots,m-1\}$; note $w_0=0$ and $w_m=1$ are public constants since $\alpha_0=0$ and $\alpha_m=2^n$).
+This reduces the number of primitive masked comparisons needed for piece selection.
+
+\paragraph{MSB and signed predicates.}
+$\msb(x)$ can be expressed via an unsigned threshold test (e.g., $\msb(x)=\neg \one[x<2^{n-1}]$), and signed comparisons reduce to unsigned comparisons after a fixed constant shift of the canonical representative.
+The corresponding masked rewrites follow by applying Lemma~\ref{lem:mask_rewrite_cmp} to the shifted comparisons; full derivations (including $\msb(x+c)$) are deferred to the appendix.
+
+
+\subsection{Compiling one operator gate with two FSS calls}
+\label{sec:suf_to_tfss}
+
+\paragraph{Gate instances.}
+An operator specification is type-level and public.
+A gate instance fixes preprocessing masks and therefore fixes the (secret) instance parameters used by backend primitive instances (shifted thresholds, translated boundaries, payloads) while revealing only their public shapes.
+
+\begin{lemma}[Interval translation under masking]
+\label{lem:interval_translate}
+Let $I=[\alpha,\beta)\subseteq [0,2^n)$ be an interval over canonical representatives and let $\hat{x}=x+r\bmod 2^n$.
+Then the image of $I$ under $x\mapsto \hat{x}$ is the cyclic interval $[\alpha+r,\beta+r)\bmod 2^n$,
+which is either a standard interval or the union of two standard intervals.
+Across a full partition, at most one interval wraps around $0$ after translation (and none wraps when the wrap point hits a boundary).
+Hence an $m$-interval operator specification partition induces at most $m+1$ standard intervals in $\hat{x}$-space.
+\end{lemma}
+
+\paragraph{Compilation sketch.}
+Given an operator specification and a per-wire mask $r_{\mathrm{in}}$, the compiler
+(i) translates boundaries into $\hat{x}$-space and pads the partition to a fixed interval count $M$,
+(ii) rewrites all primitive predicates under masking into comparisons on the public $\hat{x}$ plus secret-shared carry bits,
+(iii) collects all comparison atoms in a fixed descriptor-determined order to form one packed comparison instance, and
+(iv) packages all per-interval coefficients/constants into one interval lookup instance.
+The padding in (i) enforces mask-independent public instance shapes (and therefore mask-independent key lengths), avoiding leakage about $r_{\mathrm{in}}$ through shape.
+Full pseudocode appears in Appendix~\ref{app:compile_alg} (Protocol~\ref{alg:compile_tfss}).
+
+\paragraph{Payload structure.}
+For degree-$d$ and $r$ arithmetic outputs, the coefficient payload includes $r(d+1)$ ring elements (padding lower-degree polynomials with leading zeros if needed).
+To support fused post-processing (e.g., truncation/ARS corrections), we allow $\Pi_{\mathrm{coeff}}$ to additionally return a small number of per-interval constants; the payload length is $p=r(d+1)+p_{\mathrm{aux}}$.
+
+\begin{lemma}[Compiler correctness]
+\label{lem:compiler_correctness}
+Let $F:\mathsf{A}_n\to \mathsf{A}_n^r\times \mathsf{B}^\ell$ be a well-formed typed operator specification
+descriptor with partition $(\alpha_i)_{i=0}^m$ and per-piece data $(P_i,B_i)$.
+Let preprocessing sample a uniform mask $r_{\mathrm{in}}\in R$ and provide additive shares
+$\share{r_{\mathrm{in}}}$, as well as any mask-derived secret-shared instance constants required by the
+masked rewrite rules (e.g., carry bits in Lemmas~\ref{lem:mask_rewrite_cmp}--\ref{lem:mask_rewrite_lowbit}).
+Let $(\Pi_{\mathrm{pred}},\Pi_{\mathrm{coeff}})$ be the packed comparison and interval lookup
+instances produced by Protocol~\ref{alg:compile_tfss} for $(F,r_{\mathrm{in}})$.
+Then for every $x\in R$ and $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$, the online evaluation procedure
+(open $\hat{x}$, evaluate $\Pi_{\mathrm{pred}}$ and $\Pi_{\mathrm{coeff}}$ on $\hat{x}$, derive shares of $x$ locally, evaluate Horner and the normalized Boolean circuit)
+outputs shares $(\share{\mathbf{y}},\langle\mathbf{z}\rangle)$ that
+reconstruct to $F(x)=(\mathbf{y},\mathbf{z})$.
+
+Moreover, for any specification-compatible scalar gate $G$ with $G(x)=\Phi(F(x),\kappa,\hat{x},\mathsf{pub})$
+(Definition~\ref{def:suf_compatible}), the same compiled instances together with the fixed
+share-based evaluation of $\Phi$ reconstruct to $G(x)$.
+\end{lemma}
+
+\subsection{Two-call evaluation theorem}
+\label{sec:two_call}
+
+\begin{theorem}[Two-call evaluation for specification-compatible scalar gates]
+\label{thm:two_call}
+Assume a backend implementing the two primitive families in Section~\ref{sec:tfss_prelim}:
+packed comparison with queries of the form $\one[\mathsf{view}_{k,c}(u)<\theta]$ and
+interval lookup for vector payload lookup on $u\in R$.
+Then any scalar gate instance (and, more generally, any specification-compatible scalar gate in
+Definition~\ref{def:suf_compatible}) can be evaluated from a public masked input $\hat{x}$ using:
+
+\begin{enumerate}
+ \item At most two non-interactive backend interface evaluations on $\hat{x}$:
+ one packed comparison evaluation producing XOR-shares of all masked comparison atoms needed by the compiler
+ (possibly at multiple bit-widths $k$ via the public view operator $\mathsf{view}_{k,c}$),
+ and one interval lookup evaluation producing additive shares of the active coefficient/constant payload.
+ Either call may be omitted if the compiled instance does not require it.
+ \item $O(r\cdot d)$ ring multiplications (implemented via Beaver triples) for batched Horner evaluation of $r$ degree-$d$ polynomials
+ on secret shares of $x=\hat{x}-r_{\mathrm{in}}$ (Protocol~\ref{alg:masked_to_shares}),
+ plus an additional $M_\Phi$ ring multiplications (via Beaver triples) performed by the fixed post-processing circuit $\Phi$.
+ Here $M_\Phi$ depends only on the gate type and public parameters (often a small constant, e.g., a constant number of refinement steps).
+ \item A fixed post-processing circuit $\Phi$ whose remaining interactive cost is captured by
+ $G_\wedge$ Boolean AND gates (on XOR shares) and $G_{\mathrm{mix}}$ mixed-domain uses,
+ plus any use of secret-shared instance constants $\kappa$ (which require no interaction to consume).
+\end{enumerate}
+All remaining interaction is confined to the standard openings required by Beaver/AND/B2A subprotocols.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+$\Pi_{\mathrm{pred}}$ returns XOR-shares of all masked comparisons required by the rewritten predicate circuit (including those used to form interval indicators).
+$\Pi_{\mathrm{coeff}}$ returns additive shares of the active polynomial coefficients (and any per-interval constants) without revealing the active interval.
+Parties locally derive additive shares of $x=\hat{x}-r_{\mathrm{in}}$ and evaluate the selected polynomials via Horner's rule using Beaver triples.
+Finally, they evaluate the normalized Boolean circuit over XOR shares using XOR/NOT locally and AND/B2A when needed, and apply $\Phi$.
+\end{proof}
+
+\subsection{Security in the semi-honest preprocessing model}
+\label{sec:suf_security}
+
+\paragraph{Leakage.}
+A compiled gate instance induces public shape parameters:
+the number of comparison queries $T$ (and their bit-width multiset $\{k_t\}$) in the packed comparison instance,
+and the interval count $M$ and payload dimension $p$ in the interval lookup instance.
+We model this as an explicit leakage function $\mathcal{L}_{\mathrm{shape}}$. Depending on the backend instantiation, the public interval lookup shape may be described either by an explicit interval count $M$ (boundary representation) or by a dense table bit-width $k$ (DPF-LUT representation); we subsume such parameters in $\mathcal{L}_{\mathrm{shape}}$.
+In addition, the online protocol reveals public masked openings (e.g., $\hat{x}=x+r_{\mathrm{in}}$
+and optional masked outputs), which are information-theoretically independent of secrets under fresh uniform masks;
+we include them in the public transcript.
+All mask-derived constants (e.g., carry bits) remain secret-shared and are treated as part of preprocessing material.
+
+
+\paragraph{Ideal functionality.}
+Fix a gate type $\tau$ with ideal scalar functionality
+$G_\tau(x)=\Phi_\tau(F_\tau(x),\kappa,\hat{x},\mathsf{pub})$ (Definition~\ref{def:suf_compatible}).
+The ideal execution for one gate instance samples fresh masks and correlated randomness as in preprocessing,
+reveals $\mathcal{L}_{\mathrm{shape}}$ and the public masked openings, and returns to each party additive/XOR shares
+of the gate outputs consistent with $G_\tau(x)$.
+
+\begin{theorem}[Semi-honest security with leakage (gate level)]
+\label{thm:gate_security_leakage}
+Assume:
+(i) the packed-comparison primitive and the vector interval-lookup primitive satisfy standard single-key FSS security with explicit shape leakage, as discussed in Section~\ref{sec:tfss_prelim}; and
+(ii) the preprocessing-based subprotocols used in post-processing, including Beaver multiplication over $R$, Boolean AND over $\mathbb{Z}_2$, and any invoked B2A conversions, are semi-honest secure.
+Then for any compiled gate instance, the real-world view of a semi-honest adversary corrupting either party
+is computationally indistinguishable from the view produced by a PPT simulator given only that party's input share, its output shares, the explicit shape leakage, and the public masked openings.
+\end{theorem}
+
+\paragraph{Proof sketch.}
+The simulator samples masked openings uniformly (matching the real distribution under fresh masks),
+uses the backend interface simulator(s) to generate indistinguishable keys and local outputs for the adversary's party
+given $\mathcal{L}_{\mathrm{shape}}$,
+and simulates Beaver/AND/B2A openings using their standard simulators.
+A full hybrid proof is given in Appendix~\ref{app:security}.
+
+\section{Compiled gate modules}
+\label{sec:composite_fss}
+
+The compilation procedure in Section~\ref{sec:suf_compile} turns each scalar operator into a small protocol with a fixed structure:
+open the public masked input $\hat{x}=x+\rin\bmod 2^n$, evaluate (when needed) one packed-comparison instance and one vector interval-lookup instance on $\hat{x}$, and then run a shared post-processing circuit on secret shares.
+For engineering and batching, we package the resulting protocol into a compiled gate module.
+A compiled gate module is the unit that the transformer runtime invokes repeatedly across layers and tensors.
+
+\subsection{Gate interface}
+A gate type is specified by:
+(i) an operator specification (descriptor) $F:\mathsf{A}_n\to \mathsf{A}_n^r\times \mathsf{B}^\ell$, and
+(ii) a fixed deterministic post-processing circuit
+\[
+\Phi:\big(\mathsf{A}_n^r\times \mathsf{B}^\ell\big)\times \mathsf{K}\times \mathsf{Pub}
+\to \mathsf{A}_n^{r'}\times \mathsf{B}^{\ell'},
+\]
+where $\mathsf{K}$ is the type of any mask-derived secret-shared instance constants, such as carry bits in masked predicate rewrites, and $\mathsf{Pub}$ denotes public values available at evaluation time, including $\hat{x}$ and fixed-point metadata.
+A gate instance is one invocation of the gate on one scalar wire, together with its instance constants.
+
+\subsection{Preprocessing}
+For each gate instance, preprocessing provides to each party:
+\begin{itemize}[nosep,leftmargin=*]
+  \item mask shares $\share{\rin}$ and, when needed, output mask shares $\share{\rout}$,
+  \item any mask-derived secret-shared instance constants required by compilation,
+  \item FSS keys for the packed-comparison and interval-lookup instances emitted by the compiler, and
+  \item correlated randomness for post-processing, including Beaver triples for ring multiplications, Boolean AND correlation, and any invoked B2A conversions.
+\end{itemize}
+A conceptual dealer samples masks, derives the instance constants, runs compilation for the descriptor, and generates the corresponding FSS keys and correlated randomness.
+The dealer may also publish the public shape parameters of the two FSS instances, which we treat as explicit leakage.
+
+\subsection{Online evaluation}
+Given an arithmetic-shared input $\share{x}$:
+\begin{enumerate}[nosep,leftmargin=*]
+  \item Materialize the public masked value $\hat{x}=x+\rin$ by a batched opening (Protocol~\ref{alg:shares_to_masked}).
+  \item Evaluate packed comparisons when needed to obtain XOR-shares of all primitive predicate bits required by the compiler.
+  \item Evaluate interval lookup when needed to obtain additive shares of the active coefficient and constant payload.
+  \item Locally derive additive shares of $x=\hat{x}-\rin$ (Protocol~\ref{alg:masked_to_shares}) and evaluate the post-processing circuit $\Phi$.
+\end{enumerate}
+Optionally, if a consumer requires a masked public output, parties open $\hat{y}=y+\rout$ using fresh output masks.
+
+
+\subsection{Correctness and security}
+Correctness follows from compiler correctness for the operator specification and the correctness of the post-processing circuit.
+Security follows from the single-key security of the two FSS primitives and the security of the preprocessing-based subprotocols used in post-processing.
+We state this formally in Theorem~\ref{thm:gate_security_leakage}.
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.08}
+\caption{End-to-end two-server inference (sequence length 128, batch size 1).}
+\label{tab:e2e}
+\begin{tabular}{l
+  S[table-format=4.2] >{\columncolor{FuseTeal!12}}S[table-format=4.2] S[table-format=2.1]
+  S[table-format=1.3] >{\columncolor{FuseTeal!12}}S[table-format=1.3]
+  S[table-format=1.2] >{\columncolor{FuseTeal!12}}S[table-format=1.2]
+  S[table-format=2.3] >{\columncolor{FuseTeal!12}}S[table-format=2.3]
+}
+\toprule
+& \multicolumn{3}{c}{Online time (ms)} & \multicolumn{2}{c}{Comm (GB)} & \multicolumn{2}{c}{Keygen (s)} & \multicolumn{2}{c}{Key size (GB)} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+Model & {Sigma} & {FuseFSS} & {$\downarrow$ (\%)} & {Sigma} & {FuseFSS} & {Sigma} & {FuseFSS} & {Sigma} & {FuseFSS} \\
+\midrule
+BERT-tiny-128  & 69.84   & 55.20   & 20.9 & 0.020 & 0.017 & 0.08 & 0.06 & 0.326 & 0.250 \\
+BERT-base-128  & 1682.04 & 1313.86 & 21.9 & 0.989 & 0.830 & 1.28 & 0.99 & 16.835 & 12.739 \\
+BERT-large-128 & 4311.51 & 3125.36 & 27.5 & 2.638 & 2.213 & 3.21 & 2.18 & 45.448 & 34.529 \\
+GPT-2-128      & 1513.57 & 1073.32 & 29.1 & 0.824 & 0.724 & 1.14 & 0.88 & 14.292 & 11.101 \\
+GPT-Neo-128    & 7078.19 & 5414.84 & 23.5 & 4.029 & 3.648 & 4.95 & 4.04 & 76.187 & 61.215 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.08}
+\caption{Sequence-length sweep for BERT-base (batch size 1).}
+\label{tab:seq_sweep}
+\begin{tabular}{S[table-format=3.0]
+  S[table-format=4.2] >{\columncolor{FuseTeal!12}}S[table-format=4.2] S[table-format=2.1]
+  S[table-format=1.3] >{\columncolor{FuseTeal!12}}S[table-format=1.3]}
+\toprule
+{Seq} & {Sigma time (ms)} & {FuseFSS time (ms)} & {$\downarrow$ (\%)} & {Sigma comm (GB)} & {FuseFSS comm (GB)} \\
+\midrule
+32  & 619.98  & 464.27  & 25.1 & 0.185 & 0.167 \\
+64  & 903.87  & 684.70  & 24.2 & 0.411 & 0.361 \\
+128 & 1682.04 & 1313.86 & 21.9 & 0.989 & 0.830 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+\subsection{Experimental setup}
+We evaluate FuseFSS in the standard two-server preprocessing model, reporting online latency/communication and preprocessing cost (key-generation time and key size) per inference.
+All experiments run with 2$\times$ NVIDIA RTX PRO 6000 GPUs (one GPU per party), 2$\times$ AMD EPYC 7642 CPUs, 1\,TiB RAM, and CUDA 13.0.
+
+To quantify latency sensitivity, we also report projected online latency under a LAN/WAN model (LAN: 1\,GB/s, 0.5\,ms; WAN: 400\,MB/s, 4\,ms).
+\vspace{-2mm}
+
+\paragraph{Baselines.}
+We compare against \textsc{Sigma}~\cite{gupta2023sigma} as the primary FSS-based baseline.
+We also cite \textsc{SHAFT}~\cite{kei2025shaft} as an orthogonal reference point for private transformer inference, noting that SHAFT reports end-to-end
+time/communication without an offline/online separation. We attempted to run SHAFT on GPT-2 in our environment, but the provided script failed due to a device mismatch.
+We therefore focus our quantitative comparison on \textsc{Sigma}, which shares the same FSS-based preprocessing model.
+
+\vspace{-2mm}
+
+\paragraph{Metrics.}
+We report:
+(i) online latency and online communication from the frameworks' logs during online execution;
+(ii) key generation time and key size for one inference execution.
+Unless explicitly stated, reported numbers correspond to sequence length 128 and batch size 1.
+
+
+\paragraph{Software and Data.}
+Upon acceptance, we will release the FuseFSS implementation and the scripts needed to reproduce all experiments and figures.
+
+\subsection{End-to-end transformer inference}
+\label{sec:eval_e2e}
+
+Table~\ref{tab:e2e} reports end-to-end two-server inference costs for BERT/GPT models.
+Across all tested models, FuseFSS reduces online latency by \textbf{21--29\%} and online communication by \textbf{9--16\%},
+while also reducing preprocessing key size by \textbf{19--24\%} and key-generation time by \textbf{18--32\%}.
+Under the LAN/WAN model above, BERT-base-128 corresponds to 4.11/3.41\,s (LAN) and 11.25/9.99\,s (WAN) for Sigma/FuseFSS,
+and BERT-large-128 to 10.42/8.34\,s (LAN) and 26.81/23.28\,s (WAN).
+
+As an orthogonal reference, \textsc{SHAFT} reports 10.46\,GB end-to-end communication and
+28.60\,s (LAN) / 66.46\,s (WAN) end-to-end latency for BERT-base-128 under the same LAN/WAN model~\cite{kei2025shaft}.
+Since SHAFT does not separate offline preprocessing from online execution, its metrics are not directly comparable to our online-only communication;
+we therefore report both online cost and preprocessing material (Table~\ref{tab:e2e}) and observe that the overall costs are in the same order of magnitude
+under SHAFT's accounting for FSS-based systems (including key transfer).
+Appendix~\ref{sec:act_microbench} provides a kernel-level comparison on GELU.
+
+
+
+
+
+
+\subsection{Scaling with sequence length}
+For BERT-base, FuseFSS maintains consistent gains as sequence length increases from 32 to 128 (Table~\ref{tab:seq_sweep}).
+The relative speedup slightly decreases with longer sequences as attention and linear layers dominate end-to-end runtime.
+
+
+
+\paragraph{Additional results.}
+Appendix~\ref{app:extra_eval} reports (i) accuracy under our fixed-point MPC semantics,
+(ii) gate-level microbenchmarks for compiled activation functions (GELU/SiLU) that isolate
+FuseFSS's nonlinear kernels, and (iii) ablations quantifying the overhead of enforcing
+mask-independent public shapes and the benefit of program reuse across layers.
+
+\FloatBarrier
+
+\section{Conclusion}
+Fixed-point scalar nonlinearities and rescaling helpers remain a primary bottleneck in two-server secure inference.
+We presented \textsc{FuseFSS}, a compiler that replaces per-operator protocol engineering with a uniform compilation pipeline.
+\textsc{FuseFSS} represents each elementwise fixed-point operator using a typed operator specification, and compiles each gate instance into the same two-call structure on the public masked wire: one packed comparison for predicate extraction and one vector interval lookup for coefficient and constant retrieval.
+Compared with \textsc{Sigma}, \textsc{FuseFSS} improves end-to-end online inference performance and reduces preprocessing material while preserving model quality.
+
+\vspace{-2mm}
+\paragraph{Discussion.}
+\textsc{FuseFSS} targets the scalar nonlinear and helper kernels that dominate MPC inference costs; vector reductions remain outside the operator-specification IR and must be handled by standard MPC subprotocols and circuit-level composition.
+Finally, our security analysis focuses on the semi-honest preprocessing model with two non-colluding servers; extending the same approach to stronger adversarial models is an important next step.
+
+\clearpage
+\section*{Impact Statement}
+
+This work aims to advance privacy-preserving machine learning by reducing the cost and engineering complexity of two-server secure inference for transformer models.
+Our techniques can support deployment settings where users or organizations require strong confidentiality for prompts, embeddings, and intermediate activations (e.g., healthcare, finance, and enterprise workloads).
+
+At the same time, more efficient private inference could make it easier to access powerful models without revealing inputs to a service provider, which may complicate monitoring and abuse prevention that rely on visibility into user queries.
+
+% In the unusual situation where you want a paper to appear in the
+% references without citing it in the main text, use \nocite
+\nocite{langley00}
+
+\bibliography{example_paper}
+\bibliographystyle{icml2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\appendix
+\onecolumn
+\section{Appendix overview}
+This appendix is organized as follows.
+Appendix~\ref{app:extra_eval} reports additional experiments.
+Appendix~\ref{app:masking_protocols} collects standard masking routines, and
+Appendices~\ref{app:indicator_lemmas} and~\ref{app:lowbit_rewrite} provide supporting lemmas for interval indicators, Boolean normalization, and low-bit masked rewrites.
+Appendix~\ref{app:compile_alg} gives the full compilation protocol.
+Appendix~\ref{app:scope} clarifies the scope of operator specifications and how vector-level blocks are composed from standard MPC reductions and elementwise gates.
+Appendix~\ref{app:typed_suf} consolidates the typing discipline and a minimal typed specification language.
+Appendix~\ref{app:tfss_interface} restates the backend interface primitives and formalizes mask-independent public shapes via padding.
+Appendices~\ref{app:rewrite_proofs},~\ref{app:interval_translate}, and~\ref{app:two_call_correctness} provide detailed correctness proofs.
+Appendix~\ref{app:security} gives a semi-honest security statement with explicit leakage and its proof. Appendix~\ref{app:worked_example} provides a fully worked example of an operator specification and post-processing circuit $(F,\Phi)$.
+Finally, Appendix~\ref{app:complexity} summarizes the per-gate complexity accounting.
+
+
+
+\section{Additional evaluation results}
+\label{app:extra_eval}
+This appendix provides complementary evidence for the claims in Section~\ref{sec:evaluation}:
+(i) accuracy under the fixed-point semantics used by secure inference,
+(ii) gate-level microbenchmarks that isolate FuseFSS's compiled nonlinear activation kernels, and
+(iii) ablations that attribute performance to specific design choices (mask-independent shapes and program reuse).
+
+\subsection{Accuracy}
+We verify that FuseFSS preserves model quality under the fixed-point arithmetic (including truncation/rounding)
+used by secure inference.
+We compare floating-point PyTorch inference with FuseFSS running the same models under our MPC-style fixed-point semantics.
+Table~\ref{tab:accuracy} shows that FuseFSS closely matches PyTorch across GLUE and LAMBADA.
+
+
+
+
+\subsection{Gate microbench: compiled activations}
+\label{sec:act_microbench}
+
+To isolate the effect of FuseFSS on nonlinearities, we microbenchmark compiled activation gates at $L{=}128$.
+Each gate corresponds to one activation invocation on its full tensor (e.g., GELU on a $(128,\text{hidden})$ intermediate).
+We report per-gate online evaluation time and online communication, together with the preprocessing key material size.
+
+
+Figure~\ref{fig:act_microbench} shows that FuseFSS achieves consistent communication savings ($\approx$24\%) and substantial per-gate speedups (1.64--2.46$\times$).
+FuseFSS also shrinks per-gate key material by 4.96--6.25$\times$.
+These gate-level gains are larger than the end-to-end improvements in Table~\ref{tab:e2e},
+because end-to-end inference is dominated by linear layers and attention whose costs are largely shared by both systems.
+
+\subsection{Ablation: Cost of Mask-Independent Shapes and Reuse}
+\label{sec:ablation}
+
+We quantify two implementation choices required by FuseFSS's leakage model and runtime design:
+(i) padding compiled backend instances to a mask-independent public shape, and
+(ii) caching the compiled gate program across transformer layers.
+All numbers in this subsection come from an internal gate microbenchmark that isolates program initialization (instantiation/dispatch setup of the compiled GPU program) and online gate evaluation time; it does not include end-to-end transformer components nor LAN/WAN projection. We benchmark a representative GELU compiled gate in a BERT-base setting.
+
+\paragraph{Mask-independent public shapes via padding.}
+To avoid leaking preprocessing masks through mask-dependent instance shapes,
+FuseFSS pads both the predicate query list and the translated lookup partition to fixed public shapes.
+Table~\ref{tab:ablation_padding} quantifies the overhead on a representative BERT-base GELU gate.
+Enforcing fixed shapes increases per-gate evaluation time from 0.264\,ms to 1.014\,ms,
+and increases the compiled gate instance description size from 2{,}464\,B to 2{,}848\,B (1.16$\times$).
+The LUT payload is unchanged; the increase comes from padding the predicate list (384\,B $\rightarrow$ 768\,B).
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{Accuracy under fixed-point semantics, where $\Delta=$ (FuseFSS$-$PyTorch).}
+\label{tab:accuracy}
+\begin{tabular}{l l r r r}
+\toprule
+Model & Task & PyTorch & FuseFSS & $\Delta$ \\
+\midrule
+\multirow{3}{*}{BERT-tiny}
+  & SST-2  & 80.39 & 80.39 & +0.00 \\
+  & MRPC   & 76.37 & 76.96 & +0.59 \\
+  & QNLI   & 85.69 & 86.23 & +0.54 \\
+\midrule
+\multirow{4}{*}{BERT-base}
+  & SST-2  & 89.33 & 89.33 & +0.00 \\
+  & CoLA   & 83.43 & 83.45 & +0.02 \\
+  & MRPC   & 88.73 & 88.48 & -0.25 \\
+  & QNLI   & 91.55 & 91.67 & +0.12 \\
+\midrule
+\multirow{4}{*}{BERT-large}
+  & SST-2  & 92.55 & 92.50 & -0.05 \\
+  & CoLA   & 85.52 & 85.57 & +0.05 \\
+  & MRPC   & 87.74 & 87.50 & -0.24 \\
+  & QNLI   & 92.49 & 92.66 & +0.17 \\
+\midrule
+GPT-2   & LAMBADA & 60.59 & 60.90 & +0.31 \\
+GPT-Neo & LAMBADA & 75.46 & 75.57 & +0.11 \\
+\bottomrule
+\end{tabular}
+\vspace{-0.6em}
+\end{table*}
+
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.49\textwidth]{fig_activation_microbench_time_v2.pdf}\hfill
+\includegraphics[width=0.49\textwidth]{fig_activation_microbench_comm_v2.pdf}\\[-0.6em]
+\includegraphics[width=0.49\textwidth]{fig_activation_microbench_key_v2.pdf}
+\caption{Gate-level activation microbench at $L{=}128$.}
+\label{fig:act_microbench}
+\end{figure*}
+
+
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{Padding overhead for mask-independent public shapes.}
+\label{tab:ablation_padding}
+\begin{tabular}{l r r r}
+\toprule
+Variant & Per-gate time (ms) & Instance size (B) & Pred / LUT (B) \\
+\midrule
+mask-dependent shape
+& 0.264
+& 2{,}464
+& 384 / 2{,}080 \\
+\rowcolor{FuseTeal!12}
+fixed-shape (\textsc{FuseFSS})
+& 1.014
+& 2{,}848
+& 768 / 2{,}080 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Program reuse across layers.}
+FuseFSS compiles each gate type once and reuses the resulting GPU program across layers.
+This does not reuse preprocessing masks or keys: each layer still consumes fresh masks/keys.
+Table~\ref{tab:ablation_cache} shows that instantiating the program per layer incurs 10.389\,ms total
+initialization overhead on BERT-base (12 GELU calls), while the online evaluation time is unchanged.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.10}
+\caption{Ablation: caching the compiled gate program amortizes initialization across BERT-base layers.}
+\label{tab:ablation_cache}
+\begin{tabular}{l r r r}
+\toprule
+Variant & \# prog.\ inits & Total init (ms) & Total eval (ms) \\
+\midrule
+\rowcolor{FuseTeal!12}
+cached (reuse one program) & 1  & 0.903  & 12.161 \\
+no cache (instantiate per layer) & 12 & 10.389 & 12.184 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\section{Masking protocols}
+\label{app:masking_protocols}
+
+These are standard routines for revealing a masked value $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$ and for locally deriving additive shares of $x$ from a public $\hat{x}$.
+
+\begin{algorithm}[t]
+\caption{Shares $\rightarrow$ masked opening}
+\label{alg:shares_to_masked}
+\begin{algorithmic}[1]
+\Require $\share{x}=(x_0,x_1)$ and preprocessed $\share{r_{\mathrm{in}}}=(r_0,r_1)$.
+\Ensure Public $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$.
+\State Each $P_b$ computes $\hat{x}_b\gets x_b+r_b \bmod 2^n$.
+\State Parties exchange $\hat{x}_0,\hat{x}_1$ and reconstruct $\hat{x}\gets \hat{x}_0+\hat{x}_1 \bmod 2^n$.
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\caption{Masked $\rightarrow$ shares (local)}
+\label{alg:masked_to_shares}
+\begin{algorithmic}[1]
+\Require Public $\hat{x}$ and $\share{r_{\mathrm{in}}}=(r_0,r_1)$.
+\Ensure $\share{x}$ such that $x=\hat{x}-r_{\mathrm{in}}\bmod 2^n$.
+\State $P_0$ sets $x_0\gets (\hat{x}-r_0)\bmod 2^n$; $P_1$ sets $x_1\gets (-r_1)\bmod 2^n$ (all in $R$).
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+\section{Interval indicators and Boolean normalization}
+\label{app:indicator_lemmas}
+
+The following lemmas justify our interval-indicator construction and Boolean normalization used in Section~\ref{sec:suf_compile}.
 
 \paragraph{Interval indicators without AND gates.}
 Because the partition boundaries are strictly increasing in the canonical order, interval membership can be expressed using only XOR of two comparisons
@@ -477,9 +955,9 @@ Because the partition boundaries are strictly increasing in the canonical order,
 
 \begin{lemma}[Interval indicator as XOR of comparisons]
 \label{lem:interval_indicator_xor}
-For boundaries $\alpha_i<\alpha_{i+1}$ and any $x\in\{0,\ldots,2^n-1\}$,
+For boundaries $\alpha_i<\alpha_{i+1}$ and any $x\in R$, interpreted by its canonical representative in ${0,\ldots,2^n-1}$,
 \[
-  \one[x\in I_i] \;=\; \one[x<\alpha_{i+1}] \oplus \one[x<\alpha_i].
+ \one[x\in I_i] \;=\; \one[x<\alpha_{i+1}] \oplus \one[x<\alpha_i].
 \]
 \end{lemma}
 \begin{proof}
@@ -493,9 +971,9 @@ Using Lemma~\ref{lem:interval_indicator_xor}, piecewise Boolean outputs can be n
 \begin{lemma}[Boolean normalization by interval indicators]
 \label{lem:boolean_normalize}
 Let $(I_i)_{i=0}^{m-1}$ be a full partition as in Definition~\ref{def:suf}.
-For each output bit index $j\in[\ell]$, define the interval-indicator bit $J_i(x):=\one[x\in I_i]$ and
+For each output bit index $j\in\{1,\ldots,\ell\}$, define the interval-indicator bit $J_i(x):=\one[x\in I_i]$ and
 \[
-  B^{(j)}(x)\;=\;\bigoplus_{i=0}^{m-1}\Big( J_i(x)\wedge B_i^{(j)}(x)\Big).
+ B^{(j)}(x)\;=\;\bigoplus_{i=0}^{m-1}\Big( J_i(x)\wedge B_i^{(j)}(x)\Big).
 \]
 Then $B^{(j)}(x)=B_{i^\star}^{(j)}(x)$ for the unique $i^\star$ with $x\in I_{i^\star}$.
 \end{lemma}
@@ -505,32 +983,18 @@ Thus the XOR of the AND-masked pieces selects the active piece without revealing
 \end{proof}
 
 
-\subsection{Mask-aware rewriting under public masking}
-\label{sec:mask_rewrite}
-Let $\hat{x}=x+r\bmod 2^n$ with uniform $r$ sampled in preprocessing.
-We rewrite predicates on $x$ into Boolean formulas over comparisons on public $\hat{x}$, with secret template constants derived from $r$.
-All equalities below are over $\bits$ with $\oplus$ denoting XOR.
-Any mask-derived wrap/carry bit is kept \emph{secret-shared}: revealing such a bit would leak information about $r$ and therefore about $x$ given $\hat{x}$.
 
-\begin{lemma}[Masked rewrite for unsigned comparison]
-\label{lem:mask_rewrite_cmp}
-Let $N=2^n$ and interpret $R=\mathbb{Z}_{2^n}$ by canonical representatives in $\{0,\ldots,N-1\}$.
-Fix an \emph{integer} threshold $\beta\in\{0,1,\ldots,N\}$ and a mask $r\in R$.
-Let $\hat{x}=(x+r)\bmod N$, $\theta=(r+\beta)\bmod N$, and let
-$w=\one[r+\beta\ge N]$ denote the carry bit of the integer addition $r+\beta$.
-Assume preprocessing provides an XOR-sharing $\langle w\rangle$ (equivalently, $w$ is a secret-shared constant).
-Then for all $x\in R$,
-\[
-\one[x<\beta] \;=\; \one[\hat{x}<\theta]\ \oplus\ \one[\hat{x}<r]\ \oplus\ w,
-\]
-where all comparisons are under the canonical order on $\{0,\ldots,N-1\}$.
-\end{lemma}
+\section{Low-bit predicate rewrite}
+\label{app:lowbit_rewrite}
+
+The following lemma provides the masked rewrite identity for low-bit predicates used by truncation/ARS-style helpers.
 
 \begin{lemma}[Masked rewrite for low-bit predicate]
 \label{lem:mask_rewrite_lowbit}
 Fix $f\in[n]$ and let $N_f=2^f$.
-Fix an \emph{integer} threshold $\gamma\in\{0,1,\ldots,N_f\}$ and a mask $r\in R$.
-Let $r_f=r\bmod N_f$, $\hat{x}_f=\hat{x}\bmod N_f$, $\theta=(r_f+\gamma)\bmod N_f$,
+Fix an integer threshold $\gamma\in\{0,1,\ldots,N_f\}$ and a mask $r\in R$.
+Let $r_f=\operatorname{rep}(r)\bmod N_f$ and $\hat{x}_f=\operatorname{rep}(\hat{x})\bmod N_f$,
+let $\theta=(r_f+\gamma)\bmod N_f$,
 and $w=\one[r_f+\gamma\ge N_f]$.
 Assume preprocessing provides an XOR-sharing $\langle w\rangle$.
 Then for all $x\in R$,
@@ -540,494 +1004,329 @@ Then for all $x\in R$,
 where comparisons are under the canonical order on $\{0,\ldots,N_f-1\}$.
 \end{lemma}
 
-\paragraph{A useful corollary: masked interval indicators cancel the $\one[\hat{x}<r]$ term.}
-Combining Lemma~\ref{lem:interval_indicator_xor} with Lemma~\ref{lem:mask_rewrite_cmp}, the indicator $\one[x\in I_i]$ can be expressed using only comparisons to \emph{shifted boundaries} in $\hat{x}$-space:
-\[
-  \begin{aligned}
-  \one[x\in I_i]
-  &=
-  \one[\hat{x}<(\alpha_{i+1}+r)\bmod 2^n] \\
-  &\quad\oplus
-  \one[\hat{x}<(\alpha_i+r)\bmod 2^n]
-  \oplus
-  w_{i+1}\oplus w_i.
-  \end{aligned}
-\]
-where $w_t=\one[r+\alpha_t\ge 2^n]$ are preprocessing-time carry bits (kept secret-shared for $t\in\{1,\ldots,m-1\}$; note $w_0=0$ and $w_m=1$ are public constants).
-This reduces the number of primitive masked comparisons needed for piece selection.
+\begin{proof}
+Let $x_f:=\operatorname{rep}(x)\bmod N_f$. Since $2^f\mid 2^n$, we have $\hat{x}_f=(x_f+r_f)\bmod N_f$.
+The statement follows by applying the same carry-bit argument as Lemma~\ref{lem:mask_rewrite_cmp} over $[0,N_f)$, equivalently by instantiating Lemma~\ref{lem:mask_rewrite_cmp} in $\mathbb{Z}_{2^f}$.
+\end{proof}
 
-\paragraph{MSB and signed predicates.}
-$\msb(x)$ can be expressed via an unsigned threshold test (e.g., $\msb(x)=\neg \one[x<2^{n-1}]$), and signed comparisons reduce to unsigned comparisons after a fixed constant shift of the canonical representative.
-The corresponding masked rewrites follow by applying Lemma~\ref{lem:mask_rewrite_cmp} to the shifted comparisons; full derivations (including $\msb(x+c)$) are deferred to the appendix.
 
-\subsection{Compiling a masked SUF gate to two \textsc{tFSS} templates}
-\label{sec:suf_to_tfss}
+\section{Full compilation Protocol}
+\label{app:compile_alg}
 
-\paragraph{Gate instances.}
-A \emph{SUF descriptor} is type-level and public.
-A \emph{gate instance} fixes preprocessing masks and therefore fixes the (secret) instance parameters used by \textsc{tFSS} templates (shifted thresholds, translated boundaries, payloads) while revealing only their public shapes.
-
-\begin{lemma}[Interval translation under masking]
-\label{lem:interval_translate}
-Let $I=[\alpha,\beta)\subseteq [0,2^n)$ be an interval over canonical representatives and let $\hat{x}=x+r\bmod 2^n$.
-Then the image of $I$ under $x\mapsto \hat{x}$ is the cyclic interval $[\alpha+r,\beta+r)\bmod 2^n$,
-which is either a standard interval or the union of two standard intervals.
-Across a full partition, \emph{at most one} interval wraps around $0$ after translation (and none wraps when the wrap point hits a boundary).
-Hence an $m$-interval SUF partition induces at most $m+1$ standard intervals in $\hat{x}$-space.
-\end{lemma}
+Protocol~\ref{alg:compile_tfss} gives high-level pseudocode for compiling a scalar gate instance into the two backend primitive instances.
 
 \begin{algorithm}[t]
-\caption{Compile a SUF gate instance to two \textsc{tFSS} templates (sketch)}
+\caption{Compile a scalar gate instance to two backend primitive instances}
 \label{alg:compile_tfss}
+\footnotesize
 \begin{algorithmic}[1]
-\Require SUF $(\{\alpha_i\},\{P_i\},\{B_i\})$ and preprocessing mask $r_{\mathrm{in}}$.
-\Ensure \textsc{PackCmp} instance $\Pi_{\mathrm{pred}}$ and \textsc{IntervalLUT} instance $\Pi_{\mathrm{coeff}}$.
-\State \textbf{(Lookup partition, mask-independent shape.)}
-Let $N=2^n$.
-Translate the \emph{non-sentinel} boundaries $\alpha_0,\ldots,\alpha_{m-1}$ to $\hat{x}$-space by
-$\tilde{\alpha}_i := (\alpha_i+r_{\mathrm{in}})\bmod N \in \{0,\ldots,N-1\}$, and sort them in canonical order.
-These $\tilde{\alpha}_i$ define a cyclic partition of $\mathbb{Z}_N$; to obtain a standard partition of $[0,N)$
-for \textsc{IntervalLUT}, refine it by inserting the wrap boundary $0$ if it is not already present (equivalently,
-split the unique translated interval that crosses $0$).
-Finally, enforce a fixed shape with $M=m{+}1$ intervals:
-if the refinement yields only $m$ intervals (i.e., $0$ was already a translated boundary), insert one additional
-dummy split point $\delta$ strictly inside any interval and duplicate that interval's payload on both sides.
+\Require Operator specification $(\{\alpha_i\}_{i=0}^{m},\{P_i\}_{i=0}^{m-1},\{B_i\}_{i=0}^{m-1})$ and preprocessing mask $r_{\mathrm{in}}\in R$.
+\Ensure Packed comparison instance $\Pi_{\mathrm{pred}}$ and interval lookup instance $\Pi_{\mathrm{coeff}}$.
 
-\State \textbf{(Boolean normalization.)} Normalize piecewise Boolean outputs via interval indicators (Lemma~\ref{lem:boolean_normalize}).
-\State \textbf{(Mask rewrite.)} Rewrite all primitive predicates under masking using Lemmas~\ref{lem:mask_rewrite_cmp}--\ref{lem:mask_rewrite_lowbit}
-      (carry bits provided as secret-shared instance constants; sentinel threshold cases are compiled away).
-\State \textbf{(Fixed predicate query list.)}
-Collect all masked comparison atoms appearing after rewriting in a \emph{fixed order}
-      determined by the SUF descriptor and metadata (no mask-dependent deduplication).
-      Each atom is put in canonical form $\one[\mathsf{view}_{k,c}(\hat{x}) < \theta]$ with $\theta\in\mathbb{Z}_{2^k}$.
-\State Build $\Pi_{\mathrm{pred}}$ as a single \textsc{PackCmp} instance whose query list is
-      exactly this fixed list (optionally, an implementation may batch/group queries by $k$ internally without changing public shape).
-\State Build $\Pi_{\mathrm{coeff}}$ as a single \textsc{IntervalLUT} instance whose payload returns additive shares of all active
-      polynomial coefficients and any per-interval constants needed by post-processing, using the fixed $M=m+1$-interval partition above.
+\State $N \gets 2^n$
+\Statex \hspace{\algorithmicindent}\Comment{Well-formed integer boundaries $0=\alpha_0<\cdots<\alpha_m=N$ imply $m\le N$.}
+\State $M \gets \min(m+1, N)$ \Comment{if $m=N$ then $M=N$ (padding to $N{+}1$ is impossible)}
+\State $r \gets \mathrm{rep}(r_{\mathrm{in}})\in\{0,\ldots,N-1\}$ \Comment{canonical representative}
+
+\State \textbf{(1) Lookup partition with mask-independent shape (target $M$ intervals).}
+\For{$i \gets 0$ \textbf{to} $m-1$}
+  \State $s_i \gets (\alpha_i + r)\bmod N$ \Comment{translated start of original interval $I_i=[\alpha_i,\alpha_{i+1})$}
+\EndFor
+\State Let $\pi$ be a permutation such that $s_{\pi(0)} < s_{\pi(1)} < \cdots < s_{\pi(m-1)}$
+\State $\beta_j \gets s_{\pi(j)}$ for $j=0,\ldots,m-1$ \Comment{sorted translated starts in $[0,N)$}
+
+\If{$\beta_0 = 0$} \Comment{$0\in\{s_i\}$, i.e., the wrap point hits an existing boundary; translated partition has $m$ intervals}
+  \State $B \gets (0,\beta_1,\ldots,\beta_{m-1},N)$
+  \State $\mathrm{ord} \gets (\pi(0),\pi(1),\ldots,\pi(m-1))$
+  \If{$M = m+1$} \Comment{equivalently $m < N$; pad by splitting one standard interval}
+    \State Let $j^\star$ be the \emph{smallest} index such that $B_{j^\star+1}-B_{j^\star}\ge 2$ \Comment{exists since $m<N$}
+    \State $\delta \gets B_{j^\star}+1$ \Comment{any integer with $B_{j^\star}<\delta<B_{j^\star+1}$ works}
+    \State Insert $\delta$ into $B$ \emph{at position} $j^\star{+}1$ \Comment{split $[B_{j^\star},B_{j^\star+1})$}
+    \State Insert a copy of $\mathrm{ord}_{j^\star}$ into $\mathrm{ord}$ \emph{at position} $j^\star{+}1$
+    \Comment{duplicate payload so both sub-intervals return identical data}
+  \EndIf
+\Else \Comment{$0\notin\{s_i\}$; exactly one translated interval wraps around $0$ and is split at $0$ (thus $m<N$ and $M=m+1$)}
+  \State $B \gets (0,\beta_0,\beta_1,\ldots,\beta_{m-1},N)$
+  \State $\mathrm{ord} \gets (\pi(m-1),\pi(0),\pi(1),\ldots,\pi(m-1))$
+  \Comment{$\pi(m-1)$ duplicated for the two pieces $[0,\beta_0)$ and $[\beta_{m-1},N)$}
+\EndIf
+\Statex \hspace{\algorithmicindent}\Comment{Now $|B|=M{+}1$ and $|\mathrm{ord}|=M$.
+The public shape $(M,p)$ is mask-independent; $(B,\mathrm{ord})$ may depend on $r$ but is embedded in secret keys.}
+
+\State \textbf{(2) Boolean normalization.}
+\State Normalize piecewise Boolean outputs via interval indicators (Lemma~\ref{lem:boolean_normalize}).
+
+\State \textbf{(3) Mask rewrite.}
+\State Rewrite all primitive predicates under masking using Lemmas~\ref{lem:mask_rewrite_cmp}--\ref{lem:mask_rewrite_lowbit} and MSB/signed reductions via fixed public shifts.
+\Statex \hspace{\algorithmicindent}\Comment{Carry/wrap bits depending only on $r$ are provided as secret-shared instance constants.}
+\Statex \hspace{\algorithmicindent}\Comment{Only descriptor-level sentinels are simplified: $C_0\equiv 0$, $C_N\equiv 1$, $D_{0,f}\equiv 0$, $D_{2^f,f}\equiv 1$.}
+
+\State \textbf{(4) Fixed predicate query list.}
+\State $\mathcal{Q} \gets$ collect all masked comparison atoms after rewriting in a fixed descriptor order.
+\Statex \hspace{\algorithmicindent}\Comment{No mask-dependent deduplication/elimination (e.g., do not drop atoms because a mask-derived $\theta$ happens to be $0$).}
+\Statex \hspace{\algorithmicindent}\Comment{Canonicalize to $\one[\mathsf{view}_{k,c}(\hat{x})<\theta]$ per backend interface.}
+
+\State \textbf{(5) Build backend instances.}
+\State Build $\Pi_{\mathrm{pred}}$ as a single packed comparison instance with query list $\mathcal{Q}$.
+\For{$j \gets 0$ \textbf{to} $M-1$}
+  \State Set payload $v_j \gets$ (coefficients/constants of $P_{\mathrm{ord}_j}$, padded to degree $d$ as needed)
+\EndFor
+\State Build $\Pi_{\mathrm{coeff}}$ as an interval lookup instance with boundaries $(B_0,\ldots,B_M)$ and payloads $(v_0,\ldots,v_{M-1})$.
 \end{algorithmic}
 \end{algorithm}
 
-\paragraph{Payload structure.}
-For degree-$d$ and $r$ arithmetic outputs, the coefficient payload includes $r(d+1)$ ring elements.
-To support fused post-processing (e.g., truncation/ARS corrections), we allow $\Pi_{\mathrm{coeff}}$ to additionally return a small number of per-interval constants; the payload length is $p=r(d+1)+p_{\mathrm{aux}}$.
-
-\begin{lemma}[Compiler correctness (SUF$\rightarrow$\textsc{tFSS})]
-\label{lem:compiler_correctness}
-Let $F:\mathsf{A}_n\to \mathsf{A}_n^r\times \mathsf{B}^\ell$ be a well-formed typed SUF
-descriptor with partition $(\alpha_i)_{i=0}^m$ and per-piece data $(P_i,B_i)$.
-Let preprocessing sample a uniform mask $r_{\mathrm{in}}\in R$ and provide additive shares
-$\share{r_{\mathrm{in}}}$, as well as any mask-derived secret-shared instance constants required by the
-masked rewrite rules (e.g., carry bits in Lemmas~\ref{lem:mask_rewrite_cmp}--\ref{lem:mask_rewrite_lowbit}).
-Let $(\Pi_{\mathrm{pred}},\Pi_{\mathrm{coeff}})$ be the \textsc{PackCmp} and \textsc{IntervalLUT}
-instances produced by Protocol~\ref{alg:compile_tfss} for $(F,r_{\mathrm{in}})$.
-Then for every $x\in R$ and $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$, the online evaluation procedure
-(open $\hat{x}$, evaluate $\Pi_{\mathrm{pred}}$ and $\Pi_{\mathrm{coeff}}$ on $\hat{x}$, derive shares of $x$ locally, evaluate Horner and the normalized Boolean circuit)
-outputs shares $(\share{\mathbf{y}},\langle\mathbf{z}\rangle)$ that
-reconstruct to $F(x)=(\mathbf{y},\mathbf{z})$.
-
-Moreover, for any SUF-compatible scalar gate $G$ with $G(x)=\Phi(F(x),\kappa,\hat{x},\mathsf{pub})$
-(Definition~\ref{def:suf_compatible}), the same compiled instances together with the fixed
-share-based evaluation of $\Phi$ reconstruct to $G(x)$.
-\end{lemma}
-
-\subsection{Two-template evaluation theorem}
-\label{sec:two_call}
-
-\begin{theorem}[Two-template evaluation for SUF-compatible scalar gates]
-\label{thm:two_call}
-Assume a \textsc{tFSS} backend implementing the two template families in Section~\ref{sec:tfss_prelim}:
-\textsc{PackCmp} with queries of the form $\one[\mathsf{view}_{k,c}(u)<\theta]$ and
-\textsc{IntervalLUT} for vector payload lookup on $u\in R$.
-Then any SUF gate instance (and, more generally, any SUF-compatible scalar gate in
-Definition~\ref{def:suf_compatible}) can be evaluated from a public masked input $\hat{x}$ using:
-
-\begin{enumerate}
-  \item \emph{At most two} non-interactive \textsc{tFSS} evaluations on $\hat{x}$:
-        one \textsc{PackCmp} evaluation producing XOR-shares of \emph{all} masked comparison atoms needed by the compiler
-        (possibly at multiple bit-widths $k$ via the public view operator $\mathsf{view}_{k,c}$),
-        and one \textsc{IntervalLUT} evaluation producing additive shares of the active coefficient/constant payload.
-        Either call may be omitted if the compiled instance does not require it.
-  \item $O(r\cdot d)$ ring multiplications (implemented via Beaver triples) for batched Horner evaluation of $r$ degree-$d$ polynomials
-        on secret shares of $x=\hat{x}-r_{\mathrm{in}}$ (Protocol~\ref{alg:masked_to_shares}).
-  \item A fixed post-processing circuit $\Phi$ whose interactive cost is captured by
-        $G_\wedge$ Boolean AND gates (on XOR shares) and $G_{\mathrm{mix}}$ mixed-domain uses (B2A/A2B),
-        plus any use of secret-shared instance constants $\kappa$ (which require no interaction to consume).
-\end{enumerate}
-All remaining interaction is confined to the standard openings required by Beaver/AND/B2A subprotocols.
-\end{theorem}
-
-\begin{proof}[Proof sketch]
-$\Pi_{\mathrm{pred}}$ returns XOR-shares of all masked comparisons required by the rewritten SUF predicate circuit (including those used to form interval indicators).
-$\Pi_{\mathrm{coeff}}$ returns additive shares of the active polynomial coefficients (and any per-interval constants) without revealing the active interval.
-Parties locally derive additive shares of $x=\hat{x}-r_{\mathrm{in}}$ and evaluate the selected polynomials via Horner's rule using Beaver triples.
-Finally, they evaluate the normalized Boolean circuit over XOR shares using XOR/NOT locally and AND/B2A when needed, and apply $\Phi$.
-\end{proof}
-
-\subsection{Security in the semi-honest preprocessing model}
-\label{sec:suf_security}
-
-\paragraph{Leakage.}
-A compiled gate instance induces public \emph{shape parameters}:
-the number of comparison queries $T$ (and their bit-width multiset $\{k_t\}$) in the \textsc{PackCmp} instance,
-and the interval count $M$ and payload dimension $p$ in the \textsc{IntervalLUT} instance.
-We model this as an explicit leakage function $\mathcal{L}_{\mathrm{shape}}$.
-In addition, the online protocol reveals public masked openings (e.g., $\hat{x}=x+r_{\mathrm{in}}$
-and optional masked outputs), which are information-theoretically independent of secrets under fresh uniform masks;
-we include them in the public transcript.
-All mask-derived constants (e.g., carry bits) remain secret-shared and are treated as part of preprocessing material.
-
-\paragraph{Ideal functionality.}
-Fix a gate type $\tau$ with ideal scalar functionality
-$G_\tau(x)=\Phi_\tau(F_\tau(x),\kappa,\hat{x},\mathsf{pub})$ (Definition~\ref{def:suf_compatible}).
-The ideal execution for one gate instance samples fresh masks and correlated randomness as in preprocessing,
-reveals $\mathcal{L}_{\mathrm{shape}}$ and the public masked openings, and returns to each party additive/XOR shares
-of the gate outputs consistent with $G_\tau(x)$.
-
-\begin{theorem}[Semi-honest security with leakage (gate level)]
-\label{thm:gate_security_leakage}
-Assume:
-(i) the \textsc{tFSS} template families \textsc{PackCmp} and \textsc{IntervalLUT} are FSS-secure with shape leakage
-(as defined in Section~\ref{sec:tfss_prelim}), and
-(ii) the preprocessing-based subprotocols used in post-processing (Beaver multiplication over $R$,
-Boolean AND over $\mathbb{Z}_2$, and B2A/A2B when invoked) are semi-honest secure.
-Then for any compiled gate instance, the real-world view of a semi-honest adversary corrupting either party
-is computationally indistinguishable from the view produced by a PPT simulator given only that party's input share, its output shares, the explicit leakage
-$\mathcal{L}_{\mathrm{shape}}$ and the public masked openings.
-\end{theorem}
-
-\paragraph{Proof sketch.}
-The simulator samples masked openings uniformly (matching the real distribution under fresh masks),
-uses the \textsc{tFSS} simulator(s) to generate indistinguishable keys and local outputs for the adversary's party
-given $\mathcal{L}_{\mathrm{shape}}$,
-and simulates Beaver/AND/B2A openings using their standard simulators.
-A full hybrid proof is given in Appendix~\ref{app:security}.
-
-\section{Composite-FSS Gates}
-\label{sec:composite_fss}
-
-\paragraph{From compilation to reusable protocol modules.}
-Section~\ref{sec:suf_compile} compiles each SUF gate into (up to) two \textsc{tFSS} template instances evaluated on the public masked input $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$,
-followed by a fixed share-based post-processing template (Horner evaluation and Boolean combining).
-We package this end-to-end protocol into a \emph{Composite-FSS gate} abstraction that yields a clean unit for batching and a generic correctness/security argument, while making explicit what is instance-dependent (masks, mask-derived constants, and \textsc{tFSS} keys) versus type-dependent (the SUF descriptor and post-processing).
-
-\subsection{Gate interface}
-A gate type $\tau$ is defined by:
-(i) a SUF descriptor $F_\tau:\mathsf{A}_n\to \mathsf{A}_n^r\times \mathsf{B}^\ell$, and
-(ii) a fixed, deterministic post-processing circuit
-\[
-\Phi_\tau:\big(\mathsf{A}_n^r\times \mathsf{B}^\ell\big)\times \mathsf{K}_\tau \times \mathsf{Pub}
-\to \mathsf{A}_n^{r'}\times \mathsf{B}^{\ell'},
-\]
-where $\mathsf{K}_\tau$ denotes the type of any \emph{secret-shared instance constants} (e.g., carry bits)
-derived from preprocessing masks, and $\mathsf{Pub}$ denotes any public values available at evaluation time,
-including the public masked input $\hat{x}$ and public approximation metadata.
-A gate instance is one invocation of $\tau$ on one scalar wire, together with its instance constants $\kappa\in\mathsf{K}_\tau$.
-
-\subsection{Preprocessing}
-For each gate instance, preprocessing provides to each party:
-\begin{itemize}
-  \item mask shares $\share{r_{\mathrm{in}}}$ (and optionally $\share{r_{\mathrm{out}}}$),
-  \item any mask-derived \emph{secret-shared instance constants} required by compilation (e.g., carry bits in Lemmas~\ref{lem:mask_rewrite_cmp}--\ref{lem:mask_rewrite_lowbit}),
-  \item \textsc{tFSS} keys for the compiled templates $(\Pi_{\mathrm{pred}},\Pi_{\mathrm{coeff}})$,
-  \item Beaver triples for ring multiplications, Boolean AND correlation for XOR-shared bits, and any required B2A/A2B material.
-\end{itemize}
-A conceptual dealer samples masks, derives the instance-specific constants, runs Protocol~\ref{alg:compile_tfss} for $F_\tau$, then generates the corresponding \textsc{tFSS} keys and correlated randomness.
-The dealer may also publish the public shape parameters of the instance (e.g., number of predicates and payload dimension), which we treat as unavoidable leakage.
-
-\subsection{Online evaluation}
-Given an arithmetic-shared input $\share{x}$:
-\begin{enumerate}
-  \item Materialize $\hat{x}=x+r_{\mathrm{in}}$ by a batched opening (Protocol~\ref{alg:shares_to_masked}).
-  \item Run packed comparisons (if needed): obtain XOR-shares of all primitive predicate bits via $\Pi_{\mathrm{pred}}$ on input $\hat{x}$.
-  \item Run interval lookup (if needed): obtain additive shares of coefficients/constants via $\Pi_{\mathrm{coeff}}$ on input $\hat{x}$.
-  \item Evaluate polynomials using Beaver triples (batched Horner) to obtain $\share{\mathbf{y}}$; evaluate Boolean circuits and $\Phi_\tau$ over XOR shares using AND/B2A as needed.
-\end{enumerate}
-Optionally, if the next consumer requires a masked public output, parties open $\hat{\mathbf{y}}=\mathbf{y}+r_{\mathrm{out}}$ using fresh output masks.
-
-\subsection{Correctness and security}
-\begin{theorem}[Correctness of Composite-FSS gates]
-For any gate type $\tau$ and any instance generated in preprocessing with instance constants $\kappa$,
-the online evaluation outputs shares $\big(\share{\mathbf{y}},\langle\mathbf{z}\rangle\big)$ such that
-\[
-(\mathbf{y},\mathbf{z})=\Phi_\tau\big(F_\tau(x),\kappa,\hat{x},\mathsf{pub}\big)
-\]
-for the underlying secret input $x$ and public masked opening $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$.
-\end{theorem}
-
-
-\begin{corollary}[Semi-honest security of Composite-FSS gates (with leakage)]
-\label{cor:composite_security}
-Under the assumptions of Theorem~\ref{thm:gate_security_leakage}, each Composite-FSS gate
-instance securely realizes its corresponding ideal gate functionality in the preprocessing
-model, with leakage consisting of the public masked openings and the public \textsc{tFSS}
-shape parameters.
-\end{corollary}
-\begin{proof}
-Immediate from Theorem~\ref{thm:gate_security_leakage} and standard sequential composition.
-\end{proof}
-
-\section{Evaluation}
-\label{sec:eval}
-
-We evaluate end-to-end secure transformer inference using our SUF+TFSS prototype and compare against
-\textsc{Sigma} under matched benchmark settings.
-
-\subsection{Benchmark setup}
-\label{sec:eval_setup}
-
-We report results at sequence length $L=128$ and batch size $B=1$ on a GPU-based two-party harness.
-We benchmark \texttt{bert-tiny}, \texttt{bert-base}, \texttt{bert-large}, \texttt{gpt2}, and \texttt{gpt-neo-1.3b}.
-Our harness runs multiple iterations so that preprocessing (key generation) time can be separated from steady-state
-online timing; in the current snapshot we use $3$ iterations for SUF.\footnote{See the artifact for the exact benchmark configuration and logs.}
-
-\paragraph{Metrics.}
-We report:
-(i) online wall-clock time and total online communication,
-and (ii) preprocessing material size and preprocessing key generation time, including TFSS keys, masks, and correlated randomness
-required by the protocol for one end-to-end inference.
-
-\subsection{End-to-end online performance}
-
-\begin{table}[t]
-\centering
-\caption{Online cost (GPU, $L=128$, $B=1$). ``Sigma/SUF'' reports the two values in seconds (resp.\ GB).}
-\label{tab:online}
-\small
-{\setlength{\tabcolsep}{4pt}%
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Model & \shortstack{Time (s)\\Sigma/SUF} & Speedup & \shortstack{Comm (GB)\\Sigma/SUF} \\
-\midrule
-bert-tiny     & 0.170 / 0.059 & 2.86$\times$ & 0.022 / 0.016 \\
-bert-base     & 2.659 / 1.480 & 1.80$\times$ & 1.062 / 0.580 \\
-bert-large    & 6.774 / 3.348 & 2.02$\times$ & 2.833 / 1.547 \\
-gpt2          & 2.451 / 1.406 & 1.74$\times$ & 0.885 / 0.609 \\
-gpt-neo-1.3b  & 11.236 / 4.273 & 2.63$\times$ & 4.326 / 2.658 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Across all tested models, SUF improves online latency (up to $2.86\times$ on \texttt{bert-tiny} and $2.63\times$ on \texttt{gpt-neo-1.3b})
-and reduces online communication by up to $\approx 1.8\times$ in this setting.
-Qualitatively, the SUF compiler reduces the number of distinct TFSS template invocations per nonlinearity and exposes a uniform
-two-template structure that our runtime can batch and overlap more effectively.
-
-\subsection{Preprocessing cost}
-
-\begin{table}[t]
-\centering
-\caption{Preprocessing cost (GPU, $L=128$, $B=1$). ``Sigma/SUF'' reports the two values in seconds (resp.\ GB).}
-\label{tab:preproc}
-\small
-{\setlength{\tabcolsep}{4pt}%
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Model & \shortstack{Material (GB)\\Sigma/SUF} & Ratio & \shortstack{Keygen (s)\\Sigma/SUF} \\
-\midrule
-bert-tiny     & 0.350 / 0.026 & 13.5$\times$ & 1.57 / 0.33 \\
-bert-base     & 18.076 / 1.135 & 15.9$\times$ & 20.37 / 0.54 \\
-bert-large    & 48.800 / 2.989 & 16.3$\times$ & 41.71 / 0.39 \\
-gpt2          & 15.346 / 1.135 & 13.5$\times$ & 20.52 / 0.49 \\
-gpt-neo-1.3b  & 81.806 / 3.693 & 22.2$\times$ & 40.24 / 3.50 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-SUF substantially reduces preprocessing footprint: material size shrinks by $13\times$--$22\times$ across these models,
-and preprocessing key generation is up to $\approx 108\times$ faster on \texttt{bert-large}.
-This is consistent with SUF collapsing multi-stage, per-primitive pipelines into a small constant number of TFSS template instances per gate,
-thereby eliminating redundant per-layer key material.
-
-\subsection{Limitations and additional evaluation}
-
-Our current snapshot focuses on protocol and system costs at a fixed sequence length and batch size and under a fixed set of fixed-point approximations.
-A full submission should additionally report:
-(i) ablations that separate gains due to compilation (two-template structure) versus runtime batching/packing,
-(ii) scaling with sequence length and batch size, and
-(iii) numerical fidelity/accuracy under the chosen fixed-point configuration.
-
-\section{Conclusion}
-
-We introduced SUF, a structured intermediate representation for fixed-point scalar nonlinearities, together with a mask-aware compiler that targets
-a TFSS backend via (at most) two template instances per gate: a packed predicate instance and an interval-LUT coefficient instance.
-Combined with a uniform Beaver-based post-processing template and a batching-friendly runtime, SUF reduces protocol design complexity
-and achieves substantial end-to-end improvements over \textsc{Sigma} in both online cost and preprocessing footprint in our GPU benchmarks.
-
-\clearpage
-\IfFileExists{suf_v2.bib}{\bibliography{suf_v2}}{\bibliography{example_paper}}
-\bibliographystyle{icml2026}
-
-\appendix
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Scope of SUF Descriptors and How Vector Blocks Compose}
+\section{Scope of operator specifications and composition of vector blocks}
 \label{app:scope}
 
-This appendix clarifies the boundary of the SUF function class and how
-vector-level transformer blocks (e.g., softmax and layer normalization)
-are expressed by composing SUF(-compatible) scalar gates with standard MPC
-subprotocols.
+This appendix complements Section~\ref{sec:suf_scope} by clarifying the exact function class covered by operator specifications and illustrating how vector-level transformer blocks are expressed by composing standard MPC reductions with elementwise specification-compatible scalar gates (Definition~\ref{def:suf_compatible}).
 
-\paragraph{What SUF covers (scalar nonlinearities + scalar helpers).}
-A SUF \emph{descriptor} (Definition~\ref{def:suf}) is intended for \emph{scalar}
-maps on fixed-point words over $R=\mathbb{Z}_{2^n}$, i.e., functions whose input
-is one ring element and whose output is a constant-size tuple of ring elements
-and bits. This naturally includes elementwise nonlinear activations that are
-implemented as piecewise low-degree polynomial approximations (e.g., ReLU and
-spline-approximated GeLU/SiLU).
 
-Scalar fixed-point \emph{helper} operations (e.g., truncation/ARS and variants)
-may not be literal ring polynomials. In our framework they are handled as
-\emph{SUF-compatible scalar gates} (Definition~\ref{def:suf_compatible}): the SUF
-descriptor exposes the required predicate/helper bits (and any piecewise
-polynomial components), and a fixed deterministic share-based post-processing
-circuit $\Phi$ implements the faithful fixed-point semantics (including any
-wrap-/round-aware corrections) using standard preprocessing (Beaver/AND/B2A).
+\paragraph{What operator specifications cover.}
+An operator specification (Definition~\ref{def:suf}) targets scalar maps on fixed-point words over $R=\mathbb{Z}_{2^n}$: the input is one ring element and the output is a constant-size tuple of ring elements and bits. This naturally includes elementwise nonlinear activations implemented by piecewise low-degree polynomial approximations (e.g., ReLU and spline-approximated GeLU/SiLU), as well as range-reduced polynomial blocks used in practice (e.g., $\mathrm{nExp}$).
 
-\paragraph{What SUF does not attempt to cover (vector reductions / data-dependent control).}
-SUF is not an IR for vector reductions such as $\max$ over a vector,
+Many scalar fixed-point helper operations (e.g., truncation/ARS and wrap-/round-aware corrections) are not literal polynomials in $R$. In our framework they are handled as specification-compatible scalar gates (Definition~\ref{def:suf_compatible}): the operator specification exposes the required predicate/helper bits and any piecewise polynomial components, while a fixed deterministic share-based post-processing circuit $\Phi$ implements the faithful fixed-point semantics using standard preprocessing (Beaver/AND/B2A/A2B).
+
+\paragraph{What operator specifications do not cover.}
+Operator specifications are not intended as an IR for vector reductions such as $\max$ over a vector,
 sorting, top-$k$, or attention sparsification with data-dependent routing.
 These operations are not univariate scalar functions and typically require
 interactive MPC subprotocols (e.g., comparison trees) whose structure depends
 on vector length.
-Our paper treats them as separate, standard MPC components.
+We treat them as separate, standard MPC components.
 
 \paragraph{How softmax / layer norm are handled.}
 Vector blocks are expressed as compositions of:
 (i) linear operations over additive shares (free additions and Beaver multiplications),
 (ii) comparison-based reductions (e.g., max-reduction via a comparison tree),
-and (iii) scalar SUF-compatible gates (e.g., $\mathrm{nExp}$ and reciprocal / rsqrt).
+and (iii) scalar specification-compatible gates (e.g., $\mathrm{nExp}$ and reciprocal / rsqrt).
 For example, a standard fixed-point softmax pipeline can be written as:
 \begin{enumerate}
-  \item $m \leftarrow \max_i x_i$ (comparison tree; not SUF).
-  \item $x'_i \leftarrow x_i - m$ (linear).
-  \item $e_i \leftarrow \mathrm{nExp}(x'_i)$ (SUF-compatible scalar gate).
-  \item $s \leftarrow \sum_i e_i$ (linear).
-  \item $t \leftarrow \mathrm{Recip}(s)$ (SUF-compatible scalar gate).
-  \item $y_i \leftarrow e_i \cdot t$ (Beaver multiplications).
+ \item $m \leftarrow \max_i x_i$ (comparison tree; not covered by operator specifications).
+ \item $x'_i \leftarrow x_i - m$ (linear).
+ \item $e_i \leftarrow \mathrm{nExp}(x'_i)$ (specification-compatible scalar gate).
+ \item $s \leftarrow \sum_i e_i$ (linear).
+ \item $t \leftarrow \mathrm{Recip}(s)$ (specification-compatible scalar gate).
+ \item $y_i \leftarrow e_i \cdot t$ (Beaver multiplications).
 \end{enumerate}
 LayerNorm is similar: mean/variance reductions are linear,
-while reciprocal-square-root is a scalar SUF-compatible gate.
+while reciprocal-square-root is a scalar specification-compatible gate.
 
-\paragraph{Why this boundary matters for claims.}
-In the main text, claims about ``coverage'' should be interpreted as:
-SUF targets the scalar nonlinear and helper kernels that dominate fixed-point
-secure transformer inference cost (either directly as SUF descriptors or via
-SUF-compatible gates with fixed post-processing), while vector reductions are
-handled by standard MPC subprotocols and composed with SUF gates.
+Our FuseFSS targets the scalar nonlinear operators and helper operations that dominate fixed-point
+secure transformer inference cost (either directly as operator specifications or via
+specification-compatible gates with fixed post-processing), while vector reductions are
+handled by standard MPC subprotocols and composed with scalar gates.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Typed SUF: A Minimal Type Discipline}
-\label{app:types}
+\section{Typing discipline and typed specification language}
+\label{app:typed_suf}
 
-We restate the type discipline underlying ``typed SUF'' to make the compilation
-and mixed-domain operations explicit.
+This appendix consolidates the typing discipline and the minimal typed expression language
+used for operator specifications and specification-compatible post-processing.
 
-\paragraph{Base types.}
-We use two base value types:
+\paragraph{Base types and sharing domains.}
+Fix $n\ge 1$ and let $R=\mathbb{Z}_{2^n}$. We use two base value types:
 \[
-  \mathsf{A}_n := R=\mathbb{Z}_{2^n}, \qquad \mathsf{B} := \{0,1\}.
+ \mathsf{A}_n := R=\mathbb{Z}_{2^n}, \qquad \mathsf{B} := \{0,1\}.
 \]
-Arithmetic wires have type $\mathsf{A}_n$ and are additively shared.
-Bit wires have type $\mathsf{B}$ and are XOR-shared.
+Arithmetic wires have type $\mathsf{A}_n$ and are represented as additive shares
+$\share{x}=(x_0,x_1)$ with $x=x_0+x_1 \bmod 2^n$.
+Bit wires have type $\mathsf{B}$ and are represented as XOR shares
+$\langle b\rangle=(b_0,b_1)$ with $b=b_0\oplus b_1$.
 
-\paragraph{Primitive predicate typing.}
-Each primitive predicate is typed as a map $\mathsf{A}_n\to\mathsf{B}$:
-\[
-  \begin{aligned}
-    C_\beta(x) &= \one[x<\beta]                 : \mathsf{A}_n\to\mathsf{B}, \\
-    D_{\gamma,f}(x) &= \one[(x\bmod 2^f)<\gamma] : \mathsf{A}_n\to\mathsf{B}, \\
-    \msb(\cdot) &:\mathsf{A}_n\to\mathsf{B}.
-  \end{aligned}
-\]
-Boolean connectives $\neg,\wedge,\vee,\oplus$ are operations on $\mathsf{B}$.
+\paragraph{Embedding.}
+We use the canonical embedding $\iota:\mathsf{B}\hookrightarrow \mathsf{A}_n$ that maps
+$0,1\in\mathsf{B}$ to the corresponding ring elements in $R$.
 
-\paragraph{SUF signature.}
-A typed SUF descriptor has signature
+\paragraph{Primitive predicates and typing.}
+Primitive predicates are typed maps $\mathsf{A}_n\to\mathsf{B}$:
 \[
-  F:\mathsf{A}_n \to \mathsf{A}_n^r \times \mathsf{B}^\ell,
+ \begin{aligned}
+ C_\beta(x) &= \one[x<\beta] : \mathsf{A}_n\to\mathsf{B}, \\
+ D_{\gamma,f}(x) &= \one[(x\bmod 2^f)<\gamma] : \mathsf{A}_n\to\mathsf{B}, \\
+ \msb(x+c) &:\mathsf{A}_n\to\mathsf{B},
+ \end{aligned}
 \]
-optionally annotated with fixed-point metadata (fractional bits, signedness)
-that determine which predicates and helper bits are required by faithful
-fixed-point semantics.
+where $\beta\in\{0,\ldots,2^n\}$, $f\in\{1,\ldots,n\}$, $\gamma\in\{0,\ldots,2^f\}$, and $c\in R$ is a public constant.
+Boolean connectives $\neg,\wedge,\vee,\oplus$ are operations on $\mathsf{B}$ (with $\oplus$ denoting XOR).
 
 \paragraph{Mixed-domain conversions.}
-Whenever a bit gates arithmetic computation, the compiler inserts a conversion
-$\mathsf{B2A}: \langle b\rangle \mapsto \share{b}$ where $b\in\{0,1\}\subset R$.
-This is treated as a standard secure preprocessed subprotocol; its uses are
+Whenever a bit gates arithmetic computation, we use a standard secure conversion
+\[
+ \mathsf{B2A}:\langle b\rangle \mapsto \share{\iota(b)} \in \mathsf{A}_n,
+\]
+and whenever an arithmetic (secret-shared) value must be used as a bit, we use
+\[
+ \mathsf{A2B}:\share{x} \mapsto \langle b\rangle \quad\text{for a suitable extracted bit } b.
+\]
+Both are treated as standard preprocessing-based secure subprotocols; their invocations are
 counted in complexity statements.
 
+\paragraph{Operator specification signature.}
+A typed operator specification has signature
+\[
+ F:\mathsf{A}_n \to \mathsf{A}_n^r \times \mathsf{B}^\ell,
+\]
+optionally annotated with fixed-point metadata (fractional bits, signedness), which determines
+which primitive predicates and correction bits are required by faithful fixed-point semantics.
+The semantic definition of an operator specification (partition, per-interval polynomials and Boolean formulas)
+is given in Definition~\ref{def:suf}.
+
+\paragraph{Post-processing circuits and instance constants.}
+A specification-compatible scalar gate $G$ (Definition~\ref{def:suf_compatible}) is implemented as
+\[
+ G(x)=\Phi\big(F(x),\kappa,\hat{x},\mathsf{pub}\big),
+\]
+where $\hat{x}=(x+r_{\mathrm{in}})\bmod 2^n$ is the public masked input and
+$\kappa=\kappa(r_{\mathrm{in}})$ denotes mask-derived instance constants (kept secret-shared).
+To make typing explicit, we view
+\[
+ \kappa \in \mathsf{K} := \mathsf{A}_n^{a} \times \mathsf{B}^{b},
+\]
+i.e., $\kappa=(\kappa^{\mathsf{A}},\kappa^{\mathsf{B}})$ consists of $a$ ring elements (additively shared) and $b$ bits (XOR-shared).
+The public parameter bundle $\mathsf{pub}$ may include $\hat{x}$, bit-widths, scaling metadata, and approximation parameters.
+
+\subsection*{A minimal typed expression language}
+
+\paragraph{Bit expressions for operator specifications.}
+Within an operator specification, each per-interval Boolean output is a bit expression over the input $x$:
+\[
+ \begin{aligned}
+ b_{\mathrm{spec}} ::= {}&
+ 0 \mid 1 \mid C_\beta(x) \mid D_{\gamma,f}(x) \mid \msb(x+c) \\
+ &\mid \neg b_{\mathrm{spec}}
+ \mid (b_{\mathrm{spec}}\oplus b_{\mathrm{spec}})
+ \mid (b_{\mathrm{spec}}\wedge b_{\mathrm{spec}})
+ \mid (b_{\mathrm{spec}}\vee b_{\mathrm{spec}}).
+ \end{aligned}
+\]
+All such expressions have type $\mathsf{B}$.
+
+\paragraph{Polynomial expressions for arithmetic outputs.}
+Each per-interval arithmetic output is a ring polynomial in the single variable $x$ (evaluated in $R$):
+\[
+ p ::= c \mid x \mid p+p \mid p-p \mid p\cdot p,
+\]
+where $c\in R$ is a descriptor constant. Each $p$ has type $\mathsf{A}_n$.
+
+\paragraph{Post-processing expressions.}
+The post-processing circuit $\Phi$ may compute both arithmetic outputs and Boolean outputs from:
+(i) the arithmetic outputs $y_j\in\mathsf{A}_n$ and Boolean outputs $z_j\in\mathsf{B}$ of $F(x)$,
+(ii) mask-derived instance constants $\kappa=(\kappa^{\mathsf{A}},\kappa^{\mathsf{B}})$, and
+(iii) public values including $\hat{x}$.
+
+We use two mutually-typed expression grammars:
+
+\emph{Bit expressions for $\Phi$} (type $\mathsf{B}$):
+\[
+ \begin{aligned}
+ b ::= {}&
+ 0 \mid 1 \mid z_j \mid \kappa^{\mathsf{B}}_t \mid \mathsf{A2B}(e) \\
+ &\mid \neg b
+ \mid (b\oplus b)
+ \mid (b\wedge b)
+ \mid (b\vee b).
+ \end{aligned}
+\]
+
+\emph{Arithmetic expressions for $\Phi$} (type $\mathsf{A}_n$):
+\[
+ \begin{aligned}
+ e ::= {}&
+ c \mid y_j \mid \kappa^{\mathsf{A}}_t \mid \hat{x} \\
+ &\mid e+e \mid e-e \mid e\cdot e \mid \mathsf{B2A}(b),
+ \end{aligned}
+\]
+where $c\in R$ may also include public constants derived from $\mathsf{pub}$.
+
+\paragraph{Well-formedness.}
+An operator specification is well-formed if:
+(i) its boundaries are strictly increasing integers,
+(ii) each per-interval arithmetic output is a polynomial expression in $R[x]$, and
+(iii) each Boolean output is a well-typed bit expression built from primitive predicates and connectives.
+
+A specification-compatible gate $(F,\Phi)$ is well-formed if:
+(i) $\Phi$ is fixed (descriptor-determined) and independent of the input and sampled mask beyond its access to $(\kappa,\hat{x},\mathsf{pub})$ as parameters, and
+(ii) any use of a bit in arithmetic inside $\Phi$ occurs only via an explicit $\mathsf{B2A}(\cdot)$ node, and any extraction of a bit from a secret-shared ring value occurs only via an explicit $\mathsf{A2B}(\cdot)$ node.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{tFSS Interfaces Without Introducing New Primitives}
+\section{Backend interface}
 \label{app:tfss_interface}
 
-This appendix formalizes a minimal interface sufficient for the SUF compiler,
-while keeping the assumptions ``implementation-realistic'' and avoiding any
-new cryptographic primitive.
+This appendix formalizes a minimal interface sufficient for the compiler,
+while keeping the assumptions ``implementation-realistic''.
 
-\subsection{A multi-view packed predicate template}
+\subsection{A multi-view packed predicate primitive}
 \label{app:tfss_pred}
 
-Section~\ref{sec:tfss_prelim} defines \textsc{PackCmp} as a single template family
-that evaluates a \emph{list} of comparisons on the same public masked input
+Section~\ref{sec:tfss_prelim} defines packed comparison as a single primitive family
+that evaluates a list of comparisons on the same public masked input
 $\hat{x}\in R$, where each query may use a different bit-width $k_t$ and an
 optional public shift $c_t$ through the public view operator
 $\mathsf{view}_{k,c}(\cdot)$.
-This appendix restates that interface as a \emph{multi-view} packed predicate
-template to make explicit that full-width comparisons, low-bit predicates, and
+This appendix restates that interface as a multi-view packed predicate
+primitive to make explicit that full-width comparisons, low-bit predicates, and
 shifted/signed predicates can all be handled within a single non-interactive
-template evaluation per gate instance.
+primitive evaluation per gate instance.
 
-\begin{definition}[Multi-view packed predicate template]
+\begin{definition}[Multi-view packed predicate primitive]
 \label{def:tfss_pred}
 Fix $n\ge 1$ and $R=\mathbb{Z}_{2^n}$.
-A multi-view packed predicate template instance is specified by a list
+A multi-view packed predicate primitive instance is specified by a list
 \[
-  \mathcal{Q}=\big((k_t, c_t, \theta_t)\big)_{t=1}^{T},
+ \mathcal{Q}=\big((k_t, c_t, \theta_t)\big)_{t=1}^{T},
 \]
 where $1\le k_t\le n$, $c_t\in\mathbb{Z}_{2^{k_t}}$ is a public constant,
 and $\theta_t\in\mathbb{Z}_{2^{k_t}}$ is an instance parameter (possibly derived
 from preprocessing-time secrets such as masks).
 On input $\hat{x}\in R$, define the public view
 \[
-  \mathsf{view}_{k,c}(\hat{x}) := \big((\hat{x}\bmod 2^k) + c\big)\bmod 2^k
-  \in \mathbb{Z}_{2^k},
+ \mathsf{view}_{k,c}(\hat{x}) := \big((\hat{x}\bmod 2^k) + c\big)\bmod 2^k
+ \in \mathbb{Z}_{2^k},
 \]
-and define the template output bits
+and define the output bits
 \[
-  \mathrm{Pred}_{\mathcal{Q}}(\hat{x}) :=
-  \Big(\one[\mathsf{view}_{k_t,c_t}(\hat{x}) < \theta_t]\Big)_{t=1}^T \in \{0,1\}^T.
+ \mathrm{Pred}_{\mathcal{Q}}(\hat{x}) :=
+ \Big(\one[\mathsf{view}_{k_t,c_t}(\hat{x}) < \theta_t]\Big)_{t=1}^T \in \{0,1\}^T.
 \]
-A \textsc{tFSS} backend provides algorithms $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$
+A backend provides algorithms $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$
 such that $\mathsf{Gen}(1^\lambda,\mathcal{Q})\to(k_0,k_1)$ and on public $\hat{x}$,
 each party outputs XOR-shares
 $\mathsf{Eval}_b(k_b,\hat{x})\in\{0,1\}^T$ whose XOR reconstructs to
 $\mathrm{Pred}_{\mathcal{Q}}(\hat{x})$.
 \end{definition}
 
-\paragraph{Why this is ``not new''.}
 Definition~\ref{def:tfss_pred} is an interface-level abstraction.
-It can be instantiated by existing DCF/CDPF-style implementations by generating one
+It can be instantiated by existing DCF/DPF-style implementations by generating one
 comparison key per query $(k_t,c_t,\theta_t)$ and concatenating/batching keys.
 Each party can locally compute the public views $\mathsf{view}_{k_t,c_t}(\hat{x})$
 and evaluate all comparison keys in a single batched routine (e.g., one GPU kernel launch).
 The security proofs in this paper only rely on standard single-key privacy of
-FSS templates (with public shape leakage), not on any backend-specific trick.
+FSS primitives (with public shape leakage).
 
 \subsection{Interval lookup with vector payload}
 \label{app:tfss_lookup}
 
-We restate the interval-lookup template: given boundaries and payload vectors,
+We restate the interval-lookup primitive: given boundaries and payload vectors,
 on input $\hat{x}\in R$ output additive shares of the payload for the unique
 interval containing $\hat{x}$.
 
+\begin{definition}[Interval lookup with vector payload]
+\label{def:tfss_lookup}
+Fix $n\ge 1$ and $R=\mathbb{Z}_{2^n}$. An interval-lookup instance is specified by boundaries
+$0=\alpha_0<\cdots<\alpha_M=2^n$ and payload vectors $v_i\in R^p$ for $i\in\{0,\ldots,M-1\}$.
+On input $\hat{x}\in R$, let $i^\star$ be the unique index such that $\operatorname{rep}(\hat{x})\in[\alpha_{i^\star},\alpha_{i^\star+1})$
+and define $\mathrm{LUT}(\hat{x}):=v_{i^\star}\in R^p$.
+A backend provides algorithms $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$ such that $\mathsf{Gen}(1^\lambda,(\{\alpha_i\},\{v_i\}))\to(k_0,k_1)$ and,
+on public $\hat{x}$, each party outputs additive shares $\mathsf{Eval}_b(k_b,\hat{x})\in R^p$ that sum (in $R^p$) to $\mathrm{LUT}(\hat{x})$.
+\end{definition}
+
 \paragraph{Fixed shape requirement.}
 For our real/ideal security statement with a clean leakage function,
-we require that public shape parameters---the number of predicate outputs $T$,
-the number of intervals, and the payload dimension $p$---depend only on the
-\emph{SUF type descriptor} (public) and not on preprocessing-time secrets (e.g.,
+we require that public shape parameters, the number of predicate outputs $T$,
+the number of intervals, and the payload dimension $p$, depend only on the
+operator specification (public) and not on preprocessing-time secrets (e.g.,
 masks). This avoids ``mask-dependent key length'' leakage.
 In practice, this can be ensured by:
 (i) disabling deduplication that might depend on mask-derived thresholds,
@@ -1037,9 +1336,9 @@ We formalize this below.
 
 \begin{proposition}[Mask-independent shape via padding]
 \label{prop:shape_padding}
-Fix a SUF descriptor with $m$ intervals and fixed predicate grammar size.
-There exists a compiler convention such that the emitted \textsc{tFSS} instances
-have public shape parameters $(T,p,M)$ that depend only on the descriptor
+Fix an operator specification with $m$ intervals and fixed predicate grammar size.
+There exists a compiler convention such that the emitted backend interface instances
+have public shape parameters $(T,p,M)$ that depend only on the operator specification
 (and fixed-point metadata), where $T$ is the number of predicate outputs,
 $p$ is the payload dimension, and $M$ is the number of lookup intervals,
 and are independent of the sampled mask $r_{\mathrm{in}}$.
@@ -1047,21 +1346,36 @@ and are independent of the sampled mask $r_{\mathrm{in}}$.
 
 \begin{proof}
 The number of primitive predicates required by the compiler (before masking)
-is determined syntactically by the SUF descriptor and metadata.
+is determined syntactically by the operator specification and metadata.
 Each such predicate is rewritten into a fixed number of masked comparison
 queries (two comparisons per Lemmas~\ref{lem:mask_rewrite_cmp} and
 \ref{lem:mask_rewrite_lowbit}), plus a constant number of MSB/signed-related
-comparisons. By \emph{not} performing any deduplication that depends on mask-derived
+comparisons. By not performing any deduplication that depends on mask-derived
 threshold values, we obtain a fixed $T$.
+
+For interval lookup, Lemma~\ref{lem:interval_translate} shows the translated
+partition uses at most $m+1$ standard intervals, and with integer boundaries
+it cannot exceed $N=2^n$ intervals. We therefore fix the public lookup
+interval count as $M := \min(m+1, N)$.
+
+Let $\beta_0$ denote the smallest translated start (Protocol~\ref{alg:compile_tfss}).
+If $\beta_0>0$ (equivalently $0\notin\{s_i\}$), then exactly one translated interval
+wraps and the translated partition has $m+1$ standard intervals; we include $0$ as
+a boundary and duplicate the wrapped interval’s payload on both sides of $0$.
+If $\beta_0=0$ (equivalently $0\in\{s_i\}$), then no interval wraps and the translated
+partition has only $m$ standard intervals. If additionally $m<N$ (so $M=m+1$), then
+some standard interval has length at least $2$; we insert a dummy split point
+$\delta$ strictly inside such an interval and duplicate its payload, yielding $M$
+intervals. If $m=N$, then $M=N$ and no padding is needed (and padding is impossible).
+Thus $M$ depends only on the public operator specification and $n$, and is independent
+of the sampled mask.
 
 For interval lookup, Lemma~\ref{lem:interval_translate} shows the translated
 partition uses at most $m+1$ standard intervals.
 We can always allocate $M=m+1$ by inserting the wrap point as a boundary and,
-if it coincides with an existing boundary, inserting an empty interval
-(or, equivalently, padding with a dummy interval whose payload duplicates an
-adjacent interval and is never selected). This yields a fixed $M=m+1$.
+if it coincides with an existing boundary (so that only $m$ standard intervals arise), inserting one additional dummy split point $\delta$ strictly inside a standard interval and duplicating that interval's payload on both sides. (Both sub-intervals may be selected, but they return identical payloads, so correctness is preserved.) This yields a fixed $M=m+1$.
 Finally, $p=r(d+1)+p_{\mathrm{aux}}$ is fixed by polynomial degree and auxiliary
-constants required by post-processing, hence determined by the descriptor.
+constants required by post-processing, hence determined by the operator specification and metadata.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1076,18 +1390,18 @@ We restate the key fact that interval indicators form a partition.
 \label{lem:indicator_partition}
 Let $0=\alpha_0<\cdots<\alpha_m=2^n$ and define
 \[
-I_i(x)=\one[x<\alpha_{i+1}] \oplus \one[x<\alpha_i]\quad\text{for }i\in\{0,\ldots,m-1\},
+J_i(x)=\one[x<\alpha_{i+1}] \oplus \one[x<\alpha_i]\quad\text{for }i\in\{0,\ldots,m-1\},
 \]
 with the sentinel convention $\one[x<2^n]\equiv 1$.
-Then for every $x\in\{0,\ldots,2^n-1\}$, exactly one $I_i(x)=1$ and all others are $0$.
+Then for every $x\in\{0,\ldots,2^n-1\}$, exactly one $J_i(x)=1$ and all others are $0$.
 \end{lemma}
 
 \begin{proof}
 By definition of the partition, there exists a unique $i^\star$ such that
 $\alpha_{i^\star}\le x < \alpha_{i^\star+1}$.
-Equivalently, $\one[x<\alpha_{i^\star}]=0$ and $\one[x<\alpha_{i^\star+1}]=1$, hence $I_{i^\star}(x)=1$.
-For $j<i^\star$, we have $x\ge \alpha_{j+1}$ so $\one[x<\alpha_{j+1}]=0$ and $I_j(x)=0$.
-For $j>i^\star$, we have $x<\alpha_j$ so $\one[x<\alpha_j]=1$ and also $\one[x<\alpha_{j+1}]=1$, hence $I_j(x)=0$.
+Equivalently, $\one[x<\alpha_{i^\star}]=0$ and $\one[x<\alpha_{i^\star+1}]=1$, hence $J_{i^\star}(x)=1$.
+For $j<i^\star$, we have $x\ge \alpha_{j+1}$ so $\one[x<\alpha_{j+1}]=0$ and $J_j(x)=0$.
+For $j>i^\star$, we have $x<\alpha_j$ so $\one[x<\alpha_j]=1$ and also $\one[x<\alpha_{j+1}]=1$, hence $J_j(x)=0$.
 \end{proof}
 
 Lemma~\ref{lem:boolean_normalize} follows immediately: since exactly one indicator is $1$,
@@ -1111,69 +1425,69 @@ splits after translation.
 The map $T_r$ is a rotation on the circle $\mathbb{Z}_N$.
 The image of $I=[\alpha,\beta)$ is
 \[
-  \begin{aligned}
-    T_r(I) &= \{(x+r)\bmod N : x\in[\alpha,\beta)\} \\
-           &= [\alpha+r,\beta+r)\bmod N.
-  \end{aligned}
+ \begin{aligned}
+ T_r(I) &= \{(x+r)\bmod N : x\in[\alpha,\beta)\} \\
+ &= [\alpha+r,\beta+r)\bmod N.
+ \end{aligned}
 \]
-If $\alpha+r<N$ and $\beta+r\le N$, then this is the standard interval
-$[\alpha+r,\beta+r)$.
-If $\alpha+r<N$ but $\beta+r>N$, the image wraps around $N$ and equals
-$[\alpha+r,N)\cup[0,\beta+r-N)$, a union of two standard intervals.
-No other case occurs because $\alpha<\beta$ and translation is monotone until wrap.
+Write $a:=\alpha+r$ and $b:=\beta+r$ (so $0\le a<b<2N$). There are three cases:
+(i) if $b\le N$, then $T_r(I)=[a,b)$ is a standard interval;
+(ii) if $a\ge N$, then both endpoints wrap and $T_r(I)=[a-N,b-N)$ is a standard interval;
+(iii) if $a<N<b$, then the image wraps around $N$ and $T_r(I)=[a,N)\cup[0,b-N)$, a union of two standard intervals.
 
 For a full partition, the only way an interval splits is if the wrap point
-$N-r$ lies inside that interval in $x$-space (equivalently, if $0$ lies inside
-its image in $\hat{x}$-space). Since $N-r$ is a single point and the intervals
-are disjoint, at most one interval contains it, hence at most one interval splits.
+$x_0:=(N-r)\bmod N\in[0,N)$ lies strictly inside that interval in $x$-space
+(equivalently, if $0$ lies strictly inside its image in $\hat{x}$-space). Since $x_0$
+is a single point and the intervals are disjoint, at most one interval contains it,
+hence at most one interval splits (and if $x_0$ hits a boundary, no interval splits).
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Correctness of SUF-to-tFSS Compilation and the Two-Template Theorem}
-\label{app:two_template_correctness}
+\section{Correctness of compilation and the two-call theorem}
+\label{app:two_call_correctness}
 
 This section provides a full proof of Theorem~\ref{thm:two_call}.
 We first formalize the compiled evaluation procedure and then prove correctness
 and the stated complexity bound.
 
-\subsection{Compiled gate evaluation procedure (explicit)}
+\subsection{Compiled gate evaluation procedure}
 \label{app:eval_procedure}
 
-Fix a typed SUF descriptor $F:\mathsf{A}_n\to \mathsf{A}_n^r\times\mathsf{B}^\ell$
+Fix a typed operator specification $F:\mathsf{A}_n\to \mathsf{A}_n^r\times\mathsf{B}^\ell$
 with partition $(\alpha_i)_{i=0}^m$ and per-interval data $(P_i,B_i)$.
 Fix preprocessing mask $r_{\mathrm{in}}\in R$ and define $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$.
 
 The compiler emits:
-(i) a predicate template instance $\Pi_{\mathrm{pred}}$ producing XOR-shares of all
+(i) a predicate primitive instance $\Pi_{\mathrm{pred}}$ producing XOR-shares of all
 primitive masked comparisons required by the rewritten Boolean circuit,
-and (ii) an interval-lookup template instance $\Pi_{\mathrm{coeff}}$ producing
+and (ii) an interval-lookup primitive instance $\Pi_{\mathrm{coeff}}$ producing
 additive shares of the active interval's coefficient vector and auxiliary constants.
 
 Online evaluation on a shared input $\share{x}$ proceeds as:
 \begin{enumerate}
-  \item Materialize public $\hat{x}$ by opening $\hat{x}=x+r_{\mathrm{in}}$
-        (Protocol~\ref{alg:shares_to_masked}).
-  \item Run $\Pi_{\mathrm{pred}}$ (if needed) to obtain XOR-shares of all required
-        primitive masked comparisons on $\hat{x}$ and its public views (low bits, shifts).
-  \item Run $\Pi_{\mathrm{coeff}}$ (if needed) to obtain additive shares of the
-        active interval's coefficient vector (and auxiliary constants).
-  \item Compute shares of $x=\hat{x}-r_{\mathrm{in}}$ locally (Protocol~\ref{alg:masked_to_shares}).
-  \item Evaluate $r$ degree-$\le d$ polynomials via Horner's rule using Beaver triples
-        to obtain $\share{\mathbf{y}}\in R^r$.
-  \item Evaluate the normalized Boolean circuit (Lemma~\ref{lem:boolean_normalize}) over XOR shares
-        using AND correlation to obtain $\langle \mathbf{z}\rangle\in\mathsf{B}^\ell$,
-        and apply any deterministic post-processing $\Phi$ using B2A/A2B as needed.
+ \item Materialize public $\hat{x}$ by opening $\hat{x}=x+r_{\mathrm{in}}$
+ (Protocol~\ref{alg:shares_to_masked}).
+ \item Run $\Pi_{\mathrm{pred}}$ (if needed) to obtain XOR-shares of all required
+ primitive masked comparisons on $\hat{x}$ and its public views (low bits, shifts).
+ \item Run $\Pi_{\mathrm{coeff}}$ (if needed) to obtain additive shares of the
+ active interval's coefficient vector (and auxiliary constants).
+ \item Compute shares of $x=\hat{x}-r_{\mathrm{in}}$ locally (Protocol~\ref{alg:masked_to_shares}).
+ \item Evaluate $r$ degree-$\le d$ polynomials via Horner's rule using Beaver triples
+ to obtain $\share{\mathbf{y}}\in R^r$.
+ \item Evaluate the normalized Boolean circuit (Lemma~\ref{lem:boolean_normalize}) over XOR shares
+ using AND correlation to obtain $\langle \mathbf{z}\rangle\in\mathsf{B}^\ell$,
+ and apply any deterministic post-processing $\Phi$ using B2A/A2B as needed.
 \end{enumerate}
 
-\subsection{Proof of Theorem~\ref{thm:two_call} (full)}
+\subsection{Proof of Theorem~\ref{thm:two_call}}
 \label{app:proof_two_call}
 
 \begin{theorem}[Restatement of Theorem~\ref{thm:two_call}]
-Assume a \textsc{tFSS} backend provides:
-(i) a multi-view packed predicate template (Definition~\ref{def:tfss_pred}),
-and (ii) an interval lookup template with vector payload.
-Then any SUF gate instance can be evaluated from a public masked input $\hat{x}$ using
-at most two non-interactive \textsc{tFSS} evaluations, plus $O(r\cdot d)$ ring
+Assume a backend provides:
+(i) a multi-view packed predicate primitive (Definition~\ref{def:tfss_pred}),
+and (ii) an interval lookup primitive with vector payload.
+Then any scalar gate instance can be evaluated from a public masked input $\hat{x}$ using
+at most two non-interactive backend interface evaluations, plus $O(r\cdot d)$ ring
 multiplications for Horner evaluation and the Boolean/mixed-domain costs stated
 in Theorem~\ref{thm:two_call}.
 \end{theorem}
@@ -1189,33 +1503,33 @@ $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$ is either:
 (i) one standard interval in $\hat{x}$-space, or (ii) two standard intervals
 when wrapping occurs. In compilation, if splitting occurs, the payload for the
 split interval is duplicated. Therefore, for the unique translated interval
-containing $\hat{x}$, the interval-lookup template returns additive shares of
-exactly the coefficient vector (and auxiliary constants) associated with $I_{i^\star}$.
+containing $\hat{x}$, the interval-lookup primitive returns additive shares of
+exactly the coefficient vector associated with $I_{i^\star}$.
 
 \paragraph{Step 2: Correct predicate values under masking.}
-Consider any primitive predicate appearing in the SUF grammar.
+Consider any primitive predicate appearing in the predicate grammar.
 \begin{itemize}
-  \item For unsigned comparisons $C_\beta(x)=\one[x<\beta]$, Lemma~\ref{lem:mask_rewrite_cmp}
-        expresses $C_\beta(x)$ as an XOR of two masked comparisons on $\hat{x}$ and
-        a carry bit $w$ that depends only on the preprocessing mask and constants.
-  \item For low-bit predicates $D_{\gamma,f}(x)=\one[(x\bmod 2^f)<\gamma]$,
-        Lemma~\ref{lem:mask_rewrite_lowbit} gives the analogous rewrite over $\mathbb{Z}_{2^f}$.
-  \item MSB and signed predicates reduce to unsigned comparisons after fixed public shifts, and the corresponding
-        masked rewrites follow by applying Lemma~\ref{lem:mask_rewrite_cmp} to the shifted comparisons.
+ \item For unsigned comparisons $C_\beta(x)=\one[x<\beta]$, Lemma~\ref{lem:mask_rewrite_cmp}
+ expresses $C_\beta(x)$ as an XOR of two masked comparisons on $\hat{x}$ and
+ a carry bit $w$ that depends only on the preprocessing mask and constants.
+ \item For low-bit predicates $D_{\gamma,f}(x)=\one[(x\bmod 2^f)<\gamma]$,
+ Lemma~\ref{lem:mask_rewrite_lowbit} gives the analogous rewrite over $\mathbb{Z}_{2^f}$.
+ \item MSB and signed predicates reduce to unsigned comparisons after fixed public shifts, and the corresponding
+ masked rewrites follow by applying Lemma~\ref{lem:mask_rewrite_cmp} to the shifted comparisons.
 \end{itemize}
-The predicate template $\Pi_{\mathrm{pred}}$ is constructed to output XOR-shares of all
+The predicate primitive $\Pi_{\mathrm{pred}}$ is constructed to output XOR-shares of all
 masked comparison atoms used in these rewrites (including comparisons against secret
 mask-derived thresholds such as $r_{\mathrm{in}}$ and $r_{\mathrm{in}}\bmod 2^f$).
 Carry bits (which are constants independent of $x$) are provided as XOR-shared constants in preprocessing.
 Therefore, parties can locally compute XOR-shares of every primitive predicate value on $x$.
 
 \paragraph{Step 3: Eliminating piecewise Boolean control flow.}
-If SUF Boolean outputs are piecewise (depend on the active interval),
+If the Boolean outputs of the operator specification are piecewise,
 Lemma~\ref{lem:boolean_normalize} rewrites them into a single global Boolean circuit
 using interval indicators $J_i(x)$. Each $J_i(x)$ is itself a Boolean circuit over
 comparisons of the form $\one[x<\alpha_i]$, hence can be computed correctly from
 the masked comparison atoms obtained in Step~2. Consequently, the normalized Boolean
-circuit evaluates to exactly the SUF Boolean outputs $B(x)$, without revealing
+circuit evaluates to exactly the Boolean outputs of the operator specification, without revealing
 the active interval.
 
 \paragraph{Step 4: Correct arithmetic outputs via Horner evaluation.}
@@ -1223,54 +1537,52 @@ Parties compute additive shares of $x=\hat{x}-r_{\mathrm{in}}$ locally
 (Protocol~\ref{alg:masked_to_shares}). They hold additive shares of the correct
 coefficient vector for the active interval from Step~1.
 Evaluating each polynomial $P_{i^\star,j}(x)$ of degree at most $d$ by Horner's rule
-uses exactly $d$ ring multiplications and yields additive shares of $P_{i^\star,j}(x)$
-by standard Beaver multiplication correctness.
-This produces additive shares of the SUF arithmetic outputs $P_{i^\star}(x)$.
+uses at most $d$ ring multiplications (exactly $d$ if coefficients are padded to degree $d$ and evaluated uniformly) and yields additive shares of $P_{i^\star,j}(x)$by standard Beaver multiplication correctness.
+This produces additive shares of the arithmetic outputs $P_{i^\star}(x)$.
 
-\paragraph{Step 5: Complexity bound and ``at most two'' template calls.}
-The protocol invokes at most one predicate template evaluation (Step~2) and at most
-one lookup template evaluation (Step~1), hence at most two non-interactive \textsc{tFSS}
+\paragraph{Step 5: Complexity bound and ``at most two'' primitive evaluations.}
+The protocol invokes at most one predicate primitive evaluation (Step~2) and at most
+one lookup primitive evaluation (Step~1), hence at most two non-interactive backend interface
 evaluations on the same public input $\hat{x}$. Either call can be omitted in degenerate
 cases (no Boolean outputs/predicates or no interval-dependent coefficients).
 Horner evaluation uses $r\cdot d$ ring multiplications, hence $O(r\cdot d)$ Beaver triples.
 The Boolean circuit cost is captured by its number of AND gates $G_\wedge$ and mixed-domain
-uses $G_{\mathrm{mix}}$ (B2A/A2B), as stated.
+uses $G_{\mathrm{mix}}$, as stated.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{A Standard Real/Ideal Security Statement with Explicit Leakage}
 \label{app:security}
 
-This section replaces ``informal security'' with a standard real/ideal statement,
+This section introduces a standard real/ideal statement,
 including an explicit leakage function. Full proofs are given for the gate-level
 protocol; end-to-end transformer inference follows by standard composition.
 
 \subsection{Leakage function}
 \label{app:leakage}
 
-For a fixed SUF gate \emph{type} $\tau$, define the public \emph{shape leakage}
+For a fixed gate type $\tau$, define the public shape leakage
 \[
-  \begin{aligned}
-  \mathcal{L}_{\mathrm{shape}}(\tau) := (&T,\{k_t\}_{t=1}^T, M, p, \\
-  &\#\text{mults}, \#\text{ANDs}, \#\text{B2A/A2B}),
-  \end{aligned}
+ \begin{aligned}
+ \mathcal{L}_{\mathrm{shape}}(\tau) := (&T,\{k_t\}_{t=1}^T, M, p, \\
+ &\#\text{mults}, \#\text{ANDs}, \#\text{B2A/A2B}),
+ \end{aligned}
 \]
 where:
-$T$ and $\{k_t\}$ describe the multi-view predicate template shape,
+$T$ and $\{k_t\}$ describe the multi-view predicate primitive shape,
 $M$ and $p$ describe the interval lookup shape,
 and the remaining counts describe how many standard preprocessed subprotocols
 are invoked in post-processing.
 By Proposition~\ref{prop:shape_padding}, this leakage depends only on $\tau$ (public).
 
-The online protocol additionally reveals public masked wires such as $\hat{x}$ and
-(optional) masked outputs $\hat{y}$; we treat these as explicit leakage:
+The online protocol additionally reveals public masked wires such as $\hat{x}$ and masked outputs $\hat{y}$; we treat these as explicit leakage:
 \[
 \mathcal{L}_{\mathrm{online}} := (\hat{x}, \text{ optional masked outputs}).
 \]
 Since $\hat{x}=x+r_{\mathrm{in}}$ with uniform $r_{\mathrm{in}}$, $\hat{x}$ is uniform and
 information-theoretically independent of $x$.
 
-\subsection{Ideal functionality for a SUF gate (with leakage)}
+\subsection{Ideal functionality for a scalar gate type (with leakage)}
 \label{app:ideal_gate}
 
 We define an ideal functionality $\mathcal{F}_{\tau}^{\mathcal{L}}$ for a gate type $\tau$
@@ -1280,8 +1592,8 @@ that captures exactly what the real protocol reveals.
 On input shares from parties that reconstruct to $x\in R$, the functionality:
 (i) samples a uniform mask $r_{\mathrm{in}}\leftarrow R$,
 (ii) outputs $\hat{x}=x+r_{\mathrm{in}}\bmod 2^n$ to both parties as leakage,
-(iii) outputs additive/XOR shares of $(\mathbf{y},\mathbf{z})=\Phi_\tau(F_\tau(x))$
-to the parties, and (iv) outputs $\mathcal{L}_{\mathrm{shape}}(\tau)$ as public leakage.
+(iii) outputs additive/XOR shares of $(\mathbf{y},\mathbf{z})=G_\tau(x)$ to the parties,
+and (iv) outputs $\mathcal{L}_{\mathrm{shape}}(\tau)$ as public leakage.
 
 This ideal world models exactly the fact that the protocol reveals masked values but
 keeps the unmasked $x$ secret.
@@ -1289,32 +1601,32 @@ keeps the unmasked $x$ secret.
 \subsection{Security of subprotocols assumed}
 \label{app:assumptions}
 
-We assume standard semi-honest security (with preprocessing) for:
+We assume standard semi-honest security for:
 \begin{itemize}
-  \item Beaver multiplication over $R$,
-  \item Boolean AND over XOR shares (equivalently, multiplication over $\mathbb{Z}_2$),
-  \item B2A/A2B conversions (when used),
-  \item and \textsc{tFSS} template families, in the standard ``one-key privacy'' sense:
-        a single party's key (and all local evaluations on any polynomial number of inputs)
-        leaks nothing about instance parameters beyond public shape.
+ \item Beaver multiplication over $R$,
+ \item Boolean AND over XOR shares (equivalently, multiplication over $\mathbb{Z}_2$),
+ \item B2A/A2B conversions (when used),
+ \item and backend primitive families, in the standard ``one-key privacy'' sense:
+ a single party's key (and all local evaluations on any polynomial number of inputs)
+ leaks nothing about instance parameters beyond public shape.
 \end{itemize}
 These are standard assumptions in the preprocessing MPC literature and in FSS-based
 secure inference systems.
 
-\subsection{Proof of semi-honest security for compiled SUF gates}
+\subsection{Proof of semi-honest security for compiled scalar gates}
 \label{app:proof_security}
 
-\begin{theorem}[Gate-level semi-honest security (formal)]
+\begin{theorem}[Gate-level semi-honest security]
 \label{thm:gate_security_formal}
-Fix a gate type $\tau$ and consider the compiled Composite-FSS gate protocol for one instance.
+Fix a gate type $\tau$ and consider the compiled gate protocol for one instance.
 Under the assumptions in Appendix~\ref{app:assumptions}, for each $b\in\{0,1\}$ there exists a PPT simulator
 $\mathsf{Sim}_b$ such that for any input distribution on $x$ and any auxiliary input,
 the real view of a semi-honest adversary corrupting $P_b$ is computationally indistinguishable from the simulator's output given only:
 \[
-  \begin{aligned}
-    (&\text{the corrupted party's input share},\ \text{its output shares}, \\
-    &\mathcal{L}_{\mathrm{shape}}(\tau),\ \mathcal{L}_{\mathrm{online}}).
-  \end{aligned}
+ \begin{aligned}
+ (&\text{the corrupted party's input share},\ \text{its output shares}, \\
+ &\mathcal{L}_{\mathrm{shape}}(\tau),\ \mathcal{L}_{\mathrm{online}}).
+ \end{aligned}
 \]
 Equivalently, the protocol securely realizes $\mathcal{F}_{\tau}^{\mathcal{L}}$ in the semi-honest preprocessing model.
 \end{theorem}
@@ -1323,10 +1635,10 @@ Equivalently, the protocol securely realizes $\mathcal{F}_{\tau}^{\mathcal{L}}$ 
 We construct $\mathsf{Sim}_b$ by composing simulators for each subprotocol. The simulator is additionally given the corrupted party's output shares, which are part of the adversary's view in both the real and ideal executions.
 
 \paragraph{Preprocessing simulation.}
-All preprocessing material (masks, \textsc{tFSS} keys, Beaver/AND/B2A correlations) is input-independent.
+All preprocessing material (masks, backend interface keys, Beaver/AND/B2A correlations) is input-independent.
 Therefore, $\mathsf{Sim}_b$ samples the corrupted party's preprocessing view from the correct distribution
 conditioned on $\mathcal{L}_{\mathrm{shape}}(\tau)$ (which fixes public key shapes).
-This is feasible by the assumed security of \textsc{tFSS} templates (keys reveal no instance parameters beyond shape)
+This is feasible by the assumed security of backend primitive instances (keys reveal no instance parameters beyond shape)
 and by standard definitions of preprocessed correlations (Beaver/AND/B2A shares are uniformly random subject to correctness).
 
 \paragraph{Online simulation: masked opening of $\hat{x}$.}
@@ -1336,10 +1648,10 @@ The simulator programs the shares-to-masked opening messages consistently with t
 (using the fact that the opened value is public and the honest party's share message is not otherwise constrained).
 This is the standard simulation for openings of one-time pads.
 
-\paragraph{Online simulation: non-interactive \textsc{tFSS} evaluations.}
-\textsc{tFSS} evaluations are local: they produce no interaction transcript.
+\paragraph{Online simulation: non-interactive backend interface evaluations.}
+Backend interface evaluations are local: they produce no interaction transcript.
 The corrupted party's internal state includes its local outputs, which are deterministic functions of its key and the public input $\hat{x}$.
-Since \textsc{tFSS} keys are simulated (or sampled) to be indistinguishable from real keys of the same shape,
+Since backend interface keys are simulated or sampled to be indistinguishable from real keys of the same shape,
 the distribution of the corrupted party's entire local evaluation behavior is indistinguishable.
 
 \paragraph{Online simulation: Beaver/AND/B2A/A2B subprotocols.}
@@ -1357,11 +1669,11 @@ Standard composition theorems for semi-honest secure protocols imply that the co
 views is indistinguishable from the real view, completing the proof.
 \end{proof}
 
-\subsection{Security and correctness for Composite-FSS gates}
+\subsection{Security and correctness for compiled gates}
 \label{app:composite_proofs}
 
 \begin{proof}[Proof sketch]
-Composite-FSS gates instantiate the compiled SUF gate protocol.
+Compiled gates instantiate the compiled gate protocol.
 They then apply a deterministic post-processing map $\Phi_\tau$ using only secure share-based subprotocols.
 Correctness follows from Theorem~\ref{thm:two_call} and the correctness of the post-processing circuit.
 Security follows from Theorem~\ref{thm:gate_security_formal} and sequential composition.
@@ -1369,72 +1681,141 @@ Optional masked outputs satisfy $\hat{\mathbf{y}}=\mathbf{y}+r_{\mathrm{out}}$.
 They reveal no information about $\mathbf{y}$ since $r_{\mathrm{out}}$ is fresh uniform.
 \end{proof}
 
-\section{Typed SUF language and well-formedness}
-\label{app:typed_suf}
+\section{Example: a complete $(F,\Phi)$ pair}
+\label{app:worked_example}
 
-We give a minimal typed expression language underlying SUF descriptors and SUF-compatible
-post-processing to make mixed-domain compilation explicit.
+This appendix gives a fully concrete specification+post-processing example that can be read independently.
+The goal is: we pick the smallest operator that (i) has a genuine piecewise structure, (ii) produces at least one predicate bit, and (iii) uses a nontrivial post-processing circuit $\Phi$.
+For simplicity we present a signed \textsc{ReLU} gate; real operators (e.g., spline-approximated \textsc{GELU}/\textsc{SiLU}) follow the same pattern with more intervals and higher-degree polynomials.
 
-\paragraph{Types.}
-We use base types $\mathsf{A}_n$ (ring) and $\mathsf{B}$ (bit), with a designated embedding
-$\iota:\mathsf{B}\hookrightarrow \mathsf{A}_n$ mapping $0,1$ to the corresponding ring elements.
-A SUF signature is $F:\mathsf{A}_n\to \mathsf{A}_n^r\times \mathsf{B}^\ell$.
-
-\paragraph{Bit expressions.}
-Bit expressions are generated by:
+\paragraph{Target scalar gate.}
+Fix word size $n$ and let $R=\Z{2^n}$.
+Interpret $\mathsf{A}_n$ as two's-complement signed fixed-point with any number of fractional bits; the fractional metadata is irrelevant for this example because the map is homogeneous.
+Define the scalar gate
 \[
-  \begin{aligned}
-    b ::= {}& 0 \mid 1 \mid C_\beta(x) \mid D_{\gamma,f}(x) \mid \msb(x+c) \\
-            &\mid \neg b \mid (b\oplus b) \mid (b\wedge b) \mid (b\vee b).
-  \end{aligned}
+G_{\mathrm{ReLU}}:\mathsf{A}_n \to \mathsf{A}_n \times \mathsf{B},
+\qquad
+G_{\mathrm{ReLU}}(x) = \bigl(\max(x,0),\msb(x)\bigr),
 \]
-All connectives have $\mathsf{B}$ type.
+where $\msb(x)=1$ iff $x$ is negative in two's complement.
 
-\paragraph{Polynomial expressions (SUF arithmetic outputs).}
-In a SUF descriptor, each arithmetic output on an interval is a ring polynomial in the
-single variable $x$. A minimal grammar generating $R[x]$ is:
+\paragraph{Operator specification $F_{\mathrm{coeff}}$.}
+Instead of directly outputting $\max(x,0)$ as a polynomial piece, we show how to use $\Phi$ by having the operator specification output \emph{coefficients} for an affine form.
+Let $N=2^n$ and use the canonical representative $\mathrm{rep}(x)\in\{0,\ldots,N-1\}$.
+Consider the partition
 \[
-p ::= c \mid x \mid p+p \mid p-p \mid p\cdot p,
+0=\alpha_0 < \alpha_1 < \alpha_2=N,
+\qquad
+\alpha_1 = N/2,
 \]
-where $c\in R$.
+which corresponds to non-negative vs.\ negative signed values.
+Thus $I_0=[0,N/2)$ are non-negative representatives and $I_1=[N/2,N)$ are negative representatives.
 
-\paragraph{Post-processing expressions (for SUF-compatible gates).}
-A SUF-compatible gate may apply a fixed deterministic post-processing circuit $\Phi$
-to the SUF outputs, potentially embedding helper bits into the ring domain.
-A minimal arithmetic expression language for $\Phi$ is:
+We define an operator specification
 \[
-e ::= c \mid y_j \mid e+e \mid e-e \mid e\cdot e \mid \mathsf{B2A}(b),
+F_{\mathrm{coeff}}:\mathsf{A}_n \to \mathsf{A}_n^2 \times \mathsf{B}
 \]
-where $y_j$ ranges over the SUF arithmetic outputs and $b$ ranges over (typed) bit expressions
-built from the SUF Boolean outputs. The syntactic node $\mathsf{B2A}(b)$ corresponds to
-the standard preprocessing-based $\mathsf{B2A}$ conversion when evaluated on shares.
+with $r=2$ arithmetic outputs, the affine coefficients $a,b\in R$ and $\ell=1$ Boolean output (the sign bit $z$).
+All arithmetic pieces are degree-$0$ polynomials:
+\[
+P_0(x)=(a,b)=(1,0), \qquad P_1(x)=(a,b)=(0,0).
+\]
+For the Boolean output we use the primitive predicate $\msb(x)$:
+\[
+B_0(x)=B_1(x)=\msb(x).
+\]
+In words: $F_{\mathrm{coeff}}(x)$ returns the pair $(a,b)$ such that $a\cdot x + b = \max(x,0)$, together with $z=\msb(x)$.
 
-\paragraph{Well-formedness.}
-A SUF descriptor is well-formed if:
-(i) boundaries are strictly increasing integers,
-(ii) each per-interval arithmetic output is a polynomial expression in $R[x]$,
-and (iii) each Boolean output is a well-typed bit expression over $\mathsf{B}$.
-A SUF-compatible gate is well-formed if any use of a bit in arithmetic computation
-inside $\Phi$ occurs only through an explicit $\mathsf{B2A}$ node.
+\paragraph{Post-processing circuit $\Phi_{\mathrm{ReLU}}$.}
+Let $\Phi_{\mathrm{ReLU}}$ take as input:
+(i) additive shares of $(a,b)$ from $F_{\mathrm{coeff}}(x)$,
+(ii) an XOR-sharing $\bshare{z}$ of $z=\msb(x)$,
+(iii) additive shares of $x$ (derived from a public masked opening),
+and return $(y,z)$ where
+\[
+y = a\cdot x + b \in R.
+\]
+Concretely, $\Phi_{\mathrm{ReLU}}$ uses one Beaver multiplication for $a\cdot x$ and then local addition of $b$.
+The Boolean output $z$ is simply forwarded.
 
-\section{Complexity accounting for a compiled SUF gate}
+\paragraph{Compiled to two backend calls.}
+Let preprocessing sample a uniform mask $\rin\in R$ and distribute $\share{\rin}$.
+Online evaluation will open the public masked value $\hatx = x + \rin \bmod N$ using Algorithm~\ref{alg:shares_to_masked}.
+
+\emph{Interval lookup instance $\Pi_{\mathrm{coeff}}$.}
+There are $m=2$ original intervals, so we allocate $M=m+1=3$ intervals after padding (Protocol~\ref{alg:compile_tfss}).
+The translated starts are
+\[
+s_0=(\alpha_0+\rin)\bmod N = \rin,\qquad
+s_1=(\alpha_1+\rin)\bmod N = (\rin+N/2)\bmod N.
+\]
+Sorting $\{s_0,s_1\}$ yields $(\beta_0,\beta_1)$ and an order vector $\pi$.
+Following Algorithm~\ref{alg:compile_tfss}, we construct boundaries $B=(B_0,\ldots,B_M)$ and an index list $\mathrm{ord}\in\{0,1\}^M$ that may duplicate one payload so that the \emph{public} lookup shape $(M,p)$ is independent of the sampled mask.
+The payload dimension is $p=2$ and each payload is
+\[
+v_j = (a_{\mathrm{ord}_j},b_{\mathrm{ord}_j}) \in R^2.
+\]
+Evaluating $\Pi_{\mathrm{coeff}}$ on the public $\hatx$ returns additive shares of the correct $(a,b)$ without revealing the active interval.
+
+\emph{Packed-comparison instance $\Pi_{\mathrm{pred}}$.}
+To compute $z=\msb(x)$, we can use $\msb(x)=\neg C_{N/2}(x)$, where $C_\beta(x)=\one[x<\beta]$.
+Applying Lemma~\ref{lem:mask_rewrite_cmp} with $\beta=N/2$ yields
+\[
+C_{N/2}(x)
+=
+\one[\hatx < \theta]\;\oplus\;\one[\hatx < \rin]\;\oplus\;w,
+\qquad
+\theta=(\rin+N/2)\bmod N,
+\]
+where $w=\one[\rin+N/2\ge N]$ is a carry bit that depends only on the mask and is therefore provided as a secret-shared preprocessing constant.
+Thus the packed-comparison query list contains the two atoms $\one[\hatx<\theta]$ and $\one[\hatx<\rin]$ (both width $k=n$).
+Parties locally combine these XOR-shared atoms with $\bshare{w}$ to obtain
+$\bshare{C_{N/2}(x)}$, and then locally negate to get
+$\bshare{z}=\bshare{\msb(x)}$.
+
+\paragraph{End-to-end online evaluation.}
+Given an input $\share{x}$, parties:
+(i) open $\hatx=x+\rin$ (Protocol~\ref{alg:shares_to_masked});
+(ii) locally evaluate the two backend instances on $\hatx$ to obtain $\bshare{z}$ and $\share{(a,b)}$;
+(iii) locally derive $\share{x}$ from $\hatx$ and $\share{\rin}$ (Protocol~\ref{alg:masked_to_shares});
+(iv) run $\Phi_{\mathrm{ReLU}}$ to compute $\share{y}=a\cdot x + b$ and output $(\share{y},\bshare{z})$.
+
+\paragraph{Remark: extending to a small \textsc{GELU} example.}
+To specify a spline-approximated \textsc{GELU}, one would keep the same structure but set $r=1$ and choose $m>2$ intervals with degree-$d$ polynomials $P_i(x)$.
+Then $\Pi_{\mathrm{coeff}}$ returns the active interval's coefficient vector and the post-processing runs Horner evaluation (Theorem~\ref{thm:two_call}).
+
+
+\section{Complexity accounting for a compiled gate}
 \label{app:complexity}
 
-Let $T$ be the \emph{emitted} number of primitive masked comparison atoms in $\Pi_{\mathrm{pred}}$
-(after any \emph{descriptor-only} syntactic deduplication and optional padding), so that $T$ depends only on the public SUF descriptor and metadata.
-Let $M$ and $p$ be the interval count and payload dimension of $\Pi_{\mathrm{coeff}}$
-(under the padding convention, $M=m+1$ for a descriptor with $m$ original intervals).
-Let $M_{\mathrm{A}}$ be the number of ring multiplications (Horner + post-processing) and
-$M_{\mathrm{B}}$ the number of Boolean ANDs.
+
+Let $T$ be the emitted number of primitive masked comparison atoms in $\Pi_{\mathrm{pred}}$ after any specification-only syntactic deduplication and optional padding, so that $T$ depends only on the public operator specification and metadata.
+Let $M$ and $p$ be the interval count and payload dimension of $\Pi_{\mathrm{coeff}}$ under the padding convention, where $M=m+1$ for an operator specification with $m$ original intervals.
+Let $M_{\mathrm{A}}$ be the number of ring multiplications for Horner evaluation and post-processing, and let $M_{\mathrm{B}}$ be the number of Boolean ANDs.
 
 A compiled gate instance uses:
 \begin{itemize}
-  \item One packed-comparison template instance with output length $T$ (or omitted if $T=0$),
-  \item One interval-lookup template instance with $(M,p)$ (or omitted if the arithmetic payload is interval-independent, e.g., the descriptor has a single interval),
-  \item $M_{\mathrm{A}}$ Beaver multiplications over $R$,
-  \item $M_{\mathrm{B}}$ preprocessed Boolean ANDs over $\mathbb{Z}_2$,
-  \item $G_{\mathrm{mix}}$ mixed-domain conversions (\textsf{B2A/A2B}).
+ \item One packed-comparison primitive instance with output length $T$ (or omitted if $T=0$),
+ \item One interval-lookup primitive instance with $(M,p)$ (or omitted if the arithmetic payload is interval-independent, e.g., the operator specification has a single interval),
+ \item $M_{\mathrm{A}}$ Beaver multiplications over $R$,
+ \item $M_{\mathrm{B}}$ preprocessed Boolean ANDs over $\mathbb{Z}_2$,
+ \item $G_{\mathrm{mix}}$ mixed-domain conversions (\textsf{B2A/A2B}).
 \end{itemize}
 This accounting is backend-agnostic: concrete preprocessing size/time follows by instantiating the
-template and preprocessing costs of the chosen \textsc{tFSS} and triple-generation mechanisms.
+primitive and preprocessing costs of the chosen backend interface and triple-generation mechanisms.
+
 \end{document}
+
+% This document was modified from the file originally made available by
+% Pat Langley and Andrea Danyluk for ICML-2K. This version was created
+% by Iain Murray in 2018, and modified by Alexandre Bouchard in
+% 2019 and 2021 and by Csaba Szepesvari, Gang Niu and Sivan Sabato in 2022.
+% Modified again in 2023 and 2024 by Sivan Sabato and Jonathan Scarlett.
+% Previous contributors include Dan Roy, Lise Getoor and Tobias
+% Scheffer, which was slightly modified from the 2010 version by
+% Thorsten Joachims & Johannes Fuernkranz, slightly modified from the
+% 2009 version by Kiri Wagstaff and Sam Roweis's 2008 version, which is
+% slightly modified from Prasad Tadepalli's 2007 version which is a
+% lightly changed version of the previous year's version by Andrew
+% Moore, which was in turn edited from those of Kristian Kersting and
+% Codrina Lauth. Alex Smola contributed to the algorithmic style files.

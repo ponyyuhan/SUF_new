@@ -19,6 +19,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <cfloat>
+#ifndef FLT_MIN
+#define FLT_MIN __FLT_MIN__
+#endif
+#ifndef DBL_MAX
+#define DBL_MAX __DBL_MAX__
+#endif
+#ifndef DBL_MIN
+#define DBL_MIN __DBL_MIN__
+#endif
+
 #include "utils/gpu_data_types.h"
 #include "utils/gpu_file_utils.h"
 #include "utils/misc_utils.h"
