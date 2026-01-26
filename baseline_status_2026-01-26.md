@@ -4,6 +4,13 @@
 **Environment**: CPU-only (CUDA-enabled jaxlib not installed). SPU runtime on localhost (2PC).
 **GPU note**: OpenBumbleBee can use GPU **if** CUDA-enabled `jaxlib` and SPU GPU backend are available, but this environment lacks CUDA JAX and SPU’s GPU path is still experimental, so runs here are CPU-only.
 
+### GPU attempt (CUDA 13, JAX 0.9.0)
+- **Status**: **Partial** — JAX GPU (plaintext) runs, SPU compilation fails.
+- **JAX devices**: `CudaDevice(id=0), CudaDevice(id=1)`
+- **BERT plaintext runtime**: **~3.08 s** (JAX on GPU; log: `/tmp/bumble_bert_e2e_gpu.log`)
+- **GPT-2 plaintext runtime**: **~32.14 s** (JAX on GPU; SPU skipped via `SKIP_SPU=1`; log: `/tmp/bumble_gpt2_e2e_gpu.log`)
+- **SPU error**: XLA HLO instruction id overflow (`proto.id() > INT_MAX`, id=4294967297). This appears to be an incompatibility between newer JAX/XLA and SPU’s HLO importer.
+
 ### BERT (Flax BERT)
 - **Status**: **Completed** (CPU + SPU).
 - **Input**: dummy sentence fallback (HuggingFace `glue/cola` test split returned 404; script now falls back to a local sentence).
