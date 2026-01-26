@@ -32,6 +32,23 @@
 
 cudaMemPool_t mempool;
 
+static bool mem_debug_enabled()
+{
+    const char *v = std::getenv("SIGMA_MEM_DEBUG");
+    return v && std::atoi(v) != 0;
+}
+
+static void log_alloc_attempt(size_t size_in_bytes)
+{
+    if (!mem_debug_enabled())
+        return;
+    size_t free_bytes = 0;
+    size_t total_bytes = 0;
+    cudaMemGetInfo(&free_bytes, &total_bytes);
+    fprintf(stderr, "[gpu_mem] alloc attempt: %zu bytes (free=%zu total=%zu)\n",
+            size_in_bytes, free_bytes, total_bytes);
+}
+
 extern "C" void initGPUMemPool()
 {
     const char *disable_env = std::getenv("SIGMA_MEMPOOL_DISABLE");
@@ -63,7 +80,16 @@ extern "C" void initGPUMemPool()
 extern "C" uint8_t *gpuMalloc(size_t size_in_bytes)
 {
     uint8_t *d_a;
-    checkCudaErrors(cudaMallocAsync(&d_a, size_in_bytes, 0));
+    log_alloc_attempt(size_in_bytes);
+    cudaError_t err = cudaMallocAsync(&d_a, size_in_bytes, 0);
+    if (err != cudaSuccess) {
+        size_t free_bytes = 0;
+        size_t total_bytes = 0;
+        cudaMemGetInfo(&free_bytes, &total_bytes);
+        fprintf(stderr, "[gpu_mem] alloc failed: %zu bytes (free=%zu total=%zu)\n",
+                size_in_bytes, free_bytes, total_bytes);
+    }
+    checkCudaErrors(err);
     return d_a;
 }
 
