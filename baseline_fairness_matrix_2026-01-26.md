@@ -188,6 +188,12 @@ Every table/result should include:
 - **Runtime**: **~289.84 s** (`/tmp/bumble_bert_spu_cpu_seq128.log`, JAX 0.4.26)
 - **Note**: SPU run on CPU, protocol‑aligned but hardware‑mismatched
 
+### BOLT (CPU, 2PC+HE) — BERT MRPC (seq=128)
+- **End‑to‑end**: **P1 ~295.439 s**, **P2 ~354.371 s** (`/tmp/bolt_bert_p1_seq128_total2.log`, `/tmp/bolt_bert_p2_seq128_total2.log`)
+- **Comm (total)**: **P1 28,882,609,673 bytes**, **P2 29,146,859,639 bytes**; **sum = 58,029,469,312 bytes (~54.04 GiB)**
+- **Rounds (total)**: **124,180** (reported identically by P1/P2)
+- **Note**: CPU 2PC+HE vs GPU FSS → best‑effort only
+
 ---
 
 ## 7) Ask / Decision Needed

@@ -44,12 +44,13 @@
 **GPU note (BOLT)**: BOLT is CPU/HE-only in this setup; no GPU execution path is available here.
 
 **Current BOLT end-to-end result (BERT MRPC)**:
-- End-to-end: **403.426 s (P1), 435.943 s (P2)**
-- Comm (sum of per-op bytes): **26.88 GiB**
-- Rounds: **123,927**
+- End-to-end: **~295.439 s (P1), ~354.371 s (P2)** (seq=128, batch=1)
+- Comm (total): **P1 28,882,609,673 bytes**, **P2 29,146,859,639 bytes**; **sum = 58,029,469,312 bytes (~54.04 GiB)**
+- Rounds (total): **124,180**
+- Logs: `/tmp/bolt_bert_p1_seq128_total2.log`, `/tmp/bolt_bert_p2_seq128_total2.log`
 
 **SUF reference (BERT base, seq=128, batch=1)**:
-- End-to-end: **2313.589 ms**
+- End-to-end: **1041.672 ms**
 - Comm: **0.830 GB**
 
 **Conclusion**: SUF is much faster and lower-comm on this hardware, but **not apples-to-apples** due to different threat models and CPU vs GPU execution.
