@@ -24,6 +24,7 @@ Testing/
 # local deps and packages
 .deps/
 *.deb
+baselines/BOLT_weights/
 
 # python env/cache
 **/.venv/

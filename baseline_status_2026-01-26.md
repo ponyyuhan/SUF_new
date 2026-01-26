@@ -28,6 +28,7 @@
 **Can we compare?** **Yes, but only as a rough reference.**
 - **BOLT**: CPU 2PC + HE (EzPC/SCI + SEAL), single-host 2-party run.
 - **SUF**: GPU FSS with two-server preprocessing threat model.
+**GPU note (BOLT)**: BOLT is CPU/HE-only in this setup; no GPU execution path is available here.
 
 **Current BOLT end-to-end result (BERT MRPC)**:
 - End-to-end: **403.426 s (P1), 435.943 s (P2)**
@@ -39,6 +40,8 @@
 - Comm: **0.830 GB**
 
 **Conclusion**: SUF is much faster and lower-comm on this hardware, but **not apples-to-apples** due to different threat models and CPU vs GPU execution.
+
+**Weights note**: BOLT model weights are stored externally (not tracked in git) per request.
 
 ## If SUF runs on CPU, can it be compared to BOLT?
 **Currently no** — SUF codebase is GPU-centric (CUDA kernels + GPU MPC stack). A CPU version is not available in this repo. 
