@@ -146,6 +146,8 @@ PY
 ```
 If it prints `(1, 128)` → seq=128. Then **set SUF seq=128** and re‑run SUF BERT.
 
+**Observed (this machine):** BOLT MRPC input shape is **(128, 768)** and mask shape **(128,)** → **seq=128 confirmed**.
+
 ### Step B — Force Bumblebee BERT/GPT‑2 to a fixed seq length
 Update tokenization in Bumblebee to enforce `SEQ`:
 - BERT: use `max_length=SEQ, padding='max_length', truncation=True`
@@ -166,9 +168,30 @@ Every table/result should include:
 
 ---
 
+## 8) Latest aligned measurements (seq=128, batch=1)
+### SUF (GPU, FSS) — BERT base
+- **Runtime (online)**: **~1.042 s** (from `batch_scaling_bert_seq128_rerun.json`)
+- **Comm**: **~0.830 GB**
+
+### Sigma (GPU, FSS) — BERT base
+- **Runtime (online)**: **~1.319 s** (same run file)
+
+### Bumblebee plaintext (GPU JAX) — BERT base
+- **Runtime**: **~3.286 s** (`/tmp/bumble_bert_e2e_gpu_seq128.log`, `SKIP_SPU=1`)
+- **Note**: plaintext only (not secure)
+
+### Bumblebee plaintext (GPU JAX) — GPT‑2
+- **Runtime**: **~40.606 s** (`/tmp/bumble_gpt2_e2e_gpu_seq128.log`, `SKIP_SPU=1`)
+- **Note**: plaintext only (not secure)
+
+### Bumblebee SPU (CPU, 2PC) — BERT base
+- **Runtime**: **~289.84 s** (`/tmp/bumble_bert_spu_cpu_seq128.log`, JAX 0.4.26)
+- **Note**: SPU run on CPU, protocol‑aligned but hardware‑mismatched
+
+---
+
 ## 7) Ask / Decision Needed
 Please choose one or more of the following, and I will execute:
 1) **Check BOLT MRPC input seq length** and re‑run SUF BERT with the same seq
 2) **Pin Bumblebee to a fixed seq length** for BERT/GPT‑2 plaintext GPU and record results
 3) **Attempt Bumblebee SPU on CPU** by downgrading JAX (protocol‑aligned best‑effort)
-

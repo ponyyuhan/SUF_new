@@ -7,8 +7,8 @@
 ### GPU attempt (CUDA 13, JAX 0.9.0)
 - **Status**: **Partial** — JAX GPU (plaintext) runs, SPU compilation fails.
 - **JAX devices**: `CudaDevice(id=0), CudaDevice(id=1)`
-- **BERT plaintext runtime**: **~3.08 s** (JAX on GPU; log: `/tmp/bumble_bert_e2e_gpu.log`)
-- **GPT-2 plaintext runtime**: **~32.14 s** (JAX on GPU; SPU skipped via `SKIP_SPU=1`; log: `/tmp/bumble_gpt2_e2e_gpu.log`)
+- **BERT plaintext runtime**: **~3.29 s** (**seq=128 fixed**; JAX on GPU; SPU skipped via `SKIP_SPU=1`; log: `/tmp/bumble_bert_e2e_gpu_seq128.log`)
+- **GPT-2 plaintext runtime**: **~40.61 s** (**seq=128 fixed**; JAX on GPU; SPU skipped via `SKIP_SPU=1`; log: `/tmp/bumble_gpt2_e2e_gpu_seq128.log`)
 - **SPU error**: XLA HLO instruction id overflow (`proto.id() > INT_MAX`, id=4294967297). This appears to be an incompatibility between newer JAX/XLA and SPU’s HLO importer.
 
 ### BERT (Flax BERT)
@@ -17,6 +17,12 @@
 - **CPU runtime**: **6.453161 s**
 - **SPU runtime**: **51.627365 s**
 - **Log**: `/tmp/bumble_bert_e2e.log`
+
+### BERT (Flax BERT) — JAX 0.4.26, fixed seq=128
+- **Status**: **Completed** (CPU + SPU).
+- **CPU runtime**: **~5.316 s**
+- **SPU runtime**: **~289.84 s**
+- **Log**: `/tmp/bumble_bert_spu_cpu_seq128.log`
 
 ### GPT-2 (Flax GPT-2)
 - **Status**: **Completed** (CPU + SPU).

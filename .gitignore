@@ -29,6 +29,7 @@ baselines/BOLT_weights/
 # python env/cache
 **/.venv/
 .venv-bumblebee/
+.venv-bumblebee-spu/
 **/.hf_cache/
 **/.cache/
 **/.pytest_cache/
