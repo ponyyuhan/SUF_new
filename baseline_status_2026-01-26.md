@@ -2,6 +2,7 @@
 
 ## Bumblebee (OpenBumbleBee) end-to-end
 **Environment**: CPU-only (CUDA-enabled jaxlib not installed). SPU runtime on localhost (2PC).
+**GPU note**: OpenBumbleBee can use GPU **if** CUDA-enabled `jaxlib` and SPU GPU backend are available, but this environment lacks CUDA JAX and SPU’s GPU path is still experimental, so runs here are CPU-only.
 
 ### BERT (Flax BERT)
 - **Status**: **Completed** (CPU + SPU).

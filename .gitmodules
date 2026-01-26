@@ -1,1 +1,9 @@
-# Submodules removed; third_party/EzPC is vendored into this repo.
+[submodule "baselines/BOLT"]
+	path = baselines/BOLT
+	url = https://github.com/Clive2312/BOLT.git
+[submodule "baselines/EzPC"]
+	path = baselines/EzPC
+	url = https://github.com/Clive2312/EzPC.git
+[submodule "baselines/OpenBumbleBee"]
+	path = baselines/OpenBumbleBee
+	url = https://github.com/AntCPLab/OpenBumbleBee.git
