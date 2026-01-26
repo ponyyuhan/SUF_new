@@ -89,3 +89,38 @@ Only overlapping points are compared (BERT-base-128, GPT-2-128, GPT-2-256).
 - BERT seq=384 failed on Sigma with `cudaMallocAsync` OOM.
   - log: `/tmp/sigma_batch_bert-base_384_b1_r0_p0.log`
   - attempted with SIGMA_KEYBUF_GB=140; rerun with SIGMA_KEYBUF_GB=180 was interrupted.
+
+## Rerun: SUF vs Sigma (end-to-end, seq=128)
+
+| Model | Sigma online (ms) | SUF online (ms) | Speedup | Sigma comm (GB) | SUF comm (GB) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| BERT-tiny-128 | 58.54 | 41.09 | 1.42x | 0.020 | 0.017 |
+| BERT-base-128 | 1423.40 | 1041.28 | 1.37x | 0.989 | 0.830 |
+| BERT-large-128 | 3708.01 | 2613.64 | 1.42x | 2.638 | 2.213 |
+| GPT2-128 | 1218.31 | 962.96 | 1.27x | 0.824 | 0.724 |
+| GPT-neo-128 | 5569.35 | 4520.12 | 1.23x | 4.029 | 3.648 |
+
+### Keygen and key size (rerun, seq=128)
+
+| Model | Sigma keygen (s) | SUF keygen (s) | Sigma key (GB) | SUF key (GB) |
+| --- | ---: | ---: | ---: | ---: |
+| BERT-tiny-128 | 0.07 | 0.06 | 0.326 | 0.250 |
+| BERT-base-128 | 1.17 | 0.94 | 16.835 | 12.739 |
+| BERT-large-128 | 2.83 | 2.22 | 45.448 | 34.529 |
+| GPT2-128 | 1.51 | 0.87 | 14.292 | 11.101 |
+| GPT-neo-128 | 5.18 | 3.86 | 76.187 | 61.215 |
+
+### Delta vs evaluation_latest.md (2026-01-23)
+
+| Model | Sigma online ms (old -> new) | SUF online ms (old -> new) | Sigma comm GB (old -> new) | SUF comm GB (old -> new) |
+| --- | --- | --- | --- | --- |
+| BERT-tiny-128 | 69.84 -> 58.54 (-11.30, -16.18%) | 55.20 -> 41.09 (-14.11, -25.57%) | 0.020 -> 0.020 (+0.000, +0.93%) | 0.017 -> 0.017 (-0.000, -0.47%) |
+| BERT-base-128 | 1682.04 -> 1423.40 (-258.64, -15.38%) | 1313.86 -> 1041.28 (-272.58, -20.75%) | 0.989 -> 0.989 (+0.000, +0.04%) | 0.830 -> 0.830 (-0.000, -0.00%) |
+| BERT-large-128 | 4311.51 -> 3708.01 (-603.50, -14.00%) | 3125.36 -> 2613.64 (-511.72, -16.37%) | 2.638 -> 2.638 (+0.000, +0.01%) | 2.213 -> 2.213 (+0.000, +0.01%) |
+| GPT2-128 | 1513.57 -> 1218.31 (-295.26, -19.51%) | 1073.32 -> 962.96 (-110.36, -10.28%) | 0.824 -> 0.824 (+0.000, +0.04%) | 0.724 -> 0.724 (+0.000, +0.04%) |
+| GPT-neo-128 | 7078.19 -> 5569.35 (-1508.84, -21.32%) | 5414.84 -> 4520.12 (-894.72, -16.52%) | 4.029 -> 4.029 (-0.000, -0.01%) | 3.648 -> 3.648 (-0.000, -0.01%) |
+
+### Summary range (rerun, seq=128)
+- Speedup range: 1.23x - 1.42x
+- Online comm reduction: 9.46% - 16.18%
+- Keygen time reduction: 11.06% - 42.16%
