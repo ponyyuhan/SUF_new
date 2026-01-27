@@ -201,7 +201,7 @@ FuseFSS also reduces preprocessing overhead: key-generation time decreases by $1
 \paragraph{Contributions.}
 \begin{itemize}[nosep,leftmargin=*]
  \item \textbf{State-of-the-art secure inference performance.}
-       FuseFSS improves end-to-end latency and preprocessing cost over state-of-the-art two-server GPU secure inference baselines, while matching model accuracy on BERT and GPT. Upon acceptance.
+       FuseFSS improves end-to-end latency and preprocessing cost over state-of-the-art two-server GPU secure inference baselines, while matching model accuracy on BERT and GPT.
  \item \textbf{A practical compiler target for fixed-point nonlinear and rescaling operators.}
        We show that a wide range of fixed-point scalar operators can be expressed by a single operator specification format and executed using the same two FSS calls plus uniform share-based post-processing.
 \item \textbf{Mask-aware compilation with security.}
@@ -265,7 +265,10 @@ Our implementation therefore generates masks per wire.
 
 \subsection{Ring arithmetic and fixed point}
 
-We compute over $R=\mathbb{Z}_{2^n}$. For $x\in R$, let $\operatorname{rep}(x)\in\{0,\dots,2^n-1\}$ denote its canonical representative. Unsigned comparisons interpret each element by $\operatorname{rep}(x)$. Signed values use two's complement; the most significant bit (MSB) is $\msb(x):=\one[\operatorname{rep}(x)\in[2^{n-1},2^n)]$. We write $\bits:=\{0,1\}$ and $\one[\mathcal{E}]\in\bits$ for the indicator of a predicate/event $\mathcal{E}$.
+
+
+We compute over $R=\mathbb{Z}_{2^n}$. For $x\in R$, let $\operatorname{rep}(x)\in\{0,\dots,2^n-1\}$ denote its canonical representative. Unsigned comparisons interpret each element by $\operatorname{rep}(x)$. Signed values use two's complement; the most significant bit (MSB) is $\msb(x):=\one[\operatorname{rep}(x)\ge 2^{n-1}]$. We write $\one[\mathcal{E}]\in\bits$ for the indicator of a predicate/event $\mathcal{E}$.
+
 A real $\tilde{x}$ with $f$ fractional bits is encoded as $x=\lfloor 2^f\tilde{x}\rceil\in R$, where $\lfloor\cdot\rceil$ denotes rounding to the nearest integer with a fixed tie-breaking rule. Fixed-point rescaling is implemented via explicit truncation and arithmetic right shift (ARS) primitives; for signed values, ARS denotes a two's-complement right shift with sign extension~\cite{catrina2010secure}.
 
 
@@ -420,7 +423,7 @@ Then for all $x\in R$,
 where all comparisons are under the canonical order on $\{0,\ldots,N-1\}$.
 \end{lemma}
 
-\noindent\textbf{Low-bit predicates.} An analogous identity holds for low-bit predicates of the form $\one[(x\bmod 2^f)<\gamma]$; we defer the full statement to Lemma~\ref{lem:mask_rewrite_lowbit} in Appendix~\ref{app:lowbit_rewrite}.
+\noindent\textbf{Low-bit predicates.} An analogous rewrite holds for $\one[(x\bmod 2^f)<\gamma]$; see Lemma~\ref{lem:mask_rewrite_lowbit} in Appendix~\ref{app:lowbit_rewrite}.
 
 \paragraph{A useful corollary: masked interval indicators cancel the $\one[\hat{x}<r]$ term.}
 Combining Lemma~\ref{lem:interval_indicator_xor} with Lemma~\ref{lem:mask_rewrite_cmp}, the indicator $\one[x\in I_i]$ can be expressed using only comparisons to shifted boundaries in $\hat{x}$-space:
@@ -502,7 +505,7 @@ interval lookup for vector payload lookup on $u\in R$.
 Then any scalar gate instance (and, more generally, any specification-compatible scalar gate in
 Definition~\ref{def:suf_compatible}) can be evaluated from a public masked input $\hat{x}$ using:
 
-\begin{enumerate}
+\begin{enumerate}[nosep,leftmargin=*]
  \item At most two non-interactive backend interface evaluations on $\hat{x}$:
  one packed comparison evaluation producing XOR-shares of all masked comparison atoms needed by the compiler
  (possibly at multiple bit-widths $k$ via the public view operator $\mathsf{view}_{k,c}$),
@@ -605,9 +608,7 @@ Optionally, if a consumer requires a masked public output, parties open $\hat{y}
 
 
 \subsection{Correctness and security}
-Correctness follows from compiler correctness for the operator specification and the correctness of the post-processing circuit.
-Security follows from the single-key security of the two FSS primitives and the security of the preprocessing-based subprotocols used in post-processing.
-We state this formally in Theorem~\ref{thm:gate_security_leakage}.
+Correctness follows from Lemma~\ref{lem:compiler_correctness}, and semi-honest security with explicit shape leakage follows from Theorem~\ref{thm:gate_security_leakage} by standard composition.
 
 \section{Evaluation}
 \label{sec:evaluation}
@@ -685,7 +686,7 @@ We report:
 (ii) key generation time and key size for one inference execution.
 Unless explicitly stated, reported numbers correspond to sequence length 128 and batch size 1.
 
-
+\vspace{-3mm}
 \paragraph{Software and Data.}
 Upon acceptance, we will release the FuseFSS implementation and the scripts needed to reproduce all experiments and figures.
 
@@ -713,7 +714,6 @@ Appendix~\ref{sec:act_microbench} provides a kernel-level comparison on GELU.
 \subsection{Scaling with sequence length}
 For BERT-base, FuseFSS maintains consistent gains as sequence length increases from 32 to 128 (Table~\ref{tab:seq_sweep}).
 The relative speedup slightly decreases with longer sequences as attention and linear layers dominate end-to-end runtime.
-
 
 
 \paragraph{Additional results.}
@@ -794,7 +794,7 @@ Table~\ref{tab:accuracy} shows that FuseFSS closely matches PyTorch across GLUE 
 
 To isolate the effect of FuseFSS on nonlinearities, we microbenchmark compiled activation gates at $L{=}128$.
 Each gate corresponds to one activation invocation on its full tensor (e.g., GELU on a $(128,\text{hidden})$ intermediate).
-We report per-gate online evaluation time and online communication, together with the preprocessing key material size.
+We report per-gate online evaluation time and online communication, together with the preprocessing key material size. To ensure a fair comparison, we configure FuseFSS and Sigma to use the same fixed-point activation approximations in the microbenchmarks.
 
 
 Figure~\ref{fig:act_microbench} shows that FuseFSS achieves consistent communication savings ($\approx$24\%) and substantial per-gate speedups (1.64--2.46$\times$).
@@ -912,7 +912,6 @@ no cache (instantiate per layer) & 12 & 10.389 & 12.184 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
 
 
 \section{Masking protocols}
@@ -1035,21 +1034,27 @@ Protocol~\ref{alg:compile_tfss} gives high-level pseudocode for compiling a scal
 \State Let $\pi$ be a permutation such that $s_{\pi(0)} < s_{\pi(1)} < \cdots < s_{\pi(m-1)}$
 \State $\beta_j \gets s_{\pi(j)}$ for $j=0,\ldots,m-1$ \Comment{sorted translated starts in $[0,N)$}
 
-\If{$\beta_0 = 0$} \Comment{$0\in\{s_i\}$, i.e., the wrap point hits an existing boundary; translated partition has $m$ intervals}
-  \State $B \gets (0,\beta_1,\ldots,\beta_{m-1},N)$
-  \State $\mathrm{ord} \gets (\pi(0),\pi(1),\ldots,\pi(m-1))$
-  \If{$M = m+1$} \Comment{equivalently $m < N$; pad by splitting one standard interval}
-    \State Let $j^\star$ be the \emph{smallest} index such that $B_{j^\star+1}-B_{j^\star}\ge 2$ \Comment{exists since $m<N$}
-    \State $\delta \gets B_{j^\star}+1$ \Comment{any integer with $B_{j^\star}<\delta<B_{j^\star+1}$ works}
-    \State Insert $\delta$ into $B$ \emph{at position} $j^\star{+}1$ \Comment{split $[B_{j^\star},B_{j^\star+1})$}
-    \State Insert a copy of $\mathrm{ord}_{j^\star}$ into $\mathrm{ord}$ \emph{at position} $j^\star{+}1$
-    \Comment{duplicate payload so both sub-intervals return identical data}
-  \EndIf
-\Else \Comment{$0\notin\{s_i\}$; exactly one translated interval wraps around $0$ and is split at $0$ (thus $m<N$ and $M=m+1$)}
-  \State $B \gets (0,\beta_0,\beta_1,\ldots,\beta_{m-1},N)$
-  \State $\mathrm{ord} \gets (\pi(m-1),\pi(0),\pi(1),\ldots,\pi(m-1))$
-  \Comment{$\pi(m-1)$ duplicated for the two pieces $[0,\beta_0)$ and $[\beta_{m-1},N)$}
-\EndIf
+\State \textbf{if} $\beta_0 = 0$ \textbf{then}
+\Comment{$0\in\{s_i\}$, i.e., the wrap point hits an existing boundary; translated partition has $m$ intervals}
+\State \hspace{\algorithmicindent}$B \gets (0,\beta_1,\ldots,\beta_{m-1},N)$
+\State \hspace{\algorithmicindent}$\mathrm{ord} \gets (\pi(0),\pi(1),\ldots,\pi(m-1))$
+\State \hspace{\algorithmicindent}\textbf{if} $m < N$ \textbf{then}
+\Comment{pad by splitting one standard interval to reach $M=m+1$}
+\State \hspace{\algorithmicindent}\hspace{\algorithmicindent}Let $j^\star$ be the \emph{smallest} index such that $B_{j^\star+1}-B_{j^\star}\ge 2$
+\Comment{exists since $m<N$}
+\State \hspace{\algorithmicindent}\hspace{\algorithmicindent}$\delta \gets B_{j^\star}+1$
+\Comment{any integer with $B_{j^\star}<\delta<B_{j^\star+1}$ works}
+\State \hspace{\algorithmicindent}\hspace{\algorithmicindent}Insert $\delta$ into $B$ \emph{at position} $j^\star{+}1$
+\Comment{split $[B_{j^\star},B_{j^\star+1})$}
+\State \hspace{\algorithmicindent}\hspace{\algorithmicindent}Insert a copy of $\mathrm{ord}_{j^\star}$ into $\mathrm{ord}$ \emph{at position} $j^\star{+}1$
+\Statex \hspace{\algorithmicindent}\hspace{\algorithmicindent}\Comment{duplicate payload so both sub-intervals return identical data}
+\State \hspace{\algorithmicindent}\textbf{end if}
+\State \textbf{else}
+\Comment{$\beta_0 > 0$, so $0\notin\{s_i\}$: exactly one translated interval wraps and is split at $0$ (thus $m<N$ and $M=m+1$)}
+\State \hspace{\algorithmicindent}$B \gets (0,\beta_0,\beta_1,\ldots,\beta_{m-1},N)$
+\State \hspace{\algorithmicindent}$\mathrm{ord} \gets (\pi(m-1),\pi(0),\pi(1),\ldots,\pi(m-1))$
+\Statex \hspace{\algorithmicindent}\Comment{$\pi(m-1)$ duplicated for the two pieces $[0,\beta_0)$ and $[\beta_{m-1},N)$}
+\State \textbf{end if}
 \Statex \hspace{\algorithmicindent}\Comment{Now $|B|=M{+}1$ and $|\mathrm{ord}|=M$.
 The public shape $(M,p)$ is mask-independent; $(B,\mathrm{ord})$ may depend on $r$ but is embedded in secret keys.}
 
@@ -1290,7 +1295,7 @@ and define the output bits
  \mathrm{Pred}_{\mathcal{Q}}(\hat{x}) :=
  \Big(\one[\mathsf{view}_{k_t,c_t}(\hat{x}) < \theta_t]\Big)_{t=1}^T \in \{0,1\}^T.
 \]
-A backend provides algorithms $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$
+A backend provides protocols $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$
 such that $\mathsf{Gen}(1^\lambda,\mathcal{Q})\to(k_0,k_1)$ and on public $\hat{x}$,
 each party outputs XOR-shares
 $\mathsf{Eval}_b(k_b,\hat{x})\in\{0,1\}^T$ whose XOR reconstructs to
@@ -1318,7 +1323,7 @@ Fix $n\ge 1$ and $R=\mathbb{Z}_{2^n}$. An interval-lookup instance is specified 
 $0=\alpha_0<\cdots<\alpha_M=2^n$ and payload vectors $v_i\in R^p$ for $i\in\{0,\ldots,M-1\}$.
 On input $\hat{x}\in R$, let $i^\star$ be the unique index such that $\operatorname{rep}(\hat{x})\in[\alpha_{i^\star},\alpha_{i^\star+1})$
 and define $\mathrm{LUT}(\hat{x}):=v_{i^\star}\in R^p$.
-A backend provides algorithms $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$ such that $\mathsf{Gen}(1^\lambda,(\{\alpha_i\},\{v_i\}))\to(k_0,k_1)$ and,
+A backend provides protocols $(\mathsf{Gen},\mathsf{Eval}_0,\mathsf{Eval}_1)$ such that $\mathsf{Gen}(1^\lambda,(\{\alpha_i\},\{v_i\}))\to(k_0,k_1)$ and,
 on public $\hat{x}$, each party outputs additive shares $\mathsf{Eval}_b(k_b,\hat{x})\in R^p$ that sum (in $R^p$) to $\mathrm{LUT}(\hat{x})$.
 \end{definition}
 
@@ -1330,8 +1335,7 @@ operator specification (public) and not on preprocessing-time secrets (e.g.,
 masks). This avoids ``mask-dependent key length'' leakage.
 In practice, this can be ensured by:
 (i) disabling deduplication that might depend on mask-derived thresholds,
-and (ii) padding to a fixed worst-case interval count (e.g., always allocating
-$m{+}1$ intervals and duplicating payloads when an interval does not actually split).
+and (ii) padding to a fixed worst-case interval count $M:=\min(m{+}1,2^n)$ (duplicating payloads only when $m<2^n$ and a split does not actually occur).
 We formalize this below.
 
 \begin{proposition}[Mask-independent shape via padding]
@@ -1361,7 +1365,7 @@ interval count as $M := \min(m+1, N)$.
 Let $\beta_0$ denote the smallest translated start (Protocol~\ref{alg:compile_tfss}).
 If $\beta_0>0$ (equivalently $0\notin\{s_i\}$), then exactly one translated interval
 wraps and the translated partition has $m+1$ standard intervals; we include $0$ as
-a boundary and duplicate the wrapped interval’s payload on both sides of $0$.
+a boundary and duplicate the wrapped interval's payload on both sides of $0$.
 If $\beta_0=0$ (equivalently $0\in\{s_i\}$), then no interval wraps and the translated
 partition has only $m$ standard intervals. If additionally $m<N$ (so $M=m+1$), then
 some standard interval has length at least $2$; we insert a dummy split point
@@ -1370,13 +1374,15 @@ intervals. If $m=N$, then $M=N$ and no padding is needed (and padding is impossi
 Thus $M$ depends only on the public operator specification and $n$, and is independent
 of the sampled mask.
 
-For interval lookup, Lemma~\ref{lem:interval_translate} shows the translated
-partition uses at most $m+1$ standard intervals.
-We can always allocate $M=m+1$ by inserting the wrap point as a boundary and,
-if it coincides with an existing boundary (so that only $m$ standard intervals arise), inserting one additional dummy split point $\delta$ strictly inside a standard interval and duplicating that interval's payload on both sides. (Both sub-intervals may be selected, but they return identical payloads, so correctness is preserved.) This yields a fixed $M=m+1$.
-Finally, $p=r(d+1)+p_{\mathrm{aux}}$ is fixed by polynomial degree and auxiliary
-constants required by post-processing, hence determined by the operator specification and metadata.
+Finally, the payload dimension $p$ is fixed by the operator specification and
+metadata: for $r$ arithmetic outputs and global degree bound $d$, the coefficient
+payload contributes $r(d+1)$ ring elements with descriptor-level padding of
+lower-degree polynomials, plus a fixed number $p_{\mathrm{aux}}$ of per-interval
+auxiliary constants required by $\Phi$. Hence $p$ is descriptor-determined and
+mask-independent.
 \end{proof}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Proofs for Boolean Normalization and Mask Rewriting}
@@ -1740,17 +1746,17 @@ The Boolean output $z$ is simply forwarded.
 
 \paragraph{Compiled to two backend calls.}
 Let preprocessing sample a uniform mask $\rin\in R$ and distribute $\share{\rin}$.
-Online evaluation will open the public masked value $\hatx = x + \rin \bmod N$ using Algorithm~\ref{alg:shares_to_masked}.
+Online evaluation will open the public masked value $\hatx = x + \rin \bmod N$ using Protocols~\ref{alg:shares_to_masked}.
 
 \emph{Interval lookup instance $\Pi_{\mathrm{coeff}}$.}
-There are $m=2$ original intervals, so we allocate $M=m+1=3$ intervals after padding (Protocol~\ref{alg:compile_tfss}).
+There are $m=2$ original intervals, so we allocate $M=\min(m+1,N)=3$ intervals after padding (Protocol~\ref{alg:compile_tfss}).
 The translated starts are
 \[
 s_0=(\alpha_0+\rin)\bmod N = \rin,\qquad
 s_1=(\alpha_1+\rin)\bmod N = (\rin+N/2)\bmod N.
 \]
 Sorting $\{s_0,s_1\}$ yields $(\beta_0,\beta_1)$ and an order vector $\pi$.
-Following Algorithm~\ref{alg:compile_tfss}, we construct boundaries $B=(B_0,\ldots,B_M)$ and an index list $\mathrm{ord}\in\{0,1\}^M$ that may duplicate one payload so that the \emph{public} lookup shape $(M,p)$ is independent of the sampled mask.
+Following Protocols~\ref{alg:compile_tfss}, we construct boundaries $B=(B_0,\ldots,B_M)$ and an index list $\mathrm{ord}\in\{0,1\}^M$ that may duplicate one payload so that the \emph{public} lookup shape $(M,p)$ is independent of the sampled mask.
 The payload dimension is $p=2$ and each payload is
 \[
 v_j = (a_{\mathrm{ord}_j},b_{\mathrm{ord}_j}) \in R^2.
@@ -1789,9 +1795,9 @@ Then $\Pi_{\mathrm{coeff}}$ returns the active interval's coefficient vector and
 \label{app:complexity}
 
 
-Let $T$ be the emitted number of primitive masked comparison atoms in $\Pi_{\mathrm{pred}}$ after any specification-only syntactic deduplication and optional padding, so that $T$ depends only on the public operator specification and metadata.
-Let $M$ and $p$ be the interval count and payload dimension of $\Pi_{\mathrm{coeff}}$ under the padding convention, where $M=m+1$ for an operator specification with $m$ original intervals.
-Let $M_{\mathrm{A}}$ be the number of ring multiplications for Horner evaluation and post-processing, and let $M_{\mathrm{B}}$ be the number of Boolean ANDs.
+Let $T$ be the emitted number of primitive masked comparison atoms in $\Pi_{\mathrm{pred}}$ after any specification-only syntactic deduplication and optional padding, so that $T$ depends only on the public operator specification and metadata. Let $M$ and $p$ be the interval count and payload dimension of $\Pi_{\mathrm{coeff}}$ under the padding convention, where $M:=\min(m+1,2^n)$ for an operator specification with $m$ original intervals (Proposition~\ref{prop:shape_padding}).
+Let $M_{\mathrm{A}}$ be the number of ring multiplications (implemented via Beaver triples) performed in post-processing(Horner evaluation plus any extra multiplications in $\Phi$; cf.\ Theorem~\ref{thm:two_call}), let $M_{\mathrm{B}}$ be the number of Boolean ANDs, and let $G_{\mathrm{mix}}$ be the number of mixed-domain conversions.
+
 
 A compiled gate instance uses:
 \begin{itemize}
