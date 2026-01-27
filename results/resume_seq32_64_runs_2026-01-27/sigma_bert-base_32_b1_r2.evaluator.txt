@@ -1,0 +1,17 @@
+Batch=1
+Total time=658964 us
+Per-inference time=658964 us
+Comm time=63379 us
+Transfer time=168377 us
+MHA time=230507 us
+Matmul time=201103 us
+Truncate time=78421 us
+Gelu time=60677 us
+Softmax time=66836 us
+Layernorm time=87545 us
+
+Total Comm=198355538 B (0.184733 GB)
+Per-inference Comm=198355538 B (0.184733 GB)
+Gelu Comm=42762240 B (0.039825 GB)
+Softmax Comm=17445888 B (0.016248 GB)
+Layernorm Comm=29877840 B (0.027826 GB)

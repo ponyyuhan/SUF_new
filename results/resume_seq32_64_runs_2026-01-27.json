@@ -1,0 +1,855 @@
+{
+  "results": [
+    {
+      "variant": "sigma",
+      "model": "bert-base",
+      "seq": 32,
+      "batch": 1,
+      "keybuf_gb": 10,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 694646,
+          "key_bytes": 3979329536,
+          "total_us": 723117,
+          "comm_us": 55371,
+          "transfer_us": 171143,
+          "mha_us": 328429,
+          "matmul_us": 199488,
+          "truncate_us": 60922,
+          "gelu_us": 64819,
+          "softmax_us": 91077,
+          "layernorm_us": 68718,
+          "total_comm_bytes": 198355538,
+          "gelu_comm_bytes": 42762240,
+          "softmax_comm_bytes": 17445888,
+          "layernorm_comm_bytes": 29877840,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 533883,
+          "key_bytes": 3979329536,
+          "total_us": 625635,
+          "comm_us": 59657,
+          "transfer_us": 176520,
+          "mha_us": 235057,
+          "matmul_us": 192622,
+          "truncate_us": 59795,
+          "gelu_us": 67297,
+          "softmax_us": 68030,
+          "layernorm_us": 70115,
+          "total_comm_bytes": 198355538,
+          "gelu_comm_bytes": 42762240,
+          "softmax_comm_bytes": 17445888,
+          "layernorm_comm_bytes": 29877840,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 672386,
+          "key_bytes": 3979329536,
+          "total_us": 658964,
+          "comm_us": 63379,
+          "transfer_us": 168377,
+          "mha_us": 230507,
+          "matmul_us": 201103,
+          "truncate_us": 78421,
+          "gelu_us": 60677,
+          "softmax_us": 66836,
+          "layernorm_us": 87545,
+          "total_comm_bytes": 198355538,
+          "gelu_comm_bytes": 42762240,
+          "softmax_comm_bytes": 17445888,
+          "layernorm_comm_bytes": 29877840,
+          "keybuf_gb": 10
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 669238.6666666666,
+          "std": 40454.59728579134,
+          "median": 658964,
+          "min": 625635,
+          "max": 723117,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 633638.3333333334,
+          "std": 71120.65708514104,
+          "median": 672386,
+          "min": 533883,
+          "max": 694646,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 3979329536,
+          "std": 0.0,
+          "median": 3979329536,
+          "min": 3979329536,
+          "max": 3979329536,
+          "n": 3
+        },
+        "layernorm_comm_bytes": {
+          "mean": 29877840,
+          "std": 0.0,
+          "median": 29877840,
+          "min": 29877840,
+          "max": 29877840,
+          "n": 3
+        },
+        "run_idx": {
+          "mean": 1,
+          "std": 0.816496580927726,
+          "median": 1,
+          "min": 0,
+          "max": 2,
+          "n": 3
+        },
+        "transfer_us": {
+          "mean": 172013.33333333334,
+          "std": 3380.850221796615,
+          "median": 171143,
+          "min": 168377,
+          "max": 176520,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 66379.33333333333,
+          "std": 8527.165778980858,
+          "median": 60922,
+          "min": 59795,
+          "max": 78421,
+          "n": 3
+        },
+        "keybuf_gb": {
+          "mean": 10,
+          "std": 0.0,
+          "median": 10,
+          "min": 10,
+          "max": 10,
+          "n": 3
+        },
+        "matmul_us": {
+          "mean": 197737.66666666666,
+          "std": 3676.9181237673606,
+          "median": 199488,
+          "min": 192622,
+          "max": 201103,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 64264.333333333336,
+          "std": 2730.9145395310748,
+          "median": 64819,
+          "min": 60677,
+          "max": 67297,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 75459.33333333333,
+          "std": 8564.86646454897,
+          "median": 70115,
+          "min": 68718,
+          "max": 87545,
+          "n": 3
+        },
+        "gelu_comm_bytes": {
+          "mean": 42762240,
+          "std": 0.0,
+          "median": 42762240,
+          "min": 42762240,
+          "max": 42762240,
+          "n": 3
+        },
+        "mha_us": {
+          "mean": 264664.3333333333,
+          "std": 45126.67475254766,
+          "median": 235057,
+          "min": 230507,
+          "max": 328429,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 198355538,
+          "std": 0.0,
+          "median": 198355538,
+          "min": 198355538,
+          "max": 198355538,
+          "n": 3
+        },
+        "softmax_comm_bytes": {
+          "mean": 17445888,
+          "std": 0.0,
+          "median": 17445888,
+          "min": 17445888,
+          "max": 17445888,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 59469,
+          "std": 3271.9539524062175,
+          "median": 59657,
+          "min": 55371,
+          "max": 63379,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 75314.33333333333,
+          "std": 11156.542305850062,
+          "median": 68030,
+          "min": 66836,
+          "max": 91077,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "suf",
+      "model": "bert-base",
+      "seq": 32,
+      "batch": 1,
+      "keybuf_gb": 10,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 452356,
+          "key_bytes": 3247276032,
+          "total_us": 530649,
+          "comm_us": 55497,
+          "transfer_us": 154093,
+          "mha_us": 217402,
+          "matmul_us": 192225,
+          "truncate_us": 54491,
+          "gelu_us": 14049,
+          "softmax_us": 47419,
+          "layernorm_us": 51660,
+          "total_comm_bytes": 179664002,
+          "gelu_comm_bytes": 32145408,
+          "softmax_comm_bytes": 9421056,
+          "layernorm_comm_bytes": 29827968,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 588490,
+          "key_bytes": 3247276032,
+          "total_us": 540432,
+          "comm_us": 49125,
+          "transfer_us": 153948,
+          "mha_us": 206317,
+          "matmul_us": 210417,
+          "truncate_us": 56804,
+          "gelu_us": 13269,
+          "softmax_us": 47962,
+          "layernorm_us": 52677,
+          "total_comm_bytes": 179664002,
+          "gelu_comm_bytes": 32145408,
+          "softmax_comm_bytes": 9421056,
+          "layernorm_comm_bytes": 29827968,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 529259,
+          "key_bytes": 3247276032,
+          "total_us": 550572,
+          "comm_us": 52823,
+          "transfer_us": 160236,
+          "mha_us": 224458,
+          "matmul_us": 199781,
+          "truncate_us": 61066,
+          "gelu_us": 13191,
+          "softmax_us": 46770,
+          "layernorm_us": 51217,
+          "total_comm_bytes": 179664002,
+          "gelu_comm_bytes": 32145408,
+          "softmax_comm_bytes": 9421056,
+          "layernorm_comm_bytes": 29827968,
+          "keybuf_gb": 10
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 540551,
+          "std": 8133.965945343022,
+          "median": 540432,
+          "min": 530649,
+          "max": 550572,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 523368.3333333333,
+          "std": 55732.345212532455,
+          "median": 529259,
+          "min": 452356,
+          "max": 588490,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 3247276032,
+          "std": 0.0,
+          "median": 3247276032,
+          "min": 3247276032,
+          "max": 3247276032,
+          "n": 3
+        },
+        "layernorm_comm_bytes": {
+          "mean": 29827968,
+          "std": 0.0,
+          "median": 29827968,
+          "min": 29827968,
+          "max": 29827968,
+          "n": 3
+        },
+        "run_idx": {
+          "mean": 1,
+          "std": 0.816496580927726,
+          "median": 1,
+          "min": 0,
+          "max": 2,
+          "n": 3
+        },
+        "transfer_us": {
+          "mean": 156092.33333333334,
+          "std": 2930.612715608954,
+          "median": 154093,
+          "min": 153948,
+          "max": 160236,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 57453.666666666664,
+          "std": 2723.2586281063273,
+          "median": 56804,
+          "min": 54491,
+          "max": 61066,
+          "n": 3
+        },
+        "keybuf_gb": {
+          "mean": 10,
+          "std": 0.0,
+          "median": 10,
+          "min": 10,
+          "max": 10,
+          "n": 3
+        },
+        "matmul_us": {
+          "mean": 200807.66666666666,
+          "std": 7462.2494076667135,
+          "median": 199781,
+          "min": 192225,
+          "max": 210417,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 13503,
+          "std": 387.39127506953486,
+          "median": 13269,
+          "min": 13191,
+          "max": 14049,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 51851.333333333336,
+          "std": 611.2044575171952,
+          "median": 51660,
+          "min": 51217,
+          "max": 52677,
+          "n": 3
+        },
+        "gelu_comm_bytes": {
+          "mean": 32145408,
+          "std": 0.0,
+          "median": 32145408,
+          "min": 32145408,
+          "max": 32145408,
+          "n": 3
+        },
+        "mha_us": {
+          "mean": 216059,
+          "std": 7466.6684672616875,
+          "median": 217402,
+          "min": 206317,
+          "max": 224458,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 179664002,
+          "std": 0.0,
+          "median": 179664002,
+          "min": 179664002,
+          "max": 179664002,
+          "n": 3
+        },
+        "softmax_comm_bytes": {
+          "mean": 9421056,
+          "std": 0.0,
+          "median": 9421056,
+          "min": 9421056,
+          "max": 9421056,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 52481.666666666664,
+          "std": 2612.5309992844527,
+          "median": 52823,
+          "min": 49125,
+          "max": 55497,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 47383.666666666664,
+          "std": 487.27291007082357,
+          "median": 47419,
+          "min": 46770,
+          "max": 47962,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "sigma",
+      "model": "bert-base",
+      "seq": 64,
+      "batch": 1,
+      "keybuf_gb": 10,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 835146,
+          "key_bytes": 7978659840,
+          "total_us": 971380,
+          "comm_us": 129622,
+          "transfer_us": 282703,
+          "mha_us": 460130,
+          "matmul_us": 192589,
+          "truncate_us": 130267,
+          "gelu_us": 92179,
+          "softmax_us": 134140,
+          "layernorm_us": 95391,
+          "total_comm_bytes": 441539858,
+          "gelu_comm_bytes": 85524480,
+          "softmax_comm_bytes": 69619968,
+          "layernorm_comm_bytes": 59755536,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 904816,
+          "key_bytes": 7978659840,
+          "total_us": 925338,
+          "comm_us": 106799,
+          "transfer_us": 268134,
+          "mha_us": 384432,
+          "matmul_us": 195255,
+          "truncate_us": 115436,
+          "gelu_us": 117869,
+          "softmax_us": 114449,
+          "layernorm_us": 111593,
+          "total_comm_bytes": 441539858,
+          "gelu_comm_bytes": 85524480,
+          "softmax_comm_bytes": 69619968,
+          "layernorm_comm_bytes": 59755536,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 1056349,
+          "key_bytes": 7978659840,
+          "total_us": 969493,
+          "comm_us": 112007,
+          "transfer_us": 263867,
+          "mha_us": 492530,
+          "matmul_us": 197189,
+          "truncate_us": 96517,
+          "gelu_us": 91513,
+          "softmax_us": 137030,
+          "layernorm_us": 90914,
+          "total_comm_bytes": 441539858,
+          "gelu_comm_bytes": 85524480,
+          "softmax_comm_bytes": 69619968,
+          "layernorm_comm_bytes": 59755536,
+          "keybuf_gb": 10
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 955403.6666666666,
+          "std": 21273.589672538943,
+          "median": 969493,
+          "min": 925338,
+          "max": 971380,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 932103.6666666666,
+          "std": 92344.11862280252,
+          "median": 904816,
+          "min": 835146,
+          "max": 1056349,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 7978659840,
+          "std": 0.0,
+          "median": 7978659840,
+          "min": 7978659840,
+          "max": 7978659840,
+          "n": 3
+        },
+        "layernorm_comm_bytes": {
+          "mean": 59755536,
+          "std": 0.0,
+          "median": 59755536,
+          "min": 59755536,
+          "max": 59755536,
+          "n": 3
+        },
+        "run_idx": {
+          "mean": 1,
+          "std": 0.816496580927726,
+          "median": 1,
+          "min": 0,
+          "max": 2,
+          "n": 3
+        },
+        "transfer_us": {
+          "mean": 271568,
+          "std": 8064.035011498069,
+          "median": 268134,
+          "min": 263867,
+          "max": 282703,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 114073.33333333333,
+          "std": 13812.030271550313,
+          "median": 115436,
+          "min": 96517,
+          "max": 130267,
+          "n": 3
+        },
+        "keybuf_gb": {
+          "mean": 10,
+          "std": 0.0,
+          "median": 10,
+          "min": 10,
+          "max": 10,
+          "n": 3
+        },
+        "matmul_us": {
+          "mean": 195011,
+          "std": 1885.8511782923558,
+          "median": 195255,
+          "min": 192589,
+          "max": 197189,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 100520.33333333333,
+          "std": 12270.372592368805,
+          "median": 92179,
+          "min": 91513,
+          "max": 117869,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 99299.33333333333,
+          "std": 8883.001081966737,
+          "median": 95391,
+          "min": 90914,
+          "max": 111593,
+          "n": 3
+        },
+        "gelu_comm_bytes": {
+          "mean": 85524480,
+          "std": 0.0,
+          "median": 85524480,
+          "min": 85524480,
+          "max": 85524480,
+          "n": 3
+        },
+        "mha_us": {
+          "mean": 445697.3333333333,
+          "std": 45295.480284706355,
+          "median": 460130,
+          "min": 384432,
+          "max": 492530,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 441539858,
+          "std": 0.0,
+          "median": 441539858,
+          "min": 441539858,
+          "max": 441539858,
+          "n": 3
+        },
+        "softmax_comm_bytes": {
+          "mean": 69619968,
+          "std": 0.0,
+          "median": 69619968,
+          "min": 69619968,
+          "max": 69619968,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 116142.66666666667,
+          "std": 9765.590486783456,
+          "median": 112007,
+          "min": 106799,
+          "max": 129622,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 128539.66666666667,
+          "std": 10033.21783986684,
+          "median": 134140,
+          "min": 114449,
+          "max": 137030,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "suf",
+      "model": "bert-base",
+      "seq": 64,
+      "batch": 1,
+      "keybuf_gb": 10,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 696128,
+          "key_bytes": 6269558784,
+          "total_us": 739458,
+          "comm_us": 105249,
+          "transfer_us": 246258,
+          "mha_us": 280132,
+          "matmul_us": 234382,
+          "truncate_us": 122079,
+          "gelu_us": 21629,
+          "softmax_us": 67713,
+          "layernorm_us": 80360,
+          "total_comm_bytes": 388083842,
+          "gelu_comm_bytes": 64290816,
+          "softmax_comm_bytes": 37497600,
+          "layernorm_comm_bytes": 59655552,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 724517,
+          "key_bytes": 6269558784,
+          "total_us": 742602,
+          "comm_us": 104832,
+          "transfer_us": 220337,
+          "mha_us": 326559,
+          "matmul_us": 204464,
+          "truncate_us": 124206,
+          "gelu_us": 22613,
+          "softmax_us": 69181,
+          "layernorm_us": 63924,
+          "total_comm_bytes": 388083842,
+          "gelu_comm_bytes": 64290816,
+          "softmax_comm_bytes": 37497600,
+          "layernorm_comm_bytes": 59655552,
+          "keybuf_gb": 10
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 680122,
+          "key_bytes": 6269558784,
+          "total_us": 649398,
+          "comm_us": 72036,
+          "transfer_us": 217636,
+          "mha_us": 275860,
+          "matmul_us": 195219,
+          "truncate_us": 93455,
+          "gelu_us": 21531,
+          "softmax_us": 67051,
+          "layernorm_us": 62461,
+          "total_comm_bytes": 388083842,
+          "gelu_comm_bytes": 64290816,
+          "softmax_comm_bytes": 37497600,
+          "layernorm_comm_bytes": 59655552,
+          "keybuf_gb": 10
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 710486,
+          "std": 43214.804500309845,
+          "median": 739458,
+          "min": 649398,
+          "max": 742602,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 700255.6666666666,
+          "std": 18357.69103733425,
+          "median": 696128,
+          "min": 680122,
+          "max": 724517,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 6269558784,
+          "std": 0.0,
+          "median": 6269558784,
+          "min": 6269558784,
+          "max": 6269558784,
+          "n": 3
+        },
+        "layernorm_comm_bytes": {
+          "mean": 59655552,
+          "std": 0.0,
+          "median": 59655552,
+          "min": 59655552,
+          "max": 59655552,
+          "n": 3
+        },
+        "run_idx": {
+          "mean": 1,
+          "std": 0.816496580927726,
+          "median": 1,
+          "min": 0,
+          "max": 2,
+          "n": 3
+        },
+        "transfer_us": {
+          "mean": 228077,
+          "std": 12903.11127855087,
+          "median": 220337,
+          "min": 217636,
+          "max": 246258,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 113246.66666666667,
+          "std": 14021.735135931724,
+          "median": 122079,
+          "min": 93455,
+          "max": 124206,
+          "n": 3
+        },
+        "keybuf_gb": {
+          "mean": 10,
+          "std": 0.0,
+          "median": 10,
+          "min": 10,
+          "max": 10,
+          "n": 3
+        },
+        "matmul_us": {
+          "mean": 211355,
+          "std": 16714.256449709832,
+          "median": 204464,
+          "min": 195219,
+          "max": 234382,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 21924.333333333332,
+          "std": 488.60163278027994,
+          "median": 21629,
+          "min": 21531,
+          "max": 22613,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 68915,
+          "std": 8114.846928110638,
+          "median": 63924,
+          "min": 62461,
+          "max": 80360,
+          "n": 3
+        },
+        "gelu_comm_bytes": {
+          "mean": 64290816,
+          "std": 0.0,
+          "median": 64290816,
+          "min": 64290816,
+          "max": 64290816,
+          "n": 3
+        },
+        "mha_us": {
+          "mean": 294183.6666666667,
+          "std": 22959.15434466658,
+          "median": 280132,
+          "min": 275860,
+          "max": 326559,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 388083842,
+          "std": 0.0,
+          "median": 388083842,
+          "min": 388083842,
+          "max": 388083842,
+          "n": 3
+        },
+        "softmax_comm_bytes": {
+          "mean": 37497600,
+          "std": 0.0,
+          "median": 37497600,
+          "min": 37497600,
+          "max": 37497600,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 94039,
+          "std": 15559.401852256404,
+          "median": 104832,
+          "min": 72036,
+          "max": 105249,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 67981.66666666667,
+          "std": 890.0791475418852,
+          "median": 67713,
+          "min": 67051,
+          "max": 69181,
+          "n": 3
+        }
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "model": "bert-base",
+      "seq": 32,
+      "sigma_total_us": 642299.5,
+      "suf_total_us": 545502.0,
+      "speedup": 1.177446645475177,
+      "sigma_comm_bytes": 198355538.0,
+      "suf_comm_bytes": 179664002.0,
+      "comm_reduction_pct": 9.423248873444612,
+      "sigma_key_bytes": 3979329536.0,
+      "suf_key_bytes": 3247276032.0,
+      "key_reduction_pct": 18.39640314724616,
+      "sigma_keygen_us": 603134.5,
+      "suf_keygen_us": 558874.5,
+      "keygen_reduction_pct": 7.338330007651693
+    },
+    {
+      "model": "bert-base",
+      "seq": 64,
+      "sigma_total_us": 947415.5,
+      "suf_total_us": 696000.0,
+      "speedup": 1.3612291666666667,
+      "sigma_comm_bytes": 441539858.0,
+      "suf_comm_bytes": 388083842.0,
+      "comm_reduction_pct": 12.106724915420886,
+      "sigma_key_bytes": 7978659840.0,
+      "suf_key_bytes": 6269558784.0,
+      "key_reduction_pct": 21.420903889543435,
+      "sigma_keygen_us": 980582.5,
+      "suf_keygen_us": 702319.5,
+      "keygen_reduction_pct": 28.377316543992983
+    }
+  ],
+  "selected_policy": "run_idx>=1 median"
+}
