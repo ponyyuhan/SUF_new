@@ -18,6 +18,122 @@ Primary sources:
 - `results/ablation_cpu_vs_gpu_bertbase_2026-01-27.jsonl`
 - `results/batch_sweep_internal_metrics_selected_2026-01-27.json`
 
+## 0) Experiment configuration (aligned with evaluation_latest.md)
+
+### 0.1 Environment
+- OS: Ubuntu 24.04.3 LTS
+- CPU: 2x AMD EPYC 9654 (96 cores/socket, 384 CPUs total)
+- RAM: ~1.5 TiB
+- GPU: 2x NVIDIA RTX PRO 6000 Blackwell Workstation Edition (97,887 MiB each, sm_120)
+- CUDA: 13.0 (`nvcc` build cuda_13.0.r13.0), driver 580.119.02
+- Sigma baseline: `ezpc_upstream/GPU-MPC/experiments/sigma` with `build/gpu_mpc_upstream/sigma`
+- SUF: `third_party/EzPC_vendor/GPU-MPC/experiments/sigma` with `build/gpu_mpc_vendor/sigma`
+- GPU binding: party-0 uses GPU0, party-1 uses GPU1 (via `CUDA_VISIBLE_DEVICES=0/1`)
+
+### 0.2 Network model (for LAN/WAN projection only)
+Projection formula:
+```text
+T = comp_time + 2 * comm_bytes / bandwidth + rounds * latency
+```
+- LAN: 1 GB/s, 0.5 ms
+- WAN: 400 MB/s, 4 ms
+- `comp_time` is estimated as `(total_us - comm_us)` from `evaluator.txt`
+
+Rounds used for projection (protocol-determined constants reused across reruns):
+
+| Model / Seq | Sigma rounds | SUF rounds |
+|---|---:|---:|
+| bert-tiny-128 | 188 | 186 |
+| bert-base-32 | 1080 | 1068 |
+| bert-base-64 | 1104 | 1092 |
+| bert-base-128 | 1128 | 1116 |
+| bert-large-128 | 2256 | 2232 |
+| gpt2-128 | 1128 | 1116 |
+| gpt2-256 | 1152 | 1140 |
+| gpt-neo-128 | 2256 | 2232 |
+
+### 0.3 Run settings (env flags and selection policy)
+Common env flags (both Sigma and SUF unless noted):
+- `SIGMA_MEMPOOL_DISABLE=1`
+- `SIGMA_PINNED_KEYBUF=1`
+- `OMP_NUM_THREADS=32`
+
+SUF-specific flags (both parties):
+```text
+SUF_SOFTMAX=1 SUF_LAYERNORM=1 SUF_ACTIVATION=1
+SUF_NEXP_BITS=10 SUF_INV_BITS=10 SUF_RSQRT_BITS=9
+```
+
+Selection and aggregation:
+- Each setting is run multiple times (typically 3 runs).
+- Reported values use runs with `run_idx >= 1` and take the median.
+- `run_idx=0` is treated as warmup/outlier by default.
+
+### 0.4 Key buffer sizing (`SIGMA_KEYBUF_GB`)
+Key buffer overrides used to avoid OOM/segfault and keep the pipeline stable:
+
+| Setting | `SIGMA_KEYBUF_GB` |
+|---|---:|
+| bert-tiny, seq=128 | 4 |
+| bert-base, seq in {32, 64} | 10 |
+| bert-base/gpt2, seq=128 | 20 |
+| bert-large, seq=128 | 60 |
+| gpt-neo, seq=128 | 80 |
+| bert-base/gpt2, seq=256 | 80 |
+| bert-base/gpt2, seq=512 | 160 |
+
+Notes:
+- When `SIGMA_BATCH > 1` and no override is provided, Sigma scales key buffers internally.
+- These overrides are explicitly set for reproducibility and stability.
+
+### 0.5 Repro commands (same-mouth runs)
+End-to-end runs (example: BERT-base, seq=128).
+
+Sigma (party 0 then party 1):
+```bash
+cd /workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma
+SIGMA_MEMPOOL_DISABLE=1 SIGMA_PINNED_KEYBUF=1 SIGMA_KEYBUF_GB=20 \
+OMP_NUM_THREADS=32 CUDA_VISIBLE_DEVICES=0 \
+/workspace/SUF_new/build/gpu_mpc_upstream/sigma bert-base 128 0 127.0.0.1 32
+SIGMA_MEMPOOL_DISABLE=1 SIGMA_PINNED_KEYBUF=1 SIGMA_KEYBUF_GB=20 \
+OMP_NUM_THREADS=32 CUDA_VISIBLE_DEVICES=1 \
+/workspace/SUF_new/build/gpu_mpc_upstream/sigma bert-base 128 1 127.0.0.1 32
+```
+
+SUF (party 0 then party 1):
+```bash
+cd /workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma
+SIGMA_MEMPOOL_DISABLE=1 SIGMA_PINNED_KEYBUF=1 SIGMA_KEYBUF_GB=20 \
+OMP_NUM_THREADS=32 CUDA_VISIBLE_DEVICES=0 \
+SUF_SOFTMAX=1 SUF_LAYERNORM=1 SUF_ACTIVATION=1 \
+SUF_NEXP_BITS=10 SUF_INV_BITS=10 SUF_RSQRT_BITS=9 \
+/workspace/SUF_new/build/gpu_mpc_vendor/sigma bert-base 128 0 127.0.0.1 32
+SIGMA_MEMPOOL_DISABLE=1 SIGMA_PINNED_KEYBUF=1 SIGMA_KEYBUF_GB=20 \
+OMP_NUM_THREADS=32 CUDA_VISIBLE_DEVICES=1 \
+SUF_SOFTMAX=1 SUF_LAYERNORM=1 SUF_ACTIVATION=1 \
+SUF_NEXP_BITS=10 SUF_INV_BITS=10 SUF_RSQRT_BITS=9 \
+/workspace/SUF_new/build/gpu_mpc_vendor/sigma bert-base 128 1 127.0.0.1 32
+```
+
+For other settings, change `(model, seq)` and use the keybuf table above.
+
+Ablations (microbench; BERT-base GELU gate):
+```bash
+cd /workspace/SUF_new
+./build/bench_suf_model --model bert-base --seq 128 --iters 50 --json
+./build/bench_suf_model --model bert-base --seq 128 --iters 50 --mask-aware --mask 123456789 --json
+./build/bench_suf_model --model bert-base --seq 128 --iters 50 --mask-aware --mask 123456789 --no-template-cache --json
+./build/bench_suf_model --model bert-base --seq 128 --iters 1 --mask-aware --mask 123456789 --cpu-eval --json
+```
+
+Internal batch sweep (not true batching):
+```bash
+cd /workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma
+SIGMA_BATCH=4 SIGMA_MEMPOOL_DISABLE=1 SIGMA_PINNED_KEYBUF=1 SIGMA_KEYBUF_GB=20 \
+OMP_NUM_THREADS=32 CUDA_VISIBLE_DEVICES=0 \
+/workspace/SUF_new/build/gpu_mpc_upstream/sigma bert-base 128 0 127.0.0.1 32
+```
+
 ## 1) Seq=128 end-to-end (absolute values + LAN/WAN)
 
 | Model | Sigma online (ms) | SUF online (ms) | Speedup | Sigma comm (GiB) | SUF comm (GiB) | Comm ↓ | Sigma keygen (s) | SUF keygen (s) | Keygen ↓ | Sigma key (GiB) | SUF key (GiB) | Key ↓ | Sigma LAN (s) | SUF LAN (s) | Sigma WAN (s) | SUF WAN (s) |
