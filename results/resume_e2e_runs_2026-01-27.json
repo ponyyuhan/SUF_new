@@ -1,0 +1,1286 @@
+{
+  "results": [
+    {
+      "variant": "sigma",
+      "model": "bert-base",
+      "seq": 256,
+      "batch": 1,
+      "keybuf_gb": 80,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 2565715,
+          "key_bytes": 46664757248,
+          "total_us": 2946560,
+          "comm_us": 501976,
+          "transfer_us": 1090042,
+          "mha_us": 1805943,
+          "matmul_us": 229355,
+          "truncate_us": 354732,
+          "gelu_us": 339836,
+          "softmax_us": 980317,
+          "layernorm_us": 215645,
+          "total_comm_bytes": 2842016402,
+          "gelu_comm_bytes": 342097920,
+          "softmax_comm_bytes": 1111919616,
+          "layernorm_comm_bytes": 239021712,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 3096947,
+          "key_bytes": 46664757248,
+          "total_us": 2977994,
+          "comm_us": 449399,
+          "transfer_us": 1082878,
+          "mha_us": 1864201,
+          "matmul_us": 224215,
+          "truncate_us": 352601,
+          "gelu_us": 330758,
+          "softmax_us": 985904,
+          "layernorm_us": 205091,
+          "total_comm_bytes": 2842016402,
+          "gelu_comm_bytes": 342097920,
+          "softmax_comm_bytes": 1111919616,
+          "layernorm_comm_bytes": 239021712,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 2892284,
+          "key_bytes": 46664757248,
+          "total_us": 3004919,
+          "comm_us": 460548,
+          "transfer_us": 1064283,
+          "mha_us": 1770037,
+          "matmul_us": 227416,
+          "truncate_us": 401796,
+          "gelu_us": 387574,
+          "softmax_us": 967525,
+          "layernorm_us": 216991,
+          "total_comm_bytes": 2842016402,
+          "gelu_comm_bytes": 342097920,
+          "softmax_comm_bytes": 1111919616,
+          "layernorm_comm_bytes": 239021712,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/evaluator.txt"
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 2976491,
+          "std": 23848.654427451456,
+          "median": 2977994,
+          "min": 2946560,
+          "max": 3004919,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 470641,
+          "std": 22619.85439092539,
+          "median": 460548,
+          "min": 449399,
+          "max": 501976,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 2851648.6666666665,
+          "std": 218769.71483325158,
+          "median": 2892284,
+          "min": 2565715,
+          "max": 3096947,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 2842016402,
+          "std": 0.0,
+          "median": 2842016402,
+          "min": 2842016402,
+          "max": 2842016402,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 46664757248,
+          "std": 0.0,
+          "median": 46664757248,
+          "min": 46664757248,
+          "max": 46664757248,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 352722.6666666667,
+          "std": 24920.728953133686,
+          "median": 339836,
+          "min": 330758,
+          "max": 387574,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 977915.3333333334,
+          "std": 7692.9800178835485,
+          "median": 980317,
+          "min": 967525,
+          "max": 985904,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 212575.66666666666,
+          "std": 5320.908777851977,
+          "median": 215645,
+          "min": 205091,
+          "max": 216991,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 369709.6666666667,
+          "std": 22705.137162227307,
+          "median": 354732,
+          "min": 352601,
+          "max": 401796,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "suf",
+      "model": "bert-base",
+      "seq": 256,
+      "batch": 1,
+      "keybuf_gb": 80,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 1912591,
+          "key_bytes": 33950765056,
+          "total_us": 2012829,
+          "comm_us": 286271,
+          "transfer_us": 857338,
+          "mha_us": 1259568,
+          "matmul_us": 219488,
+          "truncate_us": 335050,
+          "gelu_us": 74132,
+          "softmax_us": 466917,
+          "layernorm_us": 123474,
+          "total_comm_bytes": 2242447874,
+          "gelu_comm_bytes": 257163264,
+          "softmax_comm_bytes": 597685248,
+          "layernorm_comm_bytes": 238622208,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 2031437,
+          "key_bytes": 33950765056,
+          "total_us": 2140404,
+          "comm_us": 277228,
+          "transfer_us": 832669,
+          "mha_us": 1307414,
+          "matmul_us": 204292,
+          "truncate_us": 419229,
+          "gelu_us": 72996,
+          "softmax_us": 462061,
+          "layernorm_us": 135353,
+          "total_comm_bytes": 2242447874,
+          "gelu_comm_bytes": 257163264,
+          "softmax_comm_bytes": 597685248,
+          "layernorm_comm_bytes": 238622208,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 2030843,
+          "key_bytes": 33950765056,
+          "total_us": 2164465,
+          "comm_us": 302303,
+          "transfer_us": 865048,
+          "mha_us": 1419278,
+          "matmul_us": 206209,
+          "truncate_us": 339725,
+          "gelu_us": 74259,
+          "softmax_us": 585158,
+          "layernorm_us": 123783,
+          "total_comm_bytes": 2242447874,
+          "gelu_comm_bytes": 257163264,
+          "softmax_comm_bytes": 597685248,
+          "layernorm_comm_bytes": 238622208,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-256/evaluator.txt"
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 2105899.3333333335,
+          "std": 66539.70313696594,
+          "median": 2140404,
+          "min": 2012829,
+          "max": 2164465,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 288600.6666666667,
+          "std": 10368.52340285518,
+          "median": 286271,
+          "min": 277228,
+          "max": 302303,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 1991623.6666666667,
+          "std": 55885.06067118674,
+          "median": 2030843,
+          "min": 1912591,
+          "max": 2031437,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 2242447874,
+          "std": 0.0,
+          "median": 2242447874,
+          "min": 2242447874,
+          "max": 2242447874,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 33950765056,
+          "std": 0.0,
+          "median": 33950765056,
+          "min": 33950765056,
+          "max": 33950765056,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 73795.66666666667,
+          "std": 567.8217638974007,
+          "median": 74132,
+          "min": 72996,
+          "max": 74259,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 504712,
+          "std": 56918.44675205628,
+          "median": 466917,
+          "min": 462061,
+          "max": 585158,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 127536.66666666667,
+          "std": 5528.421735802081,
+          "median": 123783,
+          "min": 123474,
+          "max": 135353,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 364668,
+          "std": 38627.63213900985,
+          "median": 339725,
+          "min": 335050,
+          "max": 419229,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "sigma",
+      "model": "bert-base",
+      "seq": 512,
+      "batch": 1,
+      "keybuf_gb": 160,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 6655948,
+          "key_bytes": 137418690560,
+          "total_us": 7455963,
+          "comm_us": 1152086,
+          "transfer_us": 2888743,
+          "mha_us": 5502641,
+          "matmul_us": 244494,
+          "truncate_us": 708971,
+          "gelu_us": 652782,
+          "softmax_us": 3360732,
+          "layernorm_us": 345354,
+          "total_comm_bytes": 8552955026,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 4446314496,
+          "layernorm_comm_bytes": 478043280,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 7038238,
+          "key_bytes": 137418690560,
+          "total_us": 7703355,
+          "comm_us": 994646,
+          "transfer_us": 2860306,
+          "mha_us": 5664442,
+          "matmul_us": 229727,
+          "truncate_us": 670736,
+          "gelu_us": 771313,
+          "softmax_us": 3505346,
+          "layernorm_us": 365376,
+          "total_comm_bytes": 8552955026,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 4446314496,
+          "layernorm_comm_bytes": 478043280,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 7124970,
+          "key_bytes": 137418690560,
+          "total_us": 7686138,
+          "comm_us": 1174222,
+          "transfer_us": 2870853,
+          "mha_us": 5653486,
+          "matmul_us": 240081,
+          "truncate_us": 746280,
+          "gelu_us": 644351,
+          "softmax_us": 3377610,
+          "layernorm_us": 400319,
+          "total_comm_bytes": 8552955026,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 4446314496,
+          "layernorm_comm_bytes": 478043280,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/evaluator.txt"
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 7615152,
+          "std": 112782.85792619373,
+          "median": 7686138,
+          "min": 7455963,
+          "max": 7703355,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 1106984.6666666667,
+          "std": 79947.82734314229,
+          "median": 1152086,
+          "min": 994646,
+          "max": 1174222,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 6939718.666666667,
+          "std": 203756.31426016934,
+          "median": 7038238,
+          "min": 6655948,
+          "max": 7124970,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 8552955026,
+          "std": 0.0,
+          "median": 8552955026,
+          "min": 8552955026,
+          "max": 8552955026,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 137418690560,
+          "std": 0.0,
+          "median": 137418690560,
+          "min": 137418690560,
+          "max": 137418690560,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 689482,
+          "std": 57965.534938156714,
+          "median": 652782,
+          "min": 644351,
+          "max": 771313,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 3414562.6666666665,
+          "std": 64562.253829583395,
+          "median": 3377610,
+          "min": 3360732,
+          "max": 3505346,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 370349.6666666667,
+          "std": 22713.297519783915,
+          "median": 365376,
+          "min": 345354,
+          "max": 400319,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 708662.3333333334,
+          "std": 30841.481161290263,
+          "median": 708971,
+          "min": 670736,
+          "max": 746280,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "suf",
+      "model": "bert-base",
+      "seq": 512,
+      "batch": 1,
+      "keybuf_gb": 160,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 4681918,
+          "key_bytes": 96319086592,
+          "total_us": 4977068,
+          "comm_us": 788697,
+          "transfer_us": 2098755,
+          "mha_us": 3686593,
+          "matmul_us": 239652,
+          "truncate_us": 687818,
+          "gelu_us": 151570,
+          "softmax_us": 1682288,
+          "layernorm_us": 208235,
+          "total_comm_bytes": 6325165058,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 2389192704,
+          "layernorm_comm_bytes": 477244416,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 4864678,
+          "key_bytes": 96319086592,
+          "total_us": 5333497,
+          "comm_us": 927052,
+          "transfer_us": 2095945,
+          "mha_us": 3971723,
+          "matmul_us": 254433,
+          "truncate_us": 726722,
+          "gelu_us": 164598,
+          "softmax_us": 1713726,
+          "layernorm_us": 214628,
+          "total_comm_bytes": 6325165058,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 2389192704,
+          "layernorm_comm_bytes": 477244416,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 5160055,
+          "key_bytes": 96319086592,
+          "total_us": 5314660,
+          "comm_us": 792655,
+          "transfer_us": 2144097,
+          "mha_us": 4014640,
+          "matmul_us": 232630,
+          "truncate_us": 661540,
+          "gelu_us": 148107,
+          "softmax_us": 1918759,
+          "layernorm_us": 256381,
+          "total_comm_bytes": 6325165058,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 2389192704,
+          "layernorm_comm_bytes": 477244416,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-512/evaluator.txt"
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 5208408.333333333,
+          "std": 163762.980172226,
+          "median": 5314660,
+          "min": 4977068,
+          "max": 5333497,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 836134.6666666666,
+          "std": 64308.56638807064,
+          "median": 792655,
+          "min": 788697,
+          "max": 927052,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 4902217,
+          "std": 196995.14390461508,
+          "median": 4864678,
+          "min": 4681918,
+          "max": 5160055,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 6325165058,
+          "std": 0.0,
+          "median": 6325165058,
+          "min": 6325165058,
+          "max": 6325165058,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 96319086592,
+          "std": 0.0,
+          "median": 96319086592,
+          "min": 96319086592,
+          "max": 96319086592,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 154758.33333333334,
+          "std": 7099.876634295994,
+          "median": 151570,
+          "min": 148107,
+          "max": 164598,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 1771591,
+          "std": 104851.96589795857,
+          "median": 1713726,
+          "min": 1682288,
+          "max": 1918759,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 226414.66666666666,
+          "std": 21349.527119405295,
+          "median": 214628,
+          "min": 208235,
+          "max": 256381,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 692026.6666666666,
+          "std": 26776.33205318126,
+          "median": 687818,
+          "min": 661540,
+          "max": 726722,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "sigma",
+      "model": "gpt2",
+      "seq": 256,
+      "batch": 1,
+      "keybuf_gb": 80,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 2135690,
+          "key_bytes": 35638509568,
+          "total_us": 2670241,
+          "comm_us": 453947,
+          "transfer_us": 866587,
+          "mha_us": 1471255,
+          "matmul_us": 266434,
+          "truncate_us": 349051,
+          "gelu_us": 370452,
+          "softmax_us": 725749,
+          "layernorm_us": 210098,
+          "total_comm_bytes": 2129103506,
+          "gelu_comm_bytes": 342097920,
+          "softmax_comm_bytes": 559987200,
+          "layernorm_comm_bytes": 239021712,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 2094016,
+          "key_bytes": 35638509568,
+          "total_us": 2772842,
+          "comm_us": 468085,
+          "transfer_us": 860136,
+          "mha_us": 1504300,
+          "matmul_us": 252213,
+          "truncate_us": 410102,
+          "gelu_us": 364724,
+          "softmax_us": 602275,
+          "layernorm_us": 240325,
+          "total_comm_bytes": 2129103506,
+          "gelu_comm_bytes": 342097920,
+          "softmax_comm_bytes": 559987200,
+          "layernorm_comm_bytes": 239021712,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 2130940,
+          "key_bytes": 35638509568,
+          "total_us": 2527166,
+          "comm_us": 414814,
+          "transfer_us": 878180,
+          "mha_us": 1344773,
+          "matmul_us": 220046,
+          "truncate_us": 377147,
+          "gelu_us": 337190,
+          "softmax_us": 591256,
+          "layernorm_us": 246866,
+          "total_comm_bytes": 2129103506,
+          "gelu_comm_bytes": 342097920,
+          "softmax_comm_bytes": 559987200,
+          "layernorm_comm_bytes": 239021712,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/evaluator.txt"
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 2656749.6666666665,
+          "std": 100749.47907337068,
+          "median": 2670241,
+          "min": 2527166,
+          "max": 2772842,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 445615.3333333333,
+          "std": 22531.642377381686,
+          "median": 453947,
+          "min": 414814,
+          "max": 468085,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 2120215.3333333335,
+          "std": 18626.941515509792,
+          "median": 2130940,
+          "min": 2094016,
+          "max": 2135690,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 2129103506,
+          "std": 0.0,
+          "median": 2129103506,
+          "min": 2129103506,
+          "max": 2129103506,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 35638509568,
+          "std": 0.0,
+          "median": 35638509568,
+          "min": 35638509568,
+          "max": 35638509568,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 357455.3333333333,
+          "std": 14519.30432983007,
+          "median": 364724,
+          "min": 337190,
+          "max": 370452,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 639760,
+          "std": 60969.58630333652,
+          "median": 602275,
+          "min": 591256,
+          "max": 725749,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 232429.66666666666,
+          "std": 16015.069410471571,
+          "median": 240325,
+          "min": 210098,
+          "max": 246866,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 378766.6666666667,
+          "std": 24950.26573450115,
+          "median": 377147,
+          "min": 349051,
+          "max": 410102,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "suf",
+      "model": "gpt2",
+      "seq": 256,
+      "batch": 1,
+      "keybuf_gb": 80,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 1712745,
+          "key_bytes": 26826825728,
+          "total_us": 1829801,
+          "comm_us": 281933,
+          "transfer_us": 683351,
+          "mha_us": 1021639,
+          "matmul_us": 240141,
+          "truncate_us": 351477,
+          "gelu_us": 87905,
+          "softmax_us": 339992,
+          "layernorm_us": 127339,
+          "total_comm_bytes": 1785693698,
+          "gelu_comm_bytes": 257163264,
+          "softmax_comm_bytes": 301911552,
+          "layernorm_comm_bytes": 238622208,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 1705915,
+          "key_bytes": 26826825728,
+          "total_us": 1804106,
+          "comm_us": 227451,
+          "transfer_us": 716900,
+          "mha_us": 1040349,
+          "matmul_us": 206436,
+          "truncate_us": 343819,
+          "gelu_us": 72275,
+          "softmax_us": 326517,
+          "layernorm_us": 140137,
+          "total_comm_bytes": 1785693698,
+          "gelu_comm_bytes": 257163264,
+          "softmax_comm_bytes": 301911552,
+          "layernorm_comm_bytes": 238622208,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 1591941,
+          "key_bytes": 26826825728,
+          "total_us": 1785998,
+          "comm_us": 260096,
+          "transfer_us": 697263,
+          "mha_us": 925783,
+          "matmul_us": 212012,
+          "truncate_us": 414475,
+          "gelu_us": 73039,
+          "softmax_us": 269351,
+          "layernorm_us": 159578,
+          "total_comm_bytes": 1785693698,
+          "gelu_comm_bytes": 257163264,
+          "softmax_comm_bytes": 301911552,
+          "layernorm_comm_bytes": 238622208,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-256/evaluator.txt"
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 1806635,
+          "std": 17971.692240854783,
+          "median": 1804106,
+          "min": 1785998,
+          "max": 1829801,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 256493.33333333334,
+          "std": 22387.593086846613,
+          "median": 260096,
+          "min": 227451,
+          "max": 281933,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 1670200.3333333333,
+          "std": 55407.90957575963,
+          "median": 1705915,
+          "min": 1591941,
+          "max": 1712745,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 1785693698,
+          "std": 0.0,
+          "median": 1785693698,
+          "min": 1785693698,
+          "max": 1785693698,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 26826825728,
+          "std": 0.0,
+          "median": 26826825728,
+          "min": 26826825728,
+          "max": 26826825728,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 77739.66666666667,
+          "std": 7194.739992213447,
+          "median": 73039,
+          "min": 72275,
+          "max": 87905,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 311953.3333333333,
+          "std": 30622.573485729263,
+          "median": 326517,
+          "min": 269351,
+          "max": 339992,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 142351.33333333334,
+          "std": 13254.32594371446,
+          "median": 140137,
+          "min": 127339,
+          "max": 159578,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 369923.6666666667,
+          "std": 31657.302657610544,
+          "median": 351477,
+          "min": 343819,
+          "max": 414475,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "sigma",
+      "model": "gpt2",
+      "seq": 512,
+      "batch": 1,
+      "keybuf_gb": 160,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 7571794,
+          "key_bytes": 93078962176,
+          "total_us": 8612878,
+          "comm_us": 1100330,
+          "transfer_us": 3265396,
+          "mha_us": 5281609,
+          "matmul_us": 441239,
+          "truncate_us": 1100010,
+          "gelu_us": 1022024,
+          "softmax_us": 2964207,
+          "layernorm_us": 762003,
+          "total_comm_bytes": 5693055122,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 2231599104,
+          "layernorm_comm_bytes": 478043280,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 4909991,
+          "key_bytes": 93078962176,
+          "total_us": 5438136,
+          "comm_us": 712888,
+          "transfer_us": 2013270,
+          "mha_us": 3397048,
+          "matmul_us": 252673,
+          "truncate_us": 688239,
+          "gelu_us": 618350,
+          "softmax_us": 1721599,
+          "layernorm_us": 480319,
+          "total_comm_bytes": 5693055122,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 2231599104,
+          "layernorm_comm_bytes": 478043280,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 5312328,
+          "key_bytes": 93078962176,
+          "total_us": 5416156,
+          "comm_us": 902566,
+          "transfer_us": 2002197,
+          "mha_us": 3367646,
+          "matmul_us": 244946,
+          "truncate_us": 722808,
+          "gelu_us": 729664,
+          "softmax_us": 1805626,
+          "layernorm_us": 349574,
+          "total_comm_bytes": 5693055122,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 2231599104,
+          "layernorm_comm_bytes": 478043280,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/evaluator.txt"
+        },
+        {
+          "run_idx": 3,
+          "keygen_us": 5146786,
+          "key_bytes": 93078962176,
+          "total_us": 5822021,
+          "comm_us": 917688,
+          "transfer_us": 1993479,
+          "mha_us": 3543712,
+          "matmul_us": 246542,
+          "truncate_us": 819104,
+          "gelu_us": 818069,
+          "softmax_us": 1967030,
+          "layernorm_us": 393089,
+          "total_comm_bytes": 5693055122,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 2231599104,
+          "layernorm_comm_bytes": 478043280,
+          "existing": false
+        },
+        {
+          "run_idx": 4,
+          "keygen_us": 5180125,
+          "key_bytes": 93078962176,
+          "total_us": 5853786,
+          "comm_us": 770585,
+          "transfer_us": 2050570,
+          "mha_us": 3639393,
+          "matmul_us": 231498,
+          "truncate_us": 880492,
+          "gelu_us": 718461,
+          "softmax_us": 2097946,
+          "layernorm_us": 382425,
+          "total_comm_bytes": 5693055122,
+          "gelu_comm_bytes": 684195840,
+          "softmax_comm_bytes": 2231599104,
+          "layernorm_comm_bytes": 478043280,
+          "existing": false
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 6489056.666666667,
+          "std": 1501795.2750050705,
+          "median": 5438136,
+          "min": 5416156,
+          "max": 8612878,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 905261.3333333334,
+          "std": 158184.01616963567,
+          "median": 902566,
+          "min": 712888,
+          "max": 1100330,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 5931371,
+          "std": 1171525.922202606,
+          "median": 5312328,
+          "min": 4909991,
+          "max": 7571794,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 5693055122,
+          "std": 0.0,
+          "median": 5693055122,
+          "min": 5693055122,
+          "max": 5693055122,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 93078962176,
+          "std": 0.0,
+          "median": 93078962176,
+          "min": 93078962176,
+          "max": 93078962176,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 790012.6666666666,
+          "std": 170234.4378503428,
+          "median": 729664,
+          "min": 618350,
+          "max": 1022024,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 2163810.6666666665,
+          "std": 567004.3221424527,
+          "median": 1805626,
+          "min": 1721599,
+          "max": 2964207,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 530632,
+          "std": 172091.00012687087,
+          "median": 480319,
+          "min": 349574,
+          "max": 762003,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 837019,
+          "std": 186497.45932317685,
+          "median": 722808,
+          "min": 688239,
+          "max": 1100010,
+          "n": 3
+        }
+      }
+    },
+    {
+      "variant": "suf",
+      "model": "gpt2",
+      "seq": 512,
+      "batch": 1,
+      "keybuf_gb": 160,
+      "runs": [
+        {
+          "run_idx": 0,
+          "keygen_us": 5731383,
+          "key_bytes": 67619196928,
+          "total_us": 6586313,
+          "comm_us": 971348,
+          "transfer_us": 2576200,
+          "mha_us": 3931103,
+          "matmul_us": 436492,
+          "truncate_us": 1077933,
+          "gelu_us": 228617,
+          "softmax_us": 1615287,
+          "layernorm_us": 902479,
+          "total_comm_bytes": 4491909122,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 1201121280,
+          "layernorm_comm_bytes": 477244416,
+          "existing": true
+        },
+        {
+          "run_idx": 1,
+          "keygen_us": 3855920,
+          "key_bytes": 67619196928,
+          "total_us": 3854599,
+          "comm_us": 556378,
+          "transfer_us": 1554842,
+          "mha_us": 2566135,
+          "matmul_us": 247851,
+          "truncate_us": 660216,
+          "gelu_us": 153824,
+          "softmax_us": 891838,
+          "layernorm_us": 223041,
+          "total_comm_bytes": 4491909122,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 1201121280,
+          "layernorm_comm_bytes": 477244416,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/evaluator.txt"
+        },
+        {
+          "run_idx": 2,
+          "keygen_us": 3544645,
+          "key_bytes": 67619196928,
+          "total_us": 3830836,
+          "comm_us": 596159,
+          "transfer_us": 1549684,
+          "mha_us": 2560781,
+          "matmul_us": 230338,
+          "truncate_us": 668638,
+          "gelu_us": 154610,
+          "softmax_us": 922263,
+          "layernorm_us": 211199,
+          "total_comm_bytes": 4491909122,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 1201121280,
+          "layernorm_comm_bytes": 477244416,
+          "existing": false,
+          "dealer_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/dealer.txt",
+          "evaluator_path": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-512/evaluator.txt"
+        },
+        {
+          "run_idx": 3,
+          "keygen_us": 3722320,
+          "key_bytes": 67619196928,
+          "total_us": 4607980,
+          "comm_us": 614100,
+          "transfer_us": 1602550,
+          "mha_us": 3124632,
+          "matmul_us": 280149,
+          "truncate_us": 770525,
+          "gelu_us": 180163,
+          "softmax_us": 1153605,
+          "layernorm_us": 250971,
+          "total_comm_bytes": 4491909122,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 1201121280,
+          "layernorm_comm_bytes": 477244416,
+          "existing": false
+        },
+        {
+          "run_idx": 4,
+          "keygen_us": 3728794,
+          "key_bytes": 67619196928,
+          "total_us": 4033394,
+          "comm_us": 563359,
+          "transfer_us": 1554039,
+          "mha_us": 2726844,
+          "matmul_us": 231484,
+          "truncate_us": 688272,
+          "gelu_us": 164834,
+          "softmax_us": 932560,
+          "layernorm_us": 220079,
+          "total_comm_bytes": 4491909122,
+          "gelu_comm_bytes": 514326528,
+          "softmax_comm_bytes": 1201121280,
+          "layernorm_comm_bytes": 477244416,
+          "existing": false
+        }
+      ],
+      "agg": {
+        "total_us": {
+          "mean": 4757249.333333333,
+          "std": 1293379.705160691,
+          "median": 3854599,
+          "min": 3830836,
+          "max": 6586313,
+          "n": 3
+        },
+        "comm_us": {
+          "mean": 707961.6666666666,
+          "std": 186949.01699007556,
+          "median": 596159,
+          "min": 556378,
+          "max": 971348,
+          "n": 3
+        },
+        "keygen_us": {
+          "mean": 4377316,
+          "std": 965866.1438567286,
+          "median": 3855920,
+          "min": 3544645,
+          "max": 5731383,
+          "n": 3
+        },
+        "total_comm_bytes": {
+          "mean": 4491909122,
+          "std": 0.0,
+          "median": 4491909122,
+          "min": 4491909122,
+          "max": 4491909122,
+          "n": 3
+        },
+        "key_bytes": {
+          "mean": 67619196928,
+          "std": 0.0,
+          "median": 67619196928,
+          "min": 67619196928,
+          "max": 67619196928,
+          "n": 3
+        },
+        "gelu_us": {
+          "mean": 179017,
+          "std": 35073.964218491186,
+          "median": 154610,
+          "min": 153824,
+          "max": 228617,
+          "n": 3
+        },
+        "softmax_us": {
+          "mean": 1143129.3333333333,
+          "std": 334096.85900981206,
+          "median": 922263,
+          "min": 891838,
+          "max": 1615287,
+          "n": 3
+        },
+        "layernorm_us": {
+          "mean": 445573,
+          "std": 323117.49964783195,
+          "median": 223041,
+          "min": 211199,
+          "max": 902479,
+          "n": 3
+        },
+        "truncate_us": {
+          "mean": 802262.3333333334,
+          "std": 194958.91852102813,
+          "median": 668638,
+          "min": 660216,
+          "max": 1077933,
+          "n": 3
+        }
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "model": "bert-base",
+      "seq": 256,
+      "sigma_ms_median": 2977.994,
+      "suf_ms_median": 2140.404,
+      "speedup_median": 1.391323320270379,
+      "sigma_comm_gb_median": 2.646834032610059,
+      "suf_comm_gb_median": 2.088442327454686,
+      "comm_reduction": 0.21096589294068402,
+      "sigma_key_gb_median": 43.45994186401367,
+      "suf_key_gb_median": 31.61911392211914,
+      "key_reduction": 0.27245383758092745
+    },
+    {
+      "model": "bert-base",
+      "seq": 512,
+      "sigma_ms_median": 7686.138,
+      "suf_ms_median": 5314.66,
+      "speedup_median": 1.4462144332845375,
+      "sigma_comm_gb_median": 7.965560095384717,
+      "suf_comm_gb_median": 5.8907690066844225,
+      "comm_reduction": 0.2604702072240266,
+      "sigma_key_gb_median": 127.98112869262695,
+      "suf_key_gb_median": 89.70413970947266,
+      "key_reduction": 0.29908307087277197
+    },
+    {
+      "model": "gpt2",
+      "seq": 256,
+      "sigma_ms_median": 2670.241,
+      "suf_ms_median": 1804.106,
+      "speedup_median": 1.4800909702644967,
+      "sigma_comm_gb_median": 1.982882158830762,
+      "suf_comm_gb_median": 1.6630568522959948,
+      "comm_reduction": 0.16129314851637844,
+      "sigma_key_gb_median": 33.190948486328125,
+      "suf_key_gb_median": 24.98442840576172,
+      "key_reduction": 0.2472517494926908
+    },
+    {
+      "model": "gpt2",
+      "seq": 512,
+      "sigma_ms_median": 5438.136,
+      "suf_ms_median": 3854.599,
+      "speedup_median": 1.4108175714257178,
+      "sigma_comm_gb_median": 5.302070753648877,
+      "suf_comm_gb_median": 4.183416368439794,
+      "comm_reduction": 0.21098443177870219,
+      "sigma_key_gb_median": 86.68653869628906,
+      "suf_key_gb_median": 62.975284576416016,
+      "key_reduction": 0.2735286755761087
+    }
+  ]
+}

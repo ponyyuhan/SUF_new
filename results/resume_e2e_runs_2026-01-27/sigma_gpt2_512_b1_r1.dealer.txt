@@ -1,0 +1,4 @@
+Batch=1
+Total time=4909991 us
+Per-inference time=4909991 us
+Key size=93078962176 B (86.686539 GB)

@@ -1,0 +1,9 @@
+{
+  "bert-base": {
+    "pred_bytes_ratio": 2.0,
+    "per_gate_eval_ms_ratio": 3.965190039001968,
+    "pred_ms_ratio": 1.938842197612176,
+    "lut_ms_ratio": 1.184866723989682,
+    "per_gate_key_ms_ratio": 1.5439669179648696
+  }
+}
