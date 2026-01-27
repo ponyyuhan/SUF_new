@@ -249,6 +249,8 @@ int main(int __argc, char **__argv)
     sigma->keyBuf = sigmaKeygen->startPtr;
     sigma->startPtr = sigma->keyBuf;
     sigma->keySize = sigmaKeygen->keySize;
+    sigma->resetKeyDebug();
+    sigma->debugKey("online-start");
     net->setBackend(sigma);
     sigma->peer->sync();
     start = std::chrono::high_resolution_clock::now();

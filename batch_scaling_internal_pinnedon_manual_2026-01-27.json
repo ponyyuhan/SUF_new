@@ -1,0 +1,246 @@
+{
+  "results": [
+    {
+      "model": "bert-base",
+      "batch": 1,
+      "online_ms_per_inf": 1392.692,
+      "comm_gb_per_inf": 0.9894284177571535,
+      "keygen_s_per_inf": 1.190109,
+      "key_gb_per_inf": 16.834537506103516,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128",
+      "variant": "sigma"
+    },
+    {
+      "model": "bert-base",
+      "batch": 1,
+      "online_ms_per_inf": 1064.357,
+      "comm_gb_per_inf": 0.8299834746867418,
+      "keygen_s_per_inf": 0.96616,
+      "key_gb_per_inf": 12.738677978515625,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128",
+      "variant": "suf"
+    },
+    {
+      "model": "bert-base",
+      "batch": 2,
+      "online_ms_per_inf": 1421.1375,
+      "comm_gb_per_inf": 0.9894284168258309,
+      "keygen_s_per_inf": 1.191775,
+      "key_gb_per_inf": 16.834537506103516,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b2",
+      "variant": "sigma"
+    },
+    {
+      "model": "bert-base",
+      "batch": 2,
+      "online_ms_per_inf": 1151.3865,
+      "comm_gb_per_inf": 0.8299834737554193,
+      "keygen_s_per_inf": 1.0075125,
+      "key_gb_per_inf": 12.738677978515625,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b2",
+      "variant": "suf"
+    },
+    {
+      "model": "bert-base",
+      "batch": 4,
+      "online_ms_per_inf": 1378.2695,
+      "comm_gb_per_inf": 0.9894284163601696,
+      "keygen_s_per_inf": 1.19097075,
+      "key_gb_per_inf": 16.834537506103516,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b4",
+      "variant": "sigma"
+    },
+    {
+      "model": "bert-base",
+      "batch": 4,
+      "online_ms_per_inf": 1039.046,
+      "comm_gb_per_inf": 0.829983473289758,
+      "keygen_s_per_inf": 0.918432,
+      "key_gb_per_inf": 12.738677978515625,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b4",
+      "variant": "suf"
+    },
+    {
+      "model": "bert-base",
+      "batch": 8,
+      "online_ms_per_inf": 1370.159875,
+      "comm_gb_per_inf": 0.989428416127339,
+      "keygen_s_per_inf": 1.164200875,
+      "key_gb_per_inf": 16.834537506103516,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b8",
+      "variant": "sigma"
+    },
+    {
+      "model": "bert-base",
+      "batch": 8,
+      "online_ms_per_inf": 1041.938375,
+      "comm_gb_per_inf": 0.8299834730569273,
+      "keygen_s_per_inf": 0.913075125,
+      "key_gb_per_inf": 12.738677978515625,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b8",
+      "variant": "suf"
+    },
+    {
+      "model": "gpt2",
+      "batch": 1,
+      "online_ms_per_inf": 1266.239,
+      "comm_gb_per_inf": 0.8243566919118166,
+      "keygen_s_per_inf": 1.071934,
+      "key_gb_per_inf": 14.292163848876953,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128",
+      "variant": "sigma"
+    },
+    {
+      "model": "gpt2",
+      "batch": 1,
+      "online_ms_per_inf": 931.089,
+      "comm_gb_per_inf": 0.7243194598704576,
+      "keygen_s_per_inf": 0.874893,
+      "key_gb_per_inf": 11.101318359375,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128",
+      "variant": "suf"
+    },
+    {
+      "model": "gpt2",
+      "batch": 2,
+      "online_ms_per_inf": 1270.0785,
+      "comm_gb_per_inf": 0.824356690980494,
+      "keygen_s_per_inf": 1.072037,
+      "key_gb_per_inf": 14.292163848876953,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128-b2",
+      "variant": "sigma"
+    },
+    {
+      "model": "gpt2",
+      "batch": 2,
+      "online_ms_per_inf": 961.5785,
+      "comm_gb_per_inf": 0.7243194589391351,
+      "keygen_s_per_inf": 0.8484495,
+      "key_gb_per_inf": 11.101318359375,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128-b2",
+      "variant": "suf"
+    },
+    {
+      "model": "gpt2",
+      "batch": 4,
+      "online_ms_per_inf": 1378.5725,
+      "comm_gb_per_inf": 0.8243566905148327,
+      "keygen_s_per_inf": 1.045081,
+      "key_gb_per_inf": 14.292162895202637,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128-b4",
+      "variant": "sigma"
+    },
+    {
+      "model": "gpt2",
+      "batch": 4,
+      "online_ms_per_inf": 956.57175,
+      "comm_gb_per_inf": 0.7243194584734738,
+      "keygen_s_per_inf": 0.8482095,
+      "key_gb_per_inf": 11.101317405700684,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128-b4",
+      "variant": "suf"
+    },
+    {
+      "model": "gpt2",
+      "batch": 8,
+      "online_ms_per_inf": 1288.37475,
+      "comm_gb_per_inf": 0.8243566902820021,
+      "keygen_s_per_inf": 1.0855325,
+      "key_gb_per_inf": 14.292162895202637,
+      "out_dir": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128-b8",
+      "variant": "sigma"
+    },
+    {
+      "model": "gpt2",
+      "batch": 8,
+      "online_ms_per_inf": 973.16125,
+      "comm_gb_per_inf": 0.7243194582406431,
+      "keygen_s_per_inf": 0.848644125,
+      "key_gb_per_inf": 11.101316928863525,
+      "out_dir": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/gpt2-128-b8",
+      "variant": "suf"
+    }
+  ],
+  "comparisons": [
+    {
+      "model": "bert-base",
+      "batch": 1,
+      "sigma_ms": 1392.692,
+      "suf_ms": 1064.357,
+      "speedup": 1.3084820224792997,
+      "sigma_comm_gb": 0.9894284177571535,
+      "suf_comm_gb": 0.8299834746867418,
+      "comm_reduction": 1.19210616588552
+    },
+    {
+      "model": "bert-base",
+      "batch": 2,
+      "sigma_ms": 1421.1375,
+      "suf_ms": 1151.3865,
+      "speedup": 1.2342836223978655,
+      "sigma_comm_gb": 0.9894284168258309,
+      "suf_comm_gb": 0.8299834737554193,
+      "comm_reduction": 1.192106166101082
+    },
+    {
+      "model": "bert-base",
+      "batch": 4,
+      "sigma_ms": 1378.2695,
+      "suf_ms": 1039.046,
+      "speedup": 1.3264759211815453,
+      "sigma_comm_gb": 0.9894284163601696,
+      "suf_comm_gb": 0.829983473289758,
+      "comm_reduction": 1.192106166208863
+    },
+    {
+      "model": "bert-base",
+      "batch": 8,
+      "sigma_ms": 1370.159875,
+      "suf_ms": 1041.938375,
+      "speedup": 1.3150104726683094,
+      "sigma_comm_gb": 0.989428416127339,
+      "suf_comm_gb": 0.8299834730569273,
+      "comm_reduction": 1.1921061662627535
+    },
+    {
+      "model": "gpt2",
+      "batch": 1,
+      "sigma_ms": 1266.239,
+      "suf_ms": 931.089,
+      "speedup": 1.359954848569793,
+      "sigma_comm_gb": 0.8243566919118166,
+      "suf_comm_gb": 0.7243194598704576,
+      "comm_reduction": 1.138112031477451
+    },
+    {
+      "model": "gpt2",
+      "batch": 2,
+      "sigma_ms": 1270.0785,
+      "suf_ms": 961.5785,
+      "speedup": 1.3208266407786782,
+      "sigma_comm_gb": 0.824356690980494,
+      "suf_comm_gb": 0.7243194589391351,
+      "comm_reduction": 1.138112031655034
+    },
+    {
+      "model": "gpt2",
+      "batch": 4,
+      "sigma_ms": 1378.5725,
+      "suf_ms": 956.57175,
+      "speedup": 1.441159536647408,
+      "sigma_comm_gb": 0.8243566905148327,
+      "suf_comm_gb": 0.7243194584734738,
+      "comm_reduction": 1.1381120317438256
+    },
+    {
+      "model": "gpt2",
+      "batch": 8,
+      "sigma_ms": 1288.37475,
+      "suf_ms": 973.16125,
+      "speedup": 1.3239067523496235,
+      "sigma_comm_gb": 0.8243566902820021,
+      "suf_comm_gb": 0.7243194582406431,
+      "comm_reduction": 1.1381120317882214
+    }
+  ]
+}

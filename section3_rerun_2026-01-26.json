@@ -1,0 +1,122 @@
+{
+  "results": {
+    "bert-tiny:128:sigma": {
+      "keygen_us": 66103,
+      "key_bytes": 350064640,
+      "total_us": 58540,
+      "comm_us": 7412,
+      "total_comm_bytes": 21675034,
+      "online_ms": 58.54,
+      "comm_gb": 0.020186448469758034,
+      "keygen_s": 0.066103,
+      "key_gb": 0.3260231018066406
+    },
+    "bert-tiny:128:suf": {
+      "keygen_us": 58789,
+      "key_bytes": 268587008,
+      "total_us": 41087,
+      "comm_us": 5316,
+      "total_comm_bytes": 18167938,
+      "online_ms": 41.087,
+      "comm_gb": 0.016920210793614388,
+      "keygen_s": 0.058789,
+      "key_gb": 0.2501411437988281
+    },
+    "bert-base:128:sigma": {
+      "keygen_us": 1168608,
+      "key_bytes": 18075947008,
+      "total_us": 1423404,
+      "comm_us": 301267,
+      "total_comm_bytes": 1062390674,
+      "online_ms": 1423.404,
+      "comm_gb": 0.9894284177571535,
+      "keygen_s": 1.168608,
+      "key_gb": 16.834537506103516
+    },
+    "bert-base:128:suf": {
+      "keygen_us": 941359,
+      "key_bytes": 13678051328,
+      "total_us": 1041275,
+      "comm_us": 131871,
+      "total_comm_bytes": 891187970,
+      "online_ms": 1041.275,
+      "comm_gb": 0.8299834746867418,
+      "keygen_s": 0.941359,
+      "key_gb": 12.738677978515625
+    },
+    "bert-large:128:sigma": {
+      "keygen_us": 2829263,
+      "key_bytes": 48799535104,
+      "total_us": 3708007,
+      "comm_us": 691779,
+      "total_comm_bytes": 2832800546,
+      "online_ms": 3708.007,
+      "comm_gb": 2.6382510978728533,
+      "keygen_s": 2.829263,
+      "key_gb": 45.4481086730957
+    },
+    "bert-large:128:suf": {
+      "keygen_us": 2217276,
+      "key_bytes": 37075660800,
+      "total_us": 2613639,
+      "comm_us": 319810,
+      "total_comm_bytes": 2376393218,
+      "online_ms": 2613.639,
+      "comm_gb": 2.213188650086522,
+      "keygen_s": 2.217276,
+      "key_gb": 34.52939987182617
+    },
+    "gpt2:128:sigma": {
+      "keygen_us": 1509392,
+      "key_bytes": 15346094080,
+      "total_us": 1218312,
+      "comm_us": 152556,
+      "total_comm_bytes": 885146258,
+      "online_ms": 1218.312,
+      "comm_gb": 0.8243566919118166,
+      "keygen_s": 1.509392,
+      "key_gb": 14.292163848876953
+    },
+    "gpt2:128:suf": {
+      "keygen_us": 872984,
+      "key_bytes": 11919949824,
+      "total_us": 962960,
+      "comm_us": 129787,
+      "total_comm_bytes": 777732098,
+      "online_ms": 962.96,
+      "comm_gb": 0.7243194598704576,
+      "keygen_s": 0.872984,
+      "key_gb": 11.101318359375
+    },
+    "gpt-neo:128:sigma": {
+      "keygen_us": 5184307,
+      "key_bytes": 81805541376,
+      "total_us": 5569351,
+      "comm_us": 678627,
+      "total_comm_bytes": 4325592866,
+      "online_ms": 5569.351,
+      "comm_gb": 4.028522284701467,
+      "keygen_s": 5.184307,
+      "key_gb": 76.18734741210938
+    },
+    "gpt-neo:128:suf": {
+      "keygen_us": 3859874,
+      "key_bytes": 65729339392,
+      "total_us": 4520121,
+      "comm_us": 494703,
+      "total_comm_bytes": 3916581890,
+      "online_ms": 4520.121,
+      "comm_gb": 3.647601129487157,
+      "keygen_s": 3.859874,
+      "key_gb": 61.21521759033203
+    }
+  },
+  "models": [
+    "bert-tiny",
+    "bert-base",
+    "bert-large",
+    "gpt2",
+    "gpt-neo"
+  ],
+  "seq": 128
+}

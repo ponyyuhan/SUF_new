@@ -21,11 +21,26 @@
 
 #pragma once
 
+#include <cstdlib>
+#include <cstdio>
+
 #include "utils/gpu_data_types.h"
 #include "gpu_aes_shm.h"
 #include "gpu_sstab.h"
 
 // using u32 = u32;
+
+// Lightweight key-buffer debug globals (per-process).
+inline u8 *g_keydbg_start = nullptr;
+inline size_t g_keydbg_size = 0;
+inline bool g_keydbg_enabled = false;
+
+inline size_t keydbg_offset(u8 *ptr)
+{
+    if (!g_keydbg_start || ptr < g_keydbg_start)
+        return 0;
+    return static_cast<size_t>(ptr - g_keydbg_start);
+}
 
 struct GPUDPFTreeKey
 {
@@ -86,7 +101,25 @@ GPUDPFKey readGPUDPFKey(u8 **key_as_bytes)
     }
     else
     {
-        memcpy(&k, *key_as_bytes, 3 * sizeof(int));
+        int hdr[3];
+        memcpy(hdr, *key_as_bytes, 3 * sizeof(int));
+        if (g_keydbg_enabled && g_keydbg_start && g_keydbg_size)
+        {
+            size_t off = keydbg_offset(*key_as_bytes);
+            size_t remaining = (off <= g_keydbg_size) ? (g_keydbg_size - off) : 0;
+            fprintf(stderr,
+                    "[keydbg][dpf] off=%zu remaining=%zu bin=%d M=%d B=%d\n",
+                    off, remaining, hdr[0], hdr[1], hdr[2]);
+        }
+        // Guard against reading garbage and allocating absurd key arrays.
+        if (hdr[2] <= 0 || hdr[2] > (1 << 20) || hdr[0] <= 0 || hdr[0] > 64)
+        {
+            fprintf(stderr,
+                    "[keydbg][dpf] invalid header bin=%d M=%d B=%d (aborting)\n",
+                    hdr[0], hdr[1], hdr[2]);
+            std::abort();
+        }
+        memcpy(&k, hdr, 3 * sizeof(int));
         *key_as_bytes += (3 * sizeof(int));
 
         k.dpfTreeKey = new GPUDPFTreeKey[k.B];

@@ -289,8 +289,11 @@ public:
     void output(Tensor<T> &a)
     {
         int N = a.size();
+        size_t memSz = static_cast<size_t>(N) * sizeof(T);
         unmaskValues(bw, N, a.d_data, (T *)keyBuf, &s);
         moveIntoCPUMem((u8 *)a.data, (u8 *)a.d_data, N * sizeof(T), &s);
+        // Keep keyBuf aligned across internal batch loops.
+        keyBuf += memSz;
     }
 
     void add(const std::vector<Tensor<T> *> &in, Tensor<T> &out)

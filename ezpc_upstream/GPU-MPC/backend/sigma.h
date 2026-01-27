@@ -23,6 +23,7 @@
 
 #include <omp.h>
 #include <cstdlib>
+#include <cstdio>
 
 #include <sytorch/backend/backend.h>
 #include <sytorch/backend/llama_transformer.h>
@@ -56,6 +57,9 @@ public:
     u8 *startPtr = NULL;
     u8 *keyBuf = NULL;
     size_t keySize = 0;
+    bool debug_keys = false;
+    size_t debug_last_off = 0;
+    size_t debug_mha_calls = 0;
     // int fd = -1;
     GpuPeer *peer = NULL;
     int party = -1;
@@ -66,6 +70,35 @@ public:
     T *d_geluTab, *d_siluTab;
     std::vector<GroupElement> *invSqrtTab;
     LlamaTransformer<T> *llama;
+
+    inline void resetKeyDebug()
+    {
+        debug_last_off = 0;
+        debug_mha_calls = 0;
+        g_keydbg_start = startPtr;
+        g_keydbg_size = keySize;
+        g_keydbg_enabled = debug_keys;
+    }
+
+    inline void debugKey(const char *label)
+    {
+        if (!debug_keys || !startPtr || keySize == 0)
+            return;
+        size_t off = static_cast<size_t>(keyBuf - startPtr);
+        size_t delta = (off >= debug_last_off) ? (off - debug_last_off) : 0;
+        size_t remaining = (off <= keySize) ? (keySize - off) : 0;
+        fprintf(stderr,
+                "[keydbg][P%d] %s off=%zu delta=%zu remaining=%zu keySize=%zu\n",
+                party, label, off, delta, remaining, keySize);
+        debug_last_off = off;
+        if (off > keySize)
+        {
+            fprintf(stderr,
+                    "[keydbg][P%d] key buffer overflow at %s: off=%zu keySize=%zu\n",
+                    party, label, off, keySize);
+            std::abort();
+        }
+    }
 
     SIGMA(int party, std::string ip, std::string keyFile, int bw, int scale, int n_seq, int n_embed, int numThreads, bool gpuMemPool = true) : party(party), bw(bw), scale(scale), n_seq(n_seq)
     {
@@ -89,6 +122,8 @@ public:
             double val = double(m + 128) * std::pow(2.0, k - 7);
             (*invSqrtTab)[i] = GroupElement(double(1LL << (2 * scale)) / sqrt(val / n_embed));
         }
+        const char *dbg_env = std::getenv("SIGMA_DEBUG_KEYS");
+        debug_keys = dbg_env && std::atoi(dbg_env) != 0;
         if (keyFile.compare("") != 0)
         {
             auto filename = keyFile + "_" + std::to_string(party) + ".dat";
@@ -102,6 +137,8 @@ public:
             getAlignedBuf(&keyBuf, keySize, pinKeyBuf);
             readKey(fd, keySize, keyBuf, NULL);
             startPtr = keyBuf;
+            resetKeyDebug();
+            debugKey("keyfile-load");
             closeFile(fd);
         }
 
@@ -213,7 +250,20 @@ public:
 
         MHAParams pMHA = {n_seq, n_embed, n_heads, dim_W, selfAttn, doNormQKt, doRotEmb};
         MHAMulParams pMHAMul = initMHAMulParams(pMHA, bw, scale);
+        if (debug_keys)
+        {
+            char label[64];
+            std::snprintf(label, sizeof(label), "mha%zu-pre", debug_mha_calls);
+            debugKey(label);
+        }
         auto k = readGPUMHAKey<T>(pMHA, pMHAMul, &keyBuf);
+        if (debug_keys)
+        {
+            char label[64];
+            std::snprintf(label, sizeof(label), "mha%zu-keys", debug_mha_calls);
+            debugKey(label);
+            debug_mha_calls++;
+        }
         Y.d_data = gpuMHA(peer, party, bw, scale, pMHA, pMHAMul, k, wQKV.data, bQKV.data, wProj.data, bProj.data, X.d_data, d_mhaTab, &g, &s);
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -244,8 +294,11 @@ public:
     void output(Tensor<T> &a)
     {
         int N = a.size();
+        size_t memSz = static_cast<size_t>(N) * sizeof(T);
         unmaskValues(bw, N, a.d_data, (T *)keyBuf, &s);
         moveIntoCPUMem((u8 *)a.data, (u8 *)a.d_data, N * sizeof(T), &s);
+        // Consume the output mask bytes to keep keyBuf aligned across batches.
+        keyBuf += memSz;
     }
 
     void add(const std::vector<Tensor<T> *> &in, Tensor<T> &out)

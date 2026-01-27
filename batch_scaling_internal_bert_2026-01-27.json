@@ -1,0 +1,188 @@
+{
+  "results": [
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 1,
+      "variant": "sigma",
+      "mode": "internal",
+      "online_ms_total": 15948.04,
+      "online_ms_per_inf": 15948.04,
+      "tokens_per_s": 8.026064644934424,
+      "comm_gb": 0.9894284177571535,
+      "comm_gb_per_inf": 0.9894284177571535,
+      "keygen_s_total": 8.633737,
+      "keygen_s_per_inf": 8.633737,
+      "key_gb": 16.834537506103516,
+      "key_gb_per_inf": 16.834537506103516,
+      "lan_s": 6.1330003479999995,
+      "wan_s": 13.26817237,
+      "rounds": 1128,
+      "logs": {
+        "dealer": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128/dealer.txt",
+        "evaluator": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 1,
+      "variant": "suf",
+      "mode": "internal",
+      "online_ms_total": 1830.861,
+      "online_ms_per_inf": 1830.861,
+      "tokens_per_s": 69.91246195096187,
+      "comm_gb": 0.8299834746867418,
+      "comm_gb_per_inf": 0.8299834746867418,
+      "keygen_s_total": 6.56841,
+      "keygen_s_per_inf": 6.56841,
+      "key_gb": 12.738677978515625,
+      "key_gb_per_inf": 12.738677978515625,
+      "lan_s": 3.9899239399999997,
+      "wan_s": 10.569487850000002,
+      "rounds": 1116,
+      "logs": {
+        "dealer": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128/dealer.txt",
+        "evaluator": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 2,
+      "variant": "sigma",
+      "mode": "internal",
+      "online_ms_total": 20145.512,
+      "online_ms_per_inf": 10072.756,
+      "tokens_per_s": 12.707544985702027,
+      "comm_gb": 1.9788568336516619,
+      "comm_gb_per_inf": 0.9894284168258309,
+      "keygen_s_total": 16.900021,
+      "keygen_s_per_inf": 8.4500105,
+      "key_gb": 33.66907501220703,
+      "key_gb_per_inf": 16.834537506103516,
+      "lan_s": 25.159189691999998,
+      "wan_s": 39.42953373,
+      "rounds": 2256,
+      "logs": {
+        "dealer": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b2/dealer.txt",
+        "evaluator": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b2/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 2,
+      "variant": "suf",
+      "mode": "internal",
+      "online_ms_total": 5110.24,
+      "online_ms_per_inf": 2555.12,
+      "tokens_per_s": 50.09549453646012,
+      "comm_gb": 1.6599669475108385,
+      "comm_gb_per_inf": 0.8299834737554193,
+      "keygen_s_total": 13.488547,
+      "keygen_s_per_inf": 6.7442735,
+      "key_gb": 25.47735595703125,
+      "key_gb_per_inf": 12.738677978515625,
+      "lan_s": 9.521488876,
+      "wan_s": 22.68061669,
+      "rounds": 2232,
+      "logs": {
+        "dealer": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b2/dealer.txt",
+        "evaluator": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b2/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 4,
+      "variant": "sigma",
+      "mode": "internal",
+      "online_ms_total": 61222.88,
+      "online_ms_per_inf": 15305.72,
+      "tokens_per_s": 8.362886554830482,
+      "comm_gb": 3.9577136654406786,
+      "comm_gb_per_inf": 0.9894284163601696,
+      "keygen_s_total": 35.460394,
+      "keygen_s_per_inf": 8.8650985,
+      "key_gb": 67.33815002441406,
+      "key_gb_per_inf": 16.834537506103516,
+      "lan_s": 57.680379380000005,
+      "wan_s": 86.22106745,
+      "rounds": 4512,
+      "logs": {
+        "dealer": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b4/dealer.txt",
+        "evaluator": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b4/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 4,
+      "variant": "suf",
+      "mode": "internal",
+      "online_ms_total": 52622.629,
+      "online_ms_per_inf": 13155.65725,
+      "tokens_per_s": 9.729654518021134,
+      "comm_gb": 3.319933893159032,
+      "comm_gb_per_inf": 0.829983473289758,
+      "keygen_s_total": 27.390132,
+      "keygen_s_per_inf": 6.847533,
+      "key_gb": 50.9547119140625,
+      "key_gb_per_inf": 12.738677978515625,
+      "lan_s": 47.234604747999995,
+      "wan_s": 73.55286036999999,
+      "rounds": 4464,
+      "logs": {
+        "dealer": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b4/dealer.txt",
+        "evaluator": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b4/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 8,
+      "variant": "sigma",
+      "mode": "internal",
+      "online_ms_total": 19214.998,
+      "online_ms_per_inf": 2401.87475,
+      "tokens_per_s": 53.291704740224276,
+      "comm_gb": 7.915427329018712,
+      "comm_gb_per_inf": 0.989428416127339,
+      "keygen_s_total": 68.667429,
+      "keygen_s_per_inf": 8.583428625,
+      "key_gb": 134.67630004882812,
+      "key_gb_per_inf": 16.834537506103516,
+      "lan_s": 39.399727756000004,
+      "wan_s": 96.48110389,
+      "rounds": 9024,
+      "logs": {
+        "dealer": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b8/dealer.txt",
+        "evaluator": "/workspace/SUF_new/ezpc_upstream/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b8/evaluator.txt"
+      }
+    },
+    {
+      "model": "bert-base",
+      "seq": 128,
+      "batch": 8,
+      "variant": "suf",
+      "mode": "internal",
+      "online_ms_total": 54281.813,
+      "online_ms_per_inf": 6785.226625,
+      "tokens_per_s": 18.86451360790031,
+      "comm_gb": 6.639867784455419,
+      "comm_gb_per_inf": 0.8299834730569273,
+      "keygen_s_total": 53.973049,
+      "keygen_s_per_inf": 6.746631125,
+      "key_gb": 101.909423828125,
+      "key_gb_per_inf": 12.738677978515625,
+      "lan_s": 48.694935492,
+      "wan_s": 101.33144673,
+      "rounds": 8928,
+      "logs": {
+        "dealer": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b8/dealer.txt",
+        "evaluator": "/workspace/SUF_new/third_party/EzPC_vendor/GPU-MPC/experiments/sigma/output/P0/models/bert-base-128-b8/evaluator.txt"
+      }
+    }
+  ]
+}
